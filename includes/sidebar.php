@@ -65,6 +65,11 @@
                     </a>
                 </li>
                 <li>
+                    <a href="<?php echo $base_url; ?>modules/tes/rekap_nilai.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'rekap_nilai.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-file-alt"></i> Rekap Nilai
+                    </a>
+                </li>
+                <li>
                     <a href="<?php echo $base_url; ?>modules/cetak/kartu_ujian.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'kartu_ujian.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-print"></i> Cetak Kartu
                     </a>
