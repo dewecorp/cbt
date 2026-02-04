@@ -28,7 +28,7 @@ git push -u origin "%BRANCH%"
 set BACKUP_DIR=%REPO_DIR%\backups
 if not exist "%BACKUP_DIR%" mkdir "%BACKUP_DIR%"
 set ZIP_PATH=%BACKUP_DIR%\cbt-backup.zip
-powershell -NoProfile -Command "$zip='%ZIP_PATH%'; $root='%REPO_DIR%'; $items = Get-ChildItem -Path $root -Recurse -Force | Where-Object { $_.FullName -notmatch '\\\\.git\\\\' -and $_.FullName -notmatch '\\\\backups\\\\' } | Select-Object -ExpandProperty FullName; if (Test-Path $zip) { Compress-Archive -DestinationPath $zip -Update -Path $items } else { Compress-Archive -DestinationPath $zip -Force -Path $items }"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%REPO_DIR%\backup_helper.ps1"
 echo Selesai.
 :end
 endlocal
