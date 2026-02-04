@@ -13,14 +13,14 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="<?php echo $base_url; ?>assets/vendor/jquery/jquery.min.js"></script>
+    <script src="<?php echo $base_url; ?>assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     
     <!-- DataTables -->
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.4.1/js/responsive.bootstrap5.min.js"></script>
+    <script src="<?php echo $base_url; ?>assets/vendor/datatables/js/jquery.dataTables.min.js"></script>
+    <script src="<?php echo $base_url; ?>assets/vendor/datatables/js/dataTables.bootstrap5.min.js"></script>
+    <script src="<?php echo $base_url; ?>assets/vendor/datatables/js/dataTables.responsive.min.js"></script>
+    <script src="<?php echo $base_url; ?>assets/vendor/datatables/js/responsive.bootstrap5.min.js"></script>
     
     <script>
         $(document).ready(function() {
@@ -28,7 +28,25 @@
             $('.table-datatable').DataTable({
                 responsive: true,
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
+                    // Use local file or english default if not available
+                    // url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/id.json' 
+                    // Manual translation to avoid CDN call
+                    "sEmptyTable":   "Tidak ada data yang tersedia pada tabel ini",
+                    "sProcessing":   "Sedang memproses...",
+                    "sLengthMenu":   "Tampilkan _MENU_ entri",
+                    "sZeroRecords":  "Tidak ditemukan data yang sesuai",
+                    "sInfo":         "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                    "sInfoEmpty":    "Menampilkan 0 sampai 0 dari 0 entri",
+                    "sInfoFiltered": "(disaring dari _MAX_ entri keseluruhan)",
+                    "sInfoPostFix":  "",
+                    "sSearch":       "Cari:",
+                    "sUrl":          "",
+                    "oPaginate": {
+                        "sFirst":    "Pertama",
+                        "sPrevious": "Sebelumnya",
+                        "sNext":     "Selanjutnya",
+                        "sLast":     "Terakhir"
+                    }
                 }
             });
 

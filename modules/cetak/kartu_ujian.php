@@ -46,72 +46,122 @@ while($k = mysqli_fetch_assoc($q_kelas)) {
 
     <div class="card shadow mb-4">
         <div class="card-body">
-            <form method="GET" action="" class="row g-3 align-items-end mb-4">
-                <div class="col-md-4">
-                    <label class="form-label">Pilih Kelas</label>
-                    <select name="id_kelas" class="form-select" required onchange="this.form.submit()" <?php echo ($single_class_id) ? 'disabled' : ''; ?>>
-                        <?php if(!$single_class_id): ?>
-                        <option value="">-- Pilih Kelas --</option>
-                        <?php endif; ?>
-                        <?php echo $kelas_opt; ?>
-                    </select>
-                    <?php if($single_class_id): ?>
-                    <input type="hidden" name="id_kelas" value="<?php echo $single_class_id; ?>">
-                    <?php endif; ?>
+            <?php if($level == 'siswa'): ?>
+                <?php
+                // Logika khusus Siswa
+                $id_siswa = $_SESSION['user_id'];
+                $q_me = mysqli_query($koneksi, "SELECT s.*, k.nama_kelas FROM siswa s JOIN kelas k ON s.id_kelas = k.id_kelas WHERE s.id_siswa='$id_siswa'");
+                $me = mysqli_fetch_assoc($q_me);
+                ?>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Berikut adalah kartu ujian Anda. Silahkan klik tombol cetak untuk mengunduh atau mencetak kartu ujian.
                 </div>
-                <div class="col-md-2">
-                    <?php if(isset($_GET['id_kelas'])): ?>
-                    <a href="print_kartu.php?id_kelas=<?php echo $_GET['id_kelas']; ?>" target="_blank" class="btn btn-success w-100">
-                        <i class="fas fa-print"></i> Cetak Semua
-                    </a>
-                    <?php endif; ?>
-                </div>
-            </form>
-
-            <?php if(isset($_GET['id_kelas'])): ?>
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped">
-                    <thead>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
                         <tr>
-                            <th>No</th>
-                            <th>NISN</th>
-                            <th>Nama Siswa</th>
-                            <th>Kelas</th>
-                            <th>Password (Login)</th>
-                            <th>Aksi</th>
+                            <th width="200">Nama Lengkap</th>
+                            <td><?php echo $me['nama_siswa']; ?></td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        $id_kelas = $_GET['id_kelas'];
-                        $q_siswa = mysqli_query($koneksi, "SELECT s.*, k.nama_kelas FROM siswa s JOIN kelas k ON s.id_kelas = k.id_kelas WHERE s.id_kelas='$id_kelas' ORDER BY s.nama_siswa ASC");
-                        $no = 1;
-                        while($s = mysqli_fetch_assoc($q_siswa)):
-                        ?>
                         <tr>
-                            <td><?php echo $no++; ?></td>
-                            <td><?php echo $s['nisn']; ?></td>
-                            <td><?php echo $s['nama_siswa']; ?></td>
-                            <td><?php echo $s['nama_kelas']; ?></td>
+                            <th>NISN</th>
+                            <td><?php echo $me['nisn']; ?></td>
+                        </tr>
+                        <tr>
+                            <th>Kelas</th>
+                            <td><?php echo $me['nama_kelas']; ?></td>
+                        </tr>
+                        <tr>
+                            <th>Password Login</th>
                             <td>
                                 <?php 
-                                if (strlen($s['password']) == 60 && substr($s['password'], 0, 4) === '$2y$') {
+                                if (strlen($me['password']) == 60 && substr($me['password'], 0, 4) === '$2y$') {
                                     echo '<span class="badge bg-secondary">Ter-enkripsi</span>';
                                 } else {
-                                    echo $s['password'];
+                                    echo $me['password'];
                                 }
                                 ?>
                             </td>
+                        </tr>
+                        <tr>
+                            <th>Aksi</th>
                             <td>
-                                <a href="print_kartu.php?id_siswa=<?php echo $s['id_siswa']; ?>" target="_blank" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-print"></i> Cetak
+                                <a href="print_kartu.php?id_siswa=<?php echo $me['id_siswa']; ?>" target="_blank" class="btn btn-primary">
+                                    <i class="fas fa-print"></i> Cetak Kartu Ujian
                                 </a>
                             </td>
                         </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
-            </div>
+                    </table>
+                </div>
+
+            <?php else: ?>
+                <!-- Tampilan Admin/Guru -->
+                <form method="GET" action="" class="row g-3 align-items-end mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">Pilih Kelas</label>
+                        <select name="id_kelas" class="form-select" required onchange="this.form.submit()" <?php echo ($single_class_id) ? 'disabled' : ''; ?>>
+                            <?php if(!$single_class_id): ?>
+                            <option value="">-- Pilih Kelas --</option>
+                            <?php endif; ?>
+                            <?php echo $kelas_opt; ?>
+                        </select>
+                        <?php if($single_class_id): ?>
+                        <input type="hidden" name="id_kelas" value="<?php echo $single_class_id; ?>">
+                        <?php endif; ?>
+                    </div>
+                    <div class="col-md-2">
+                        <?php if(isset($_GET['id_kelas'])): ?>
+                        <a href="print_kartu.php?id_kelas=<?php echo $_GET['id_kelas']; ?>" target="_blank" class="btn btn-success w-100">
+                            <i class="fas fa-print"></i> Cetak Semua
+                        </a>
+                        <?php endif; ?>
+                    </div>
+                </form>
+
+                <?php if(isset($_GET['id_kelas'])): ?>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>NISN</th>
+                                <th>Nama Siswa</th>
+                                <th>Kelas</th>
+                                <th>Password (Login)</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $id_kelas = $_GET['id_kelas'];
+                            $q_siswa = mysqli_query($koneksi, "SELECT s.*, k.nama_kelas FROM siswa s JOIN kelas k ON s.id_kelas = k.id_kelas WHERE s.id_kelas='$id_kelas' ORDER BY s.nama_siswa ASC");
+                            $no = 1;
+                            while($s = mysqli_fetch_assoc($q_siswa)):
+                            ?>
+                            <tr>
+                                <td><?php echo $no++; ?></td>
+                                <td><?php echo $s['nisn']; ?></td>
+                                <td><?php echo $s['nama_siswa']; ?></td>
+                                <td><?php echo $s['nama_kelas']; ?></td>
+                                <td>
+                                    <?php 
+                                    if (strlen($s['password']) == 60 && substr($s['password'], 0, 4) === '$2y$') {
+                                        echo '<span class="badge bg-secondary">Ter-enkripsi</span>';
+                                    } else {
+                                        echo $s['password'];
+                                    }
+                                    ?>
+                                </td>
+                                <td>
+                                    <a href="print_kartu.php?id_siswa=<?php echo $s['id_siswa']; ?>" target="_blank" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-print"></i> Cetak
+                                    </a>
+                                </td>
+                            </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>

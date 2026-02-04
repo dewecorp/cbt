@@ -14,7 +14,16 @@ $ujian = mysqli_fetch_assoc(mysqli_query($koneksi, "
 "));
 
 if (!$ujian) {
-    echo "<script>alert('Ujian tidak ditemukan'); window.location='../../dashboard.php';</script>";
+    echo "<script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Ujian tidak ditemukan!',
+            confirmButtonText: 'Kembali ke Dashboard'
+        }).then(() => {
+            window.location='../../dashboard.php';
+        });
+    </script>";
     exit;
 }
 
@@ -25,7 +34,16 @@ $sudah_mulai = false;
 if (mysqli_num_rows($cek_ujian_siswa) > 0) {
     $us = mysqli_fetch_assoc($cek_ujian_siswa);
     if ($us['status'] == 'selesai') {
-        echo "<script>alert('Anda sudah menyelesaikan ujian ini'); window.location='../../dashboard.php';</script>";
+        echo "<script>
+            Swal.fire({
+                icon: 'info',
+                title: 'Selesai',
+                text: 'Anda sudah menyelesaikan ujian ini.',
+                confirmButtonText: 'Kembali'
+            }).then(() => {
+                window.location='../../dashboard.php';
+            });
+        </script>";
         exit;
     }
     $sudah_mulai = true;

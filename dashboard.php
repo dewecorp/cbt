@@ -3,13 +3,59 @@ include 'config/database.php';
 include 'includes/header.php';
 
 // Hitung Data untuk Dashboard
-$jml_guru = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM users WHERE level='guru'"));
-$jml_siswa = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM siswa WHERE status='aktif'"));
-$jml_kelas = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM kelas"));
-$jml_ujian = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM ujian WHERE status='aktif'"));
+$q_guru_count = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM users WHERE level='guru'");
+$jml_guru = mysqli_fetch_assoc($q_guru_count)['count'];
+
+$q_siswa_count = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM siswa WHERE status='aktif'");
+$jml_siswa = mysqli_fetch_assoc($q_siswa_count)['count'];
+
+$q_kelas_count = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM kelas");
+$jml_kelas = mysqli_fetch_assoc($q_kelas_count)['count'];
+
+$q_ujian_count = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM ujian WHERE status='aktif'");
+$jml_ujian = mysqli_fetch_assoc($q_ujian_count)['count'];
 
 // Safe session level
 $level = isset($_SESSION['level']) ? $_SESSION['level'] : '';
+
+// Self-healing session level mismatch (Fix for Khoiruddin & Adiba case)
+if (isset($_SESSION['user_id'])) {
+    $uid_check = $_SESSION['user_id'];
+    $current_level = isset($_SESSION['level']) ? $_SESSION['level'] : '';
+
+    if ($current_level === 'siswa') {
+        // Jika session bilang siswa, cek tabel siswa DULU
+        $q_check_s = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_siswa='$uid_check'");
+        if (mysqli_num_rows($q_check_s) > 0) {
+            // Valid siswa, jangan ubah apa-apa
+        } else {
+            // Tidak ketemu di siswa? Mungkin salah label, baru cek users
+            $q_check_u = mysqli_query($koneksi, "SELECT level FROM users WHERE id_user='$uid_check'");
+            if (mysqli_num_rows($q_check_u) > 0) {
+                $d_check_u = mysqli_fetch_assoc($q_check_u);
+                $_SESSION['level'] = $d_check_u['level'];
+                $level = $d_check_u['level'];
+            }
+        }
+    } else {
+        // Jika session bilang admin/guru, atau kosong, cek users DULU
+        $q_check_u = mysqli_query($koneksi, "SELECT level FROM users WHERE id_user='$uid_check'");
+        if (mysqli_num_rows($q_check_u) > 0) {
+            $d_check_u = mysqli_fetch_assoc($q_check_u);
+            if ($current_level !== $d_check_u['level']) {
+                $_SESSION['level'] = $d_check_u['level'];
+                $level = $d_check_u['level'];
+            }
+        } else {
+            // Tidak ketemu di users? Cek siswa
+            $q_check_s = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_siswa='$uid_check'");
+            if (mysqli_num_rows($q_check_s) > 0) {
+                $_SESSION['level'] = 'siswa';
+                $level = 'siswa';
+            }
+        }
+    }
+}
 
 // Admin welcome text
 $admin_welcome_text = "Aplikasi Computer Based Test (CBT) ini dirancang untuk memudahkan pelaksanaan ujian di MI Sultan Fattah Sukosono. Silahkan gunakan menu di samping untuk mengelola data dan ujian.";
@@ -22,14 +68,16 @@ if ($d_setting_dash && isset($d_setting_dash['admin_welcome_text']) && !empty($d
 // Data untuk guru
 if($level === 'guru') {
     $id_guru = $_SESSION['user_id'];
-    $jml_bank_soal_guru = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM bank_soal WHERE id_guru='$id_guru'"));
+    $q_bank_guru = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM bank_soal WHERE id_guru='$id_guru'");
+    $jml_bank_soal_guru = mysqli_fetch_assoc($q_bank_guru)['count'];
     
-    $jml_ujian_guru = mysqli_num_rows(mysqli_query($koneksi, "
-        SELECT u.* 
+    $q_ujian_guru = mysqli_query($koneksi, "
+        SELECT COUNT(*) as count 
         FROM ujian u 
         JOIN bank_soal b ON u.id_bank_soal = b.id_bank_soal 
         WHERE b.id_guru='$id_guru' AND u.status='aktif'
-    "));
+    ");
+    $jml_ujian_guru = mysqli_fetch_assoc($q_ujian_guru)['count'];
 
     // Data Siswa per Kelas yang diajar
     $teacher_classes = [];
@@ -46,25 +94,30 @@ if($level === 'guru') {
             $jml_mapel_guru = count($clean_mapel_ids);
         }
 
-        // Process Classes
+        // Process Classes Optimized
         if (!empty($d_guru['mengajar_kelas'])) {
-            $kelas_ids = explode(',', $d_guru['mengajar_kelas']);
-            foreach($kelas_ids as $kid) {
+            $kelas_ids_raw = explode(',', $d_guru['mengajar_kelas']);
+            $clean_kelas_ids = [];
+            foreach($kelas_ids_raw as $kid) {
                 $kid = trim($kid);
-                if(empty($kid)) continue;
+                if(!empty($kid)) $clean_kelas_ids[] = mysqli_real_escape_string($koneksi, $kid);
+            }
+
+            if (!empty($clean_kelas_ids)) {
+                $ids_str = implode("','", $clean_kelas_ids);
+                $query_classes = "
+                    SELECT k.nama_kelas, COUNT(s.id_siswa) as count 
+                    FROM kelas k 
+                    LEFT JOIN siswa s ON k.id_kelas = s.id_kelas AND s.status='aktif' 
+                    WHERE k.id_kelas IN ('$ids_str') 
+                    GROUP BY k.id_kelas, k.nama_kelas
+                ";
+                $q_classes = mysqli_query($koneksi, $query_classes);
                 
-                // Get Class Name
-                $q_k = mysqli_query($koneksi, "SELECT nama_kelas FROM kelas WHERE id_kelas='$kid'");
-                $d_k = mysqli_fetch_assoc($q_k);
-                
-                // Count Students
-                $q_s = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM siswa WHERE id_kelas='$kid' AND status='aktif'");
-                $d_s = mysqli_fetch_assoc($q_s);
-                
-                if($d_k) {
+                while($row = mysqli_fetch_assoc($q_classes)) {
                     $teacher_classes[] = [
-                        'nama_kelas' => $d_k['nama_kelas'],
-                        'jumlah_siswa' => $d_s['count']
+                        'nama_kelas' => $row['nama_kelas'],
+                        'jumlah_siswa' => $row['count']
                     ];
                 }
             }
@@ -81,6 +134,7 @@ if($level === 'siswa') {
         JOIN bank_soal b ON u.id_bank_soal = b.id_bank_soal 
         JOIN mapel m ON b.id_mapel = m.id_mapel
         WHERE u.status = 'aktif' 
+        AND b.id_kelas = '$id_kelas'
         AND NOW() BETWEEN u.tgl_mulai AND u.tgl_selesai
     ");
 }

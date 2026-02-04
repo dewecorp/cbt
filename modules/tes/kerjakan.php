@@ -99,6 +99,10 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
     </div>
 </nav>
 
+<div class="alert alert-danger text-center m-0 rounded-0 fw-bold">
+    <i class="fas fa-exclamation-triangle"></i> PERINGATAN: DILARANG MEMBUKA TAB LAIN ATAU MINIMIZE BROWSER! UJIAN AKAN OTOMATIS TERHENTI.
+</div>
+
 <div class="container-fluid mt-4">
     <div class="row">
         <!-- Area Soal -->
@@ -266,8 +270,15 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
             
         if (sisaDetik <= 0) {
             clearInterval(timerInterval);
-            alert("Waktu Habis!");
-            window.location.href = "selesai_ujian.php?id=<?php echo $id_ujian; ?>";
+            Swal.fire({
+                title: 'Waktu Habis!',
+                text: 'Waktu pengerjaan ujian telah berakhir.',
+                icon: 'warning',
+                confirmButtonText: 'OK',
+                allowOutsideClick: false
+            }).then((result) => {
+                window.location.href = "selesai_ujian.php?id=<?php echo $id_ujian; ?>";
+            });
         }
         sisaDetik--;
     }
@@ -313,6 +324,34 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
             if (result.isConfirmed) {
                 window.location.href = "selesai_ujian.php?id=<?php echo $id_ujian; ?>";
             }
+        });
+    }
+
+    // Deteksi Pindah Tab / Minimize (Anti-Cheat)
+    document.addEventListener("visibilitychange", function() {
+        if (document.hidden) {
+            handleViolation();
+        }
+    });
+
+    var violationDetected = false;
+
+    function handleViolation() {
+        if(violationDetected) return;
+        violationDetected = true;
+        
+        // Stop timer
+        clearInterval(timerInterval);
+        
+        Swal.fire({
+            title: 'PELANGGARAN TERDETEKSI!',
+            text: 'Anda meninggalkan halaman ujian (membuka tab lain/minimize). Ujian Anda otomatis dihentikan!',
+            icon: 'error',
+            allowOutsideClick: false,
+            confirmButtonText: 'Keluar',
+            confirmButtonColor: '#d33'
+        }).then((result) => {
+            window.location.href = "selesai_ujian.php?id=<?php echo $id_ujian; ?>&violation=true";
         });
     }
 </script>

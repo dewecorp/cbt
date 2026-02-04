@@ -7,7 +7,16 @@ $id_bank = $_GET['id'];
 $bank = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT b.*, m.nama_mapel FROM bank_soal b JOIN mapel m ON b.id_mapel = m.id_mapel WHERE id_bank_soal='$id_bank'"));
 
 if (!$bank) {
-    echo "<script>alert('Bank soal tidak ditemukan'); window.location='bank_soal.php';</script>";
+    echo "<script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Bank soal tidak ditemukan!',
+            confirmButtonText: 'Kembali'
+        }).then(() => {
+            window.location='bank_soal.php';
+        });
+    </script>";
     exit;
 }
 

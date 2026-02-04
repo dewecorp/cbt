@@ -157,7 +157,9 @@ if ($_SESSION['level'] == 'guru') {
                             <th>Selesai</th>
                             <th>Token</th>
                             <th>Status</th>
-                            <!-- <th width="15%">Aksi</th> -->
+                            <?php if($_SESSION['level'] == 'guru'): ?>
+                            <th width="15%">Aksi</th>
+                            <?php endif; ?>
                         </tr>
                     </thead>
                     <tbody>
@@ -190,9 +192,8 @@ if ($_SESSION['level'] == 'guru') {
                                         <span class="badge bg-secondary">Selesai</span>
                                     <?php endif; ?>
                                 </td>
-                                <!-- 
+                                <?php if($_SESSION['level'] == 'guru'): ?>
                                 <td>
-                                    <?php if($_SESSION['level'] == 'guru'): ?>
                                     <a href="monitoring_ujian.php?id=<?php echo $row['id_ujian']; ?>" class="btn btn-info btn-sm text-white" title="Monitoring Ujian">
                                         <i class="fas fa-desktop"></i>
                                     </a>
@@ -210,9 +211,8 @@ if ($_SESSION['level'] == 'guru') {
                                     <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('jadwal_ujian.php?delete=<?php echo $row['id_ujian']; ?>')">
                                         <i class="fas fa-trash"></i>
                                     </button>
-                                    <?php endif; ?>
                                 </td>
-                                -->
+                                <?php endif; ?>
                             </tr>
                         <?php endwhile; ?>
                     </tbody>

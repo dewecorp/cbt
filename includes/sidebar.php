@@ -59,8 +59,6 @@
                         <i class="fas fa-calendar-alt"></i> Administrasi Tes
                     </a>
                 </li>
-                <?php endif; ?>
-
                 <li>
                     <a href="<?php echo $base_url; ?>modules/tes/hasil_ujian.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'hasil_ujian.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-poll"></i> Hasil Tes
@@ -71,6 +69,20 @@
                         <i class="fas fa-print"></i> Cetak Kartu
                     </a>
                 </li>
+                <?php endif; ?>
+
+                <?php if($level === 'siswa'): ?>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/tes/hasil_ujian.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'hasil_ujian.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-poll"></i> Hasil Tes
+                    </a>
+                </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/cetak/kartu_ujian.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'kartu_ujian.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-print"></i> Cetak Kartu
+                    </a>
+                </li>
+                <?php endif; ?>
 
                 <?php if($level === 'admin'): ?>
                 <li class="nav-item mt-2">
