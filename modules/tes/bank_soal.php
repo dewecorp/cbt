@@ -123,6 +123,11 @@ if ($_SESSION['level'] == 'guru') {
 <div class="container-fluid">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Bank Soal</h1>
+        <?php if($_SESSION['level'] == 'guru'): ?>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+            <i class="fas fa-plus"></i> Tambah Bank Soal
+        </button>
+        <?php endif; ?>
     </div>
 
     <?php
