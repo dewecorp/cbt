@@ -123,13 +123,57 @@ if ($_SESSION['level'] == 'guru') {
 <div class="container-fluid">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Bank Soal</h1>
-        <?php if($_SESSION['level'] == 'guru'): ?>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
-            <i class="fas fa-plus"></i> Buat Bank Soal
-        </button>
-        <?php endif; ?>
     </div>
 
+    <?php
+    $q_kelas_filter = false;
+    $single_class_id = null;
+    if ($_SESSION['level'] == 'guru') {
+        if (!empty($guru_kelas_ids)) {
+            if (count($guru_kelas_ids) == 1) {
+                $single_class_id = $guru_kelas_ids[0];
+                if (!isset($_GET['id_kelas'])) {
+                    $_GET['id_kelas'] = $single_class_id;
+                }
+            }
+            $ids_str = implode(',', $guru_kelas_ids);
+            $q_kelas_filter = mysqli_query($koneksi, "SELECT * FROM kelas WHERE id_kelas IN ($ids_str) ORDER BY nama_kelas ASC");
+        }
+    } else {
+        $q_kelas_filter = mysqli_query($koneksi, "SELECT * FROM kelas ORDER BY nama_kelas ASC");
+    }
+    ?>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Pilih Kelas</label>
+                    <select name="id_kelas" class="form-select" onchange="this.form.submit()" <?php echo ($single_class_id) ? 'disabled' : ''; ?>>
+                        <?php if(!$single_class_id): ?>
+                        <option value="">-- Pilih Kelas --</option>
+                        <?php endif; ?>
+                        <?php 
+                        if($q_kelas_filter) {
+                            while($k = mysqli_fetch_assoc($q_kelas_filter)): 
+                        ?>
+                        <option value="<?php echo $k['id_kelas']; ?>" <?php echo (isset($_GET['id_kelas']) && $_GET['id_kelas'] == $k['id_kelas']) ? 'selected' : ''; ?>>
+                            <?php echo $k['nama_kelas']; ?>
+                        </option>
+                        <?php 
+                            endwhile; 
+                        }
+                        ?>
+                    </select>
+                    <?php if($single_class_id): ?>
+                    <input type="hidden" name="id_kelas" value="<?php echo $single_class_id; ?>">
+                    <?php endif; ?>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <?php if(isset($_GET['id_kelas']) && !empty($_GET['id_kelas'])): ?>
     <div class="card shadow mb-4">
         <div class="card-body">
             <div class="table-responsive">
@@ -144,14 +188,22 @@ if ($_SESSION['level'] == 'guru') {
                             <th>Tanggal</th>
                             <th>Jumlah Soal</th>
                             <th>Status</th>
+                            <?php if($_SESSION['level'] == 'guru'): ?>
                             <th width="20%">Aksi</th>
+                            <?php endif; ?>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
-                        $where = "";
+                        $where_parts = [];
                         if($_SESSION['level'] == 'guru') {
-                            $where = "WHERE b.id_guru = '".$_SESSION['user_id']."'";
+                            $where_parts[] = "b.id_guru = '".$_SESSION['user_id']."'";
+                        }
+                        $id_kelas_sel = $_GET['id_kelas'];
+                        $where_parts[] = "b.id_kelas = '".$id_kelas_sel."'";
+                        $where = "";
+                        if (!empty($where_parts)) {
+                            $where = "WHERE " . implode(" AND ", $where_parts);
                         }
                         
                         $query = mysqli_query($koneksi, "
@@ -184,11 +236,11 @@ if ($_SESSION['level'] == 'guru') {
                                         <span class="badge bg-secondary">Nonaktif</span>
                                     <?php endif; ?>
                                 </td>
+                                <?php if($_SESSION['level'] == 'guru'): ?>
                                 <td>
                                     <a href="buat_soal.php?id=<?php echo $row['id_bank_soal']; ?>" class="btn btn-info btn-sm text-white">
-                                        <i class="fas fa-list"></i> <?php echo ($_SESSION['level'] == 'admin') ? 'Lihat Soal' : 'Kelola Soal'; ?>
+                                        <i class="fas fa-list"></i> Kelola Soal
                                     </a>
-                                    <?php if($_SESSION['level'] == 'guru'): ?>
                                     <button type="button" class="btn btn-warning btn-sm text-white" 
                                         data-bs-toggle="modal" 
                                         data-bs-target="#editModal"
@@ -202,8 +254,8 @@ if ($_SESSION['level'] == 'guru') {
                                     <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('bank_soal.php?delete=<?php echo $row['id_bank_soal']; ?>')">
                                         <i class="fas fa-trash"></i>
                                     </button>
-                                    <?php endif; ?>
                                 </td>
+                                <?php endif; ?>
                             </tr>
                         <?php endwhile; ?>
                     </tbody>
@@ -211,6 +263,7 @@ if ($_SESSION['level'] == 'guru') {
             </div>
         </div>
     </div>
+    <?php endif; ?>
 </div>
 
 <!-- Add Modal -->
