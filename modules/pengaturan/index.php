@@ -12,6 +12,12 @@ if ($_SESSION['level'] != 'admin') {
 $query = mysqli_query($koneksi, "SELECT * FROM setting LIMIT 1");
 $setting = mysqli_fetch_assoc($query);
 
+// Ensure column for admin welcome text exists
+$col_check = mysqli_query($koneksi, "SHOW COLUMNS FROM setting LIKE 'admin_welcome_text'");
+if (mysqli_num_rows($col_check) == 0) {
+    mysqli_query($koneksi, "ALTER TABLE setting ADD COLUMN admin_welcome_text TEXT NULL");
+}
+
 // Handle Update
 if (isset($_POST['simpan'])) {
     $nama_sekolah = mysqli_real_escape_string($koneksi, $_POST['nama_sekolah']);
@@ -21,6 +27,7 @@ if (isset($_POST['simpan'])) {
     $kepala_madrasah = mysqli_real_escape_string($koneksi, $_POST['kepala_madrasah']);
     $nip_kepala = mysqli_real_escape_string($koneksi, $_POST['nip_kepala']);
     $panitia_ujian = mysqli_real_escape_string($koneksi, $_POST['panitia_ujian']);
+    $admin_welcome_text = mysqli_real_escape_string($koneksi, $_POST['admin_welcome_text']);
     
     $logo_sql = "";
     
@@ -59,14 +66,15 @@ if (isset($_POST['simpan'])) {
             semester='$semester',
             kepala_madrasah='$kepala_madrasah',
             nip_kepala='$nip_kepala',
-            panitia_ujian='$panitia_ujian'
+            panitia_ujian='$panitia_ujian',
+            admin_welcome_text='$admin_welcome_text'
             $logo_sql
             WHERE id='".$setting['id']."'";
     } else {
         // If no setting exists, insert new
         $logo_val = isset($new_filename) ? $new_filename : '';
-        $q_update = "INSERT INTO setting (nama_sekolah, alamat, tahun_ajaran, semester, kepala_madrasah, nip_kepala, panitia_ujian, logo) 
-            VALUES ('$nama_sekolah', '$alamat', '$tahun_ajaran', '$semester', '$kepala_madrasah', '$nip_kepala', '$panitia_ujian', '$logo_val')";
+        $q_update = "INSERT INTO setting (nama_sekolah, alamat, tahun_ajaran, semester, kepala_madrasah, nip_kepala, panitia_ujian, logo, admin_welcome_text) 
+            VALUES ('$nama_sekolah', '$alamat', '$tahun_ajaran', '$semester', '$kepala_madrasah', '$nip_kepala', '$panitia_ujian', '$logo_val', '$admin_welcome_text')";
     }
     
     if (mysqli_query($koneksi, $q_update)) {
@@ -152,6 +160,11 @@ if (isset($_POST['simpan'])) {
                             <input type="text" class="form-control" name="panitia_ujian" value="<?php echo isset($setting['panitia_ujian']) ? $setting['panitia_ujian'] : ''; ?>">
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label">Teks Selamat Datang Dashboard Admin</label>
+                            <textarea class="form-control" id="admin_welcome_text" name="admin_welcome_text" rows="6"><?php echo isset($setting['admin_welcome_text']) ? $setting['admin_welcome_text'] : 'Aplikasi Computer Based Test (CBT) ini dirancang untuk memudahkan pelaksanaan ujian di MI Sultan Fattah Sukosono. Silahkan gunakan menu di samping untuk mengelola data dan ujian.'; ?></textarea>
+                        </div>
+
                         <button type="submit" name="simpan" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Perubahan</button>
                     </form>
                 </div>
@@ -159,5 +172,10 @@ if (isset($_POST['simpan'])) {
         </div>
     </div>
 </div>
+
+<script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+<script>
+CKEDITOR.replace('admin_welcome_text');
+</script>
 
 <?php include '../../includes/footer.php'; ?>

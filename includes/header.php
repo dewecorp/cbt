@@ -2,9 +2,44 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+
+// Ensure database and base_url available
+if (!isset($koneksi) || !isset($base_url)) {
+    $config_path = dirname(__DIR__) . '/config/database.php';
+    if (file_exists($config_path)) {
+        include $config_path;
+    }
+}
+
+// Redirect if not logged in
 if (!isset($_SESSION['user_id'])) {
-    header("Location: " . $base_url . "index.php");
+    header("Location: " . (isset($base_url) ? $base_url : "/") . "index.php");
     exit;
+}
+
+// Recover missing session level if needed
+if (!isset($_SESSION['level']) && isset($koneksi)) {
+    $uid = $_SESSION['user_id'];
+    $q_u = mysqli_query($koneksi, "SELECT * FROM users WHERE id_user='$uid'");
+    if ($q_u && mysqli_num_rows($q_u) > 0) {
+        $u = mysqli_fetch_assoc($q_u);
+        $_SESSION['level'] = $u['level'];
+        if (!isset($_SESSION['nama'])) {
+            $_SESSION['nama'] = $u['nama_lengkap'];
+        }
+    } else {
+        $q_s = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_siswa='$uid'");
+        if ($q_s && mysqli_num_rows($q_s) > 0) {
+            $s = mysqli_fetch_assoc($q_s);
+            $_SESSION['level'] = 'siswa';
+            if (!isset($_SESSION['nama'])) {
+                $_SESSION['nama'] = $s['nama_siswa'];
+            }
+            if (!isset($_SESSION['id_kelas'])) {
+                $_SESSION['id_kelas'] = $s['id_kelas'];
+            }
+        }
+    }
 }
 ?>
 <!DOCTYPE html>

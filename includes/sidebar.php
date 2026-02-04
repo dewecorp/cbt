@@ -17,7 +17,8 @@
                     </a>
                 </li>
                 
-                <?php if($_SESSION['level'] == 'admin'): ?>
+                <?php $level = isset($_SESSION['level']) ? $_SESSION['level'] : ''; ?>
+                <?php if($level === 'admin'): ?>
                 <li class="nav-item mt-2">
                     <span class="text-uppercase small text-white-50 ms-3">Master Data</span>
                 </li>
@@ -47,7 +48,7 @@
                     <span class="text-uppercase small text-white-50 ms-3">Ujian</span>
                 </li>
                 
-                <?php if($_SESSION['level'] == 'admin' || $_SESSION['level'] == 'guru'): ?>
+                <?php if($level === 'admin' || $level === 'guru'): ?>
                 <li>
                     <a href="<?php echo $base_url; ?>modules/tes/bank_soal.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'bank_soal.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-database"></i> Bank Soal
@@ -71,7 +72,7 @@
                     </a>
                 </li>
 
-                <?php if($_SESSION['level'] == 'admin'): ?>
+                <?php if($level === 'admin'): ?>
                 <li class="nav-item mt-2">
                     <span class="text-uppercase small text-white ms-3">System</span>
                 </li>

@@ -75,6 +75,31 @@ $q_bank = mysqli_query($koneksi, "SELECT b.*, m.nama_mapel FROM bank_soal b JOIN
 while($b = mysqli_fetch_assoc($q_bank)) {
     $bank_opt .= "<option value='".$b['id_bank_soal']."'>".$b['kode_bank']." - ".$b['nama_mapel']."</option>";
 }
+
+// Filter Kelas Logic
+$guru_kelas_ids = [];
+$single_class_id = null;
+$q_kelas_filter = false;
+
+if ($_SESSION['level'] == 'guru') {
+    $uid = $_SESSION['user_id'];
+    $q_u = mysqli_query($koneksi, "SELECT mengajar_kelas FROM users WHERE id_user='$uid'");
+    $d_u = mysqli_fetch_assoc($q_u);
+    if ($d_u['mengajar_kelas']) {
+        $guru_kelas_ids = explode(',', $d_u['mengajar_kelas']);
+        if(count($guru_kelas_ids) == 1){
+            $single_class_id = $guru_kelas_ids[0];
+            if(!isset($_GET['id_kelas'])) {
+                $_GET['id_kelas'] = $single_class_id;
+            }
+        }
+        $ids_str = implode(',', $guru_kelas_ids);
+        $q_kelas_filter = mysqli_query($koneksi, "SELECT * FROM kelas WHERE id_kelas IN ($ids_str) ORDER BY nama_kelas ASC");
+    }
+} else {
+    // Admin
+    $q_kelas_filter = mysqli_query($koneksi, "SELECT * FROM kelas ORDER BY nama_kelas ASC");
+}
 ?>
 
 <div class="container-fluid">
@@ -87,6 +112,37 @@ while($b = mysqli_fetch_assoc($q_bank)) {
         <?php endif; ?>
     </div>
 
+    <!-- Filter Kelas -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Pilih Kelas</label>
+                    <select name="id_kelas" class="form-select" onchange="this.form.submit()" <?php echo ($single_class_id) ? 'disabled' : ''; ?>>
+                        <?php if(!$single_class_id): ?>
+                        <option value="">-- Pilih Kelas --</option>
+                        <?php endif; ?>
+                        <?php 
+                        if($q_kelas_filter) {
+                            while($k = mysqli_fetch_assoc($q_kelas_filter)): 
+                        ?>
+                        <option value="<?php echo $k['id_kelas']; ?>" <?php echo (isset($_GET['id_kelas']) && $_GET['id_kelas'] == $k['id_kelas']) ? 'selected' : ''; ?>>
+                            <?php echo $k['nama_kelas']; ?>
+                        </option>
+                        <?php 
+                            endwhile; 
+                        }
+                        ?>
+                    </select>
+                    <?php if($single_class_id): ?>
+                    <input type="hidden" name="id_kelas" value="<?php echo $single_class_id; ?>">
+                    <?php endif; ?>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <?php if(isset($_GET['id_kelas']) && !empty($_GET['id_kelas'])): ?>
     <div class="card shadow mb-4">
         <div class="card-body">
             <div class="table-responsive">
@@ -101,14 +157,18 @@ while($b = mysqli_fetch_assoc($q_bank)) {
                             <th>Selesai</th>
                             <th>Token</th>
                             <th>Status</th>
-                            <th width="15%">Aksi</th>
+                            <!-- <th width="15%">Aksi</th> -->
                         </tr>
                     </thead>
                     <tbody>
                         <?php
                         $where_guru = "";
+                        $id_kelas_sel = $_GET['id_kelas'];
+                        
                         if($_SESSION['level'] == 'guru') {
-                            $where_guru = "WHERE b.id_guru = '".$_SESSION['user_id']."'";
+                            $where_guru = "WHERE b.id_guru = '".$_SESSION['user_id']."' AND b.id_kelas = '$id_kelas_sel'";
+                        } else {
+                            $where_guru = "WHERE b.id_kelas = '$id_kelas_sel'";
                         }
                         
                         $query = mysqli_query($koneksi, "SELECT u.*, b.kode_bank, m.nama_mapel FROM ujian u JOIN bank_soal b ON u.id_bank_soal = b.id_bank_soal JOIN mapel m ON b.id_mapel = m.id_mapel $where_guru ORDER BY u.id_ujian DESC");
@@ -130,6 +190,7 @@ while($b = mysqli_fetch_assoc($q_bank)) {
                                         <span class="badge bg-secondary">Selesai</span>
                                     <?php endif; ?>
                                 </td>
+                                <!-- 
                                 <td>
                                     <?php if($_SESSION['level'] == 'guru'): ?>
                                     <a href="monitoring_ujian.php?id=<?php echo $row['id_ujian']; ?>" class="btn btn-info btn-sm text-white" title="Monitoring Ujian">
@@ -151,6 +212,7 @@ while($b = mysqli_fetch_assoc($q_bank)) {
                                     </button>
                                     <?php endif; ?>
                                 </td>
+                                -->
                             </tr>
                         <?php endwhile; ?>
                     </tbody>
@@ -158,6 +220,7 @@ while($b = mysqli_fetch_assoc($q_bank)) {
             </div>
         </div>
     </div>
+    <?php endif; ?>
 </div>
 
 <!-- Add Modal -->

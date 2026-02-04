@@ -3,13 +3,24 @@ include 'config/database.php';
 include 'includes/header.php';
 
 // Hitung Data untuk Dashboard
-//$jml_guru = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM users WHERE level='guru'"));
+$jml_guru = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM users WHERE level='guru'"));
 $jml_siswa = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM siswa WHERE status='aktif'"));
 $jml_kelas = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM kelas"));
 $jml_ujian = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM ujian WHERE status='aktif'"));
 
+// Safe session level
+$level = isset($_SESSION['level']) ? $_SESSION['level'] : '';
+
+// Admin welcome text
+$admin_welcome_text = "Aplikasi Computer Based Test (CBT) ini dirancang untuk memudahkan pelaksanaan ujian di MI Sultan Fattah Sukosono. Silahkan gunakan menu di samping untuk mengelola data dan ujian.";
+$q_setting_dash = mysqli_query($koneksi, "SELECT * FROM setting LIMIT 1");
+$d_setting_dash = $q_setting_dash ? mysqli_fetch_assoc($q_setting_dash) : null;
+if ($d_setting_dash && isset($d_setting_dash['admin_welcome_text']) && !empty($d_setting_dash['admin_welcome_text'])) {
+    $admin_welcome_text = $d_setting_dash['admin_welcome_text'];
+}
+
 // Data untuk guru
-if($_SESSION['level'] == 'guru') {
+if($level === 'guru') {
     $id_guru = $_SESSION['user_id'];
     $jml_bank_soal_guru = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM bank_soal WHERE id_guru='$id_guru'"));
     
@@ -62,7 +73,7 @@ if($_SESSION['level'] == 'guru') {
 }
 
 // Data untuk siswa
-if($_SESSION['level'] == 'siswa') {
+if($level === 'siswa') {
     $id_kelas = $_SESSION['id_kelas'];
     $ujian_aktif = mysqli_query($koneksi, "
         SELECT u.*, m.nama_mapel 
@@ -83,9 +94,9 @@ if($_SESSION['level'] == 'siswa') {
         </div>
     </div>
 
-    <?php if($_SESSION['level'] == 'admin'): ?>
+    <?php if($level === 'admin'): ?>
     <div class="row">
-        <!-- Data Guru Widget Removed
+        <!-- Data Guru Widget -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2 border-start border-4 border-primary">
                 <div class="card-body">
@@ -101,7 +112,6 @@ if($_SESSION['level'] == 'siswa') {
                 </div>
             </div>
         </div>
-        -->
 
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
@@ -159,17 +169,14 @@ if($_SESSION['level'] == 'siswa') {
                     <h6 class="m-0 font-weight-bold text-primary">Selamat Datang di CBT MI Sultan Fattah Sukosono</h6>
                 </div>
                 <div class="card-body">
-                    <div class="text-center">
-                        <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;" src="assets/img/undraw_posting_photo.svg" alt="...">
-                    </div>
-                    <p>Aplikasi Computer Based Test (CBT) ini dirancang untuk memudahkan pelaksanaan ujian di MI Sultan Fattah Sukosono. Silahkan gunakan menu di samping untuk mengelola data dan ujian.</p>
+                    <div><?php echo $admin_welcome_text; ?></div>
                 </div>
             </div>
         </div>
     </div>
     <?php endif; ?>
 
-    <?php if($_SESSION['level'] == 'guru'): ?>
+    <?php if($level === 'guru'): ?>
     <div class="row">
         <div class="col-12 mb-4">
             <div class="card shadow border-left-primary py-2">
@@ -257,10 +264,10 @@ if($_SESSION['level'] == 'siswa') {
     </div>
     <?php endif; ?>
 
-    <?php if($_SESSION['level'] == 'siswa'): ?>
+    <?php if($level === 'siswa'): ?>
     <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card shadow border-left-primary py-2">
+        <div class="col-xl-8 col-lg-7 mb-4">
+            <div class="card shadow border-left-primary py-2 h-100">
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col mr-2">
@@ -269,6 +276,29 @@ if($_SESSION['level'] == 'siswa') {
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-smile fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5 mb-4">
+            <div class="card border-left-info shadow h-100 py-2 border-start border-4 border-info">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Kartu Ujian</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <a href="modules/cetak/print_kartu.php?id_siswa=<?php echo $_SESSION['user_id']; ?>" target="_blank" class="btn btn-info btn-icon-split btn-sm">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-print"></i>
+                                    </span>
+                                    <span class="text text-white">Cetak Kartu Ujian</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-id-card fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
