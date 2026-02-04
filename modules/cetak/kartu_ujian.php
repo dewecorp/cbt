@@ -1,5 +1,6 @@
 <?php
 include '../../config/database.php';
+$page_title = 'Cetak Kartu Ujian';
 include '../../includes/header.php';
 include '../../includes/sidebar.php';
 

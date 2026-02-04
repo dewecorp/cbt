@@ -79,6 +79,7 @@ if($menit > 0) $waktu_pengerjaan .= $menit . " menit ";
 $waktu_pengerjaan .= $detik . " detik";
 
 // Include Header (sudah handle session)
+$page_title = 'Ujian Selesai';
 include '../../includes/header.php';
 ?>
 

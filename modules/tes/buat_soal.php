@@ -1,5 +1,6 @@
 <?php
 include '../../config/database.php';
+$page_title = 'Buat Soal';
 include '../../includes/header.php';
 include '../../includes/sidebar.php';
 require '../../vendor/autoload.php';

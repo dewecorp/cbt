@@ -1,5 +1,6 @@
 <?php
 include '../../config/database.php';
+$page_title = 'Manajemen User';
 include '../../includes/header.php';
 
 // Cek Level Admin

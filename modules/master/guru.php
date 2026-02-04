@@ -1,6 +1,7 @@
 <?php
 require '../../vendor/autoload.php';
 include '../../config/database.php';
+$page_title = 'Data Guru';
 include '../../includes/header.php';
 
 use Shuchkin\SimpleXLSX;

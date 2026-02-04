@@ -75,13 +75,23 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ujian Berlangsung - CBT MI Sultan Fattah</title>
+    <title>Ujian Berlangsung - <?php echo isset($ujian['nama_ujian']) ? $ujian['nama_ujian'] : 'CBT MI Sultan Fattah'; ?> - CBT MI Sultan Fattah</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         body { background-color: #f0f2f5; }
         .soal-container { min-height: 400px; }
-        .nav-soal-btn { width: 40px; height: 40px; margin: 3px; font-size: 14px; }
+        .nav-soal-btn { 
+            width: 40px; 
+            height: 40px; 
+            margin: 3px; 
+            font-size: 14px; 
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
         .nav-soal-btn.answered { background-color: #198754; color: white; }
         .nav-soal-btn.active { border: 2px solid #0d6efd; font-weight: bold; }
         .timer-box { font-size: 1.5rem; font-weight: bold; font-family: monospace; }
@@ -118,7 +128,7 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
                 <div class="card-body soal-container">
                     <div class="mb-4 fs-5"><?php echo $soal['pertanyaan']; ?></div>
                     
-                    <form id="formJawaban">
+                    <form id="formJawaban" onsubmit="event.preventDefault(); return false;">
                         <input type="hidden" name="id_jawaban" value="<?php echo $soal['id_jawaban']; ?>">
                         <input type="hidden" name="jenis" value="<?php echo $soal['jenis']; ?>">
                         
@@ -158,7 +168,6 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
                             $kiri = json_decode($soal['opsi_a']);
                             $kanan = json_decode($soal['opsi_b']);
                             // Jawaban disimpan sebagai "0:1,1:0" (indexKiri:indexKanan)
-                            // Kita butuh UI untuk menghubungkan. Sederhananya pakai Dropdown di sebelah kanan item Kiri.
                             $pairs = [];
                             if(!empty($soal['jawaban'])) {
                                 $pairs_raw = explode(',', $soal['jawaban']);
@@ -194,26 +203,26 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
                         <?php elseif($soal['jenis'] == 'isian_singkat'): ?>
                             <div class="mb-3">
                                 <label class="form-label">Jawaban Singkat:</label>
-                                <input type="text" class="form-control" name="jawaban_text" value="<?php echo $soal['jawaban']; ?>" onblur="simpanJawaban()">
+                                <input type="text" class="form-control" name="jawaban_text" value="<?php echo htmlspecialchars($soal['jawaban']); ?>" onblur="simpanJawaban()">
                             </div>
 
                         <?php elseif($soal['jenis'] == 'essay'): ?>
                             <div class="mb-3">
                                 <label class="form-label">Jawaban Uraian:</label>
-                                <textarea class="form-control" name="jawaban_essay" rows="5" onblur="simpanJawaban()"><?php echo $soal['jawaban']; ?></textarea>
+                                <textarea class="form-control" name="jawaban_essay" rows="5" onblur="simpanJawaban()"><?php echo htmlspecialchars($soal['jawaban']); ?></textarea>
                             </div>
                         <?php endif; ?>
                     </form>
                 </div>
                 <div class="card-footer d-flex justify-content-between">
                     <?php if($no_soal > 1): ?>
-                        <a href="kerjakan.php?id=<?php echo $id_ujian; ?>&no=<?php echo $no_soal-1; ?>" class="btn btn-secondary"><i class="fas fa-chevron-left"></i> Sebelumnya</a>
+                        <a href="javascript:void(0)" onclick="navigateTo('kerjakan.php?id=<?php echo $id_ujian; ?>&no=<?php echo $no_soal-1; ?>')" class="btn btn-secondary"><i class="fas fa-chevron-left"></i> Sebelumnya</a>
                     <?php else: ?>
                         <div></div>
                     <?php endif; ?>
 
                     <?php if($no_soal < $total_soal): ?>
-                        <a href="kerjakan.php?id=<?php echo $id_ujian; ?>&no=<?php echo $no_soal+1; ?>" class="btn btn-primary">Selanjutnya <i class="fas fa-chevron-right"></i></a>
+                        <a href="javascript:void(0)" onclick="navigateTo('kerjakan.php?id=<?php echo $id_ujian; ?>&no=<?php echo $no_soal+1; ?>')" class="btn btn-primary">Selanjutnya <i class="fas fa-chevron-right"></i></a>
                     <?php else: ?>
                         <button type="button" class="btn btn-success" onclick="selesaiUjian()">Selesai Ujian <i class="fas fa-check"></i></button>
                     <?php endif; ?>
@@ -236,7 +245,7 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
                             if($nav['ragu']) $status_class = 'bg-warning text-dark';
                             if($n == $no_soal) $status_class .= ' active';
                         ?>
-                            <a href="kerjakan.php?id=<?php echo $id_ujian; ?>&no=<?php echo $n; ?>" class="btn btn-outline-secondary nav-soal-btn <?php echo $status_class; ?>">
+                            <a href="javascript:void(0)" onclick="navigateTo('kerjakan.php?id=<?php echo $id_ujian; ?>&no=<?php echo $n; ?>')" class="btn btn-outline-secondary nav-soal-btn <?php echo $status_class; ?>">
                                 <?php echo $n++; ?>
                             </a>
                         <?php endwhile; ?>
@@ -287,7 +296,7 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
     updateTimer();
 
     // Simpan Jawaban
-    function simpanJawaban() {
+    function simpanJawaban(nextUrl = null) {
         var formData = $('#formJawaban').serialize();
         $.ajax({
             url: 'simpan_jawaban.php',
@@ -295,8 +304,20 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
             data: formData,
             success: function(response) {
                 console.log("Jawaban tersimpan");
+                if(nextUrl) {
+                    window.location.href = nextUrl;
+                }
+            },
+            error: function() {
+                if(nextUrl) {
+                    window.location.href = nextUrl;
+                }
             }
         });
+    }
+
+    function navigateTo(url) {
+        simpanJawaban(url);
     }
 
     // Set Ragu
@@ -322,7 +343,7 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = "selesai_ujian.php?id=<?php echo $id_ujian; ?>";
+                simpanJawaban("selesai_ujian.php?id=<?php echo $id_ujian; ?>");
             }
         });
     }

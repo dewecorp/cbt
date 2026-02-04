@@ -1,5 +1,6 @@
 <?php
 include '../../config/database.php';
+$page_title = 'Data Kelas';
 include '../../includes/header.php';
 include '../../includes/sidebar.php';
 

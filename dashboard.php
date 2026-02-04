@@ -1,5 +1,6 @@
 <?php
 include 'config/database.php';
+$page_title = 'Dashboard';
 include 'includes/header.php';
 
 // Hitung Data untuk Dashboard

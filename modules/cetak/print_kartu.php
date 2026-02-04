@@ -20,11 +20,18 @@ $setting = mysqli_fetch_assoc($q_setting);
 if (!$setting) {
     $setting = [];
 }
+$page_title = 'Cetak Kartu Ujian';
+if (isset($id_kelas)) {
+    // We don't have nama_kelas directly in variable, but it's in the first row of q_siswa
+    // However, fetching it moves the pointer. Let's just use generic or fetch one row then reset.
+    // Or simpler, just keep it generic "Cetak Kartu Ujian" or append ID.
+    // Let's try to get class name if possible, but minimal impact is better.
+}
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Cetak Kartu Ujian</title>
+    <title><?php echo $page_title; ?> - CBT MI Sultan Fattah Sukosono</title>
     <style>
         @page {
             size: 215mm 330mm; /* F4 Portrait */
