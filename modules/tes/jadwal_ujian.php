@@ -8,15 +8,19 @@ function generateToken($length = 6) {
     return strtoupper(substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, $length));
 }
 
-// Handle Add/Delete
+// Handle Add/Edit/Delete
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SESSION['level'] == 'guru') {
     if (isset($_POST['add'])) {
-        $nama_ujian = mysqli_real_escape_string($koneksi, $_POST['nama_ujian']);
         $id_bank_soal = $_POST['id_bank_soal'];
         $tgl_mulai = $_POST['tgl_mulai'];
         $tgl_selesai = $_POST['tgl_selesai'];
         $waktu = $_POST['waktu'];
         $token = generateToken();
+
+        // Get Name from Bank Soal
+        $q_bs = mysqli_query($koneksi, "SELECT kode_bank, m.nama_mapel FROM bank_soal b JOIN mapel m ON b.id_mapel=m.id_mapel WHERE id_bank_soal='$id_bank_soal'");
+        $d_bs = mysqli_fetch_assoc($q_bs);
+        $nama_ujian = $d_bs['kode_bank'] . " - " . $d_bs['nama_mapel'];
 
         mysqli_query($koneksi, "INSERT INTO ujian (nama_ujian, id_bank_soal, tgl_mulai, tgl_selesai, waktu, token, status) VALUES ('$nama_ujian', '$id_bank_soal', '$tgl_mulai', '$tgl_selesai', '$waktu', '$token', 'aktif')");
         echo "<script>
@@ -24,6 +28,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SESSION['level'] == 'guru') {
                 icon: 'success',
                 title: 'Berhasil',
                 text: 'Jadwal ujian berhasil dibuat',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = 'jadwal_ujian.php';
+            });
+        </script>";
+    }
+
+    if (isset($_POST['edit'])) {
+        $id_ujian = $_POST['id_ujian'];
+        $id_bank_soal = $_POST['id_bank_soal'];
+        $tgl_mulai = $_POST['tgl_mulai'];
+        $tgl_selesai = $_POST['tgl_selesai'];
+        $waktu = $_POST['waktu'];
+
+        // Get Name from Bank Soal
+        $q_bs = mysqli_query($koneksi, "SELECT kode_bank, m.nama_mapel FROM bank_soal b JOIN mapel m ON b.id_mapel=m.id_mapel WHERE id_bank_soal='$id_bank_soal'");
+        $d_bs = mysqli_fetch_assoc($q_bs);
+        $nama_ujian = $d_bs['kode_bank'] . " - " . $d_bs['nama_mapel'];
+
+        mysqli_query($koneksi, "UPDATE ujian SET nama_ujian='$nama_ujian', id_bank_soal='$id_bank_soal', tgl_mulai='$tgl_mulai', tgl_selesai='$tgl_selesai', waktu='$waktu' WHERE id_ujian='$id_ujian'");
+        echo "<script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: 'Jadwal ujian berhasil diperbarui',
                 timer: 1500,
                 showConfirmButton: false
             }).then(() => {
@@ -102,6 +132,20 @@ while($b = mysqli_fetch_assoc($q_bank)) {
                                 </td>
                                 <td>
                                     <?php if($_SESSION['level'] == 'guru'): ?>
+                                    <a href="monitoring_ujian.php?id=<?php echo $row['id_ujian']; ?>" class="btn btn-info btn-sm text-white" title="Monitoring Ujian">
+                                        <i class="fas fa-desktop"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-warning btn-sm text-white" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editModal"
+                                        data-id="<?php echo $row['id_ujian']; ?>"
+                                        data-bank="<?php echo $row['id_bank_soal']; ?>"
+                                        data-mulai="<?php echo date('Y-m-d\TH:i', strtotime($row['tgl_mulai'])); ?>"
+                                        data-selesai="<?php echo date('Y-m-d\TH:i', strtotime($row['tgl_selesai'])); ?>"
+                                        data-waktu="<?php echo $row['waktu']; ?>"
+                                    >
+                                        <i class="fas fa-edit"></i>
+                                    </button>
                                     <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('jadwal_ujian.php?delete=<?php echo $row['id_ujian']; ?>')">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -126,10 +170,6 @@ while($b = mysqli_fetch_assoc($q_bank)) {
             </div>
             <form method="POST">
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Nama Ujian</label>
-                        <input type="text" class="form-control" name="nama_ujian" required placeholder="Contoh: UAS Matematika Ganjil">
-                    </div>
                     <div class="mb-3">
                         <label class="form-label">Bank Soal</label>
                         <select class="form-select" name="id_bank_soal" required>
@@ -160,5 +200,71 @@ while($b = mysqli_fetch_assoc($q_bank)) {
         </div>
     </div>
 </div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Jadwal Ujian</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST">
+                <input type="hidden" name="id_ujian" id="edit_id_ujian">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Bank Soal</label>
+                        <select class="form-select" name="id_bank_soal" id="edit_id_bank_soal" required>
+                            <option value="">Pilih Bank Soal</option>
+                            <?php echo $bank_opt; ?>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tanggal Mulai</label>
+                            <input type="datetime-local" class="form-control" name="tgl_mulai" id="edit_tgl_mulai" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tanggal Selesai</label>
+                            <input type="datetime-local" class="form-control" name="tgl_selesai" id="edit_tgl_selesai" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Waktu Pengerjaan (Menit)</label>
+                        <input type="number" class="form-control" name="waktu" id="edit_waktu" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" name="edit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    var editModal = document.getElementById('editModal');
+    editModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var id = button.getAttribute('data-id');
+        var bank = button.getAttribute('data-bank');
+        var mulai = button.getAttribute('data-mulai');
+        var selesai = button.getAttribute('data-selesai');
+        var waktu = button.getAttribute('data-waktu');
+        
+        var inputId = editModal.querySelector('#edit_id_ujian');
+        var selectBank = editModal.querySelector('#edit_id_bank_soal');
+        var inputMulai = editModal.querySelector('#edit_tgl_mulai');
+        var inputSelesai = editModal.querySelector('#edit_tgl_selesai');
+        var inputWaktu = editModal.querySelector('#edit_waktu');
+        
+        inputId.value = id;
+        selectBank.value = bank;
+        inputMulai.value = mulai;
+        inputSelesai.value = selesai;
+        inputWaktu.value = waktu;
+    });
+</script>
 
 <?php include '../../includes/footer.php'; ?>

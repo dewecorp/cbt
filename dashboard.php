@@ -19,6 +19,46 @@ if($_SESSION['level'] == 'guru') {
         JOIN bank_soal b ON u.id_bank_soal = b.id_bank_soal 
         WHERE b.id_guru='$id_guru' AND u.status='aktif'
     "));
+
+    // Data Siswa per Kelas yang diajar
+    $teacher_classes = [];
+    $jml_mapel_guru = 0;
+    
+    $q_guru = mysqli_query($koneksi, "SELECT mengajar_kelas, mengajar_mapel FROM users WHERE id_user='$id_guru'");
+    $d_guru = mysqli_fetch_assoc($q_guru);
+    
+    if ($d_guru) {
+        // Count Mapel
+        if (!empty($d_guru['mengajar_mapel'])) {
+            $mapel_ids = explode(',', $d_guru['mengajar_mapel']);
+            $clean_mapel_ids = array_filter($mapel_ids, function($value) { return !empty(trim($value)); });
+            $jml_mapel_guru = count($clean_mapel_ids);
+        }
+
+        // Process Classes
+        if (!empty($d_guru['mengajar_kelas'])) {
+            $kelas_ids = explode(',', $d_guru['mengajar_kelas']);
+            foreach($kelas_ids as $kid) {
+                $kid = trim($kid);
+                if(empty($kid)) continue;
+                
+                // Get Class Name
+                $q_k = mysqli_query($koneksi, "SELECT nama_kelas FROM kelas WHERE id_kelas='$kid'");
+                $d_k = mysqli_fetch_assoc($q_k);
+                
+                // Count Students
+                $q_s = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM siswa WHERE id_kelas='$kid' AND status='aktif'");
+                $d_s = mysqli_fetch_assoc($q_s);
+                
+                if($d_k) {
+                    $teacher_classes[] = [
+                        'nama_kelas' => $d_k['nama_kelas'],
+                        'jumlah_siswa' => $d_s['count']
+                    ];
+                }
+            }
+        }
+    }
 }
 
 // Data untuk siswa
@@ -147,7 +187,7 @@ if($_SESSION['level'] == 'siswa') {
             </div>
         </div>
 
-        <div class="col-xl-6 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-info shadow h-100 py-2 border-start border-4 border-info">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -163,7 +203,7 @@ if($_SESSION['level'] == 'siswa') {
             </div>
         </div>
 
-        <div class="col-xl-6 col-md-6 mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2 border-start border-4 border-warning">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -178,6 +218,42 @@ if($_SESSION['level'] == 'siswa') {
                 </div>
             </div>
         </div>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2 border-start border-4 border-primary">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Mapel Diampu</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_mapel_guru; ?></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-book fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <?php if(!empty($teacher_classes)): ?>
+            <?php foreach($teacher_classes as $tc): ?>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Siswa Kelas <?php echo $tc['nama_kelas']; ?></div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $tc['jumlah_siswa']; ?> Siswa</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-users fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 

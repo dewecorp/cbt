@@ -6,15 +6,32 @@ include '../../includes/sidebar.php';
 $id_user = $_SESSION['user_id'];
 $level = $_SESSION['level'];
 
-// Filter Logic for Admin
+// Get Guru's Classes
+$guru_kelas_ids = [];
+$single_class_id = null;
+if ($level == 'guru') {
+    $q_u = mysqli_query($koneksi, "SELECT mengajar_kelas FROM users WHERE id_user='$id_user'");
+    $d_u = mysqli_fetch_assoc($q_u);
+    if ($d_u['mengajar_kelas']) {
+        $guru_kelas_ids = explode(',', $d_u['mengajar_kelas']);
+        if(count($guru_kelas_ids) == 1){
+            $single_class_id = $guru_kelas_ids[0];
+        }
+    }
+}
+
+// Filter Logic for Admin/Guru
 $where = " WHERE 1=1 ";
 if ($level == 'siswa') {
     $where .= " AND us.id_siswa = '$id_user' ";
 } else {
-    // Admin filters
+    // Admin/Guru filters
     if(isset($_GET['id_kelas']) && !empty($_GET['id_kelas'])) {
         $id_kelas = $_GET['id_kelas'];
         $where .= " AND s.id_kelas = '$id_kelas' ";
+    } elseif ($single_class_id) {
+        $where .= " AND s.id_kelas = '$single_class_id' ";
+        $_GET['id_kelas'] = $single_class_id; // Set for UI
     }
 }
 
@@ -43,7 +60,13 @@ $result = mysqli_query($koneksi, $query);
 
 // Get Kelas for Filter (Admin only)
 if ($level == 'admin' || $level == 'guru') {
-    $q_kelas = mysqli_query($koneksi, "SELECT * FROM kelas ORDER BY nama_kelas ASC");
+    $sql_kelas = "SELECT * FROM kelas ";
+    if($level == 'guru' && !empty($guru_kelas_ids)){
+        $ids_str = implode(',', $guru_kelas_ids);
+        $sql_kelas .= " WHERE id_kelas IN ($ids_str) ";
+    }
+    $sql_kelas .= " ORDER BY nama_kelas ASC";
+    $q_kelas = mysqli_query($koneksi, $sql_kelas);
 }
 ?>
 
@@ -58,14 +81,19 @@ if ($level == 'admin' || $level == 'guru') {
             <form method="GET" action="" class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label">Filter Kelas</label>
-                    <select name="id_kelas" class="form-select" onchange="this.form.submit()">
+                    <select name="id_kelas" class="form-select" onchange="this.form.submit()" <?php echo ($single_class_id) ? 'disabled' : ''; ?>>
+                        <?php if(!$single_class_id): ?>
                         <option value="">-- Semua Kelas --</option>
+                        <?php endif; ?>
                         <?php while($k = mysqli_fetch_assoc($q_kelas)): ?>
                         <option value="<?php echo $k['id_kelas']; ?>" <?php echo (isset($_GET['id_kelas']) && $_GET['id_kelas'] == $k['id_kelas']) ? 'selected' : ''; ?>>
                             <?php echo $k['nama_kelas']; ?>
                         </option>
                         <?php endwhile; ?>
                     </select>
+                    <?php if($single_class_id): ?>
+                    <input type="hidden" name="id_kelas" value="<?php echo $single_class_id; ?>">
+                    <?php endif; ?>
                 </div>
             </form>
         </div>

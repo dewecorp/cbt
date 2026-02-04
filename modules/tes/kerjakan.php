@@ -42,7 +42,8 @@ if (mysqli_num_rows($cek_jawaban) == 0) {
 
 // Hitung Sisa Waktu
 $waktu_mulai = strtotime($us['waktu_mulai']);
-$waktu_selesai = $waktu_mulai + ($ujian['waktu'] * 60);
+$tambah_waktu = isset($us['tambah_waktu']) ? $us['tambah_waktu'] : 0;
+$waktu_selesai = $waktu_mulai + (($ujian['waktu'] + $tambah_waktu) * 60);
 $sisa_detik = $waktu_selesai - time();
 
 if ($sisa_detik <= 0) {

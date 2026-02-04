@@ -3,9 +3,36 @@ include '../../config/database.php';
 include '../../includes/header.php';
 include '../../includes/sidebar.php';
 
+// Get Guru's Classes
+$id_user = $_SESSION['user_id'];
+$level = $_SESSION['level'];
+$guru_kelas_ids = [];
+$single_class_id = null;
+
+if ($level == 'guru') {
+    $q_u = mysqli_query($koneksi, "SELECT mengajar_kelas FROM users WHERE id_user='$id_user'");
+    $d_u = mysqli_fetch_assoc($q_u);
+    if ($d_u['mengajar_kelas']) {
+        $guru_kelas_ids = explode(',', $d_u['mengajar_kelas']);
+        if(count($guru_kelas_ids) == 1){
+            $single_class_id = $guru_kelas_ids[0];
+            if(!isset($_GET['id_kelas'])){
+                $_GET['id_kelas'] = $single_class_id;
+            }
+        }
+    }
+}
+
 // Get Kelas
+$sql_kelas = "SELECT * FROM kelas ";
+if($level == 'guru' && !empty($guru_kelas_ids)){
+    $ids_str = implode(',', $guru_kelas_ids);
+    $sql_kelas .= " WHERE id_kelas IN ($ids_str) ";
+}
+$sql_kelas .= " ORDER BY nama_kelas ASC";
+$q_kelas = mysqli_query($koneksi, $sql_kelas);
+
 $kelas_opt = "";
-$q_kelas = mysqli_query($koneksi, "SELECT * FROM kelas ORDER BY nama_kelas ASC");
 while($k = mysqli_fetch_assoc($q_kelas)) {
     $sel = (isset($_GET['id_kelas']) && $_GET['id_kelas'] == $k['id_kelas']) ? 'selected' : '';
     $kelas_opt .= "<option value='".$k['id_kelas']."' $sel>".$k['nama_kelas']."</option>";
@@ -22,10 +49,15 @@ while($k = mysqli_fetch_assoc($q_kelas)) {
             <form method="GET" action="" class="row g-3 align-items-end mb-4">
                 <div class="col-md-4">
                     <label class="form-label">Pilih Kelas</label>
-                    <select name="id_kelas" class="form-select" required onchange="this.form.submit()">
+                    <select name="id_kelas" class="form-select" required onchange="this.form.submit()" <?php echo ($single_class_id) ? 'disabled' : ''; ?>>
+                        <?php if(!$single_class_id): ?>
                         <option value="">-- Pilih Kelas --</option>
+                        <?php endif; ?>
                         <?php echo $kelas_opt; ?>
                     </select>
+                    <?php if($single_class_id): ?>
+                    <input type="hidden" name="id_kelas" value="<?php echo $single_class_id; ?>">
+                    <?php endif; ?>
                 </div>
                 <div class="col-md-2">
                     <?php if(isset($_GET['id_kelas'])): ?>
