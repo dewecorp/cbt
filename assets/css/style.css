@@ -1,0 +1,102 @@
+:root {
+    --kemenag-green: #00796b;
+    --kemenag-light: #4db6ac;
+    --kemenag-dark: #004d40;
+    --white: #ffffff;
+    --gray-100: #f8f9fa;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--gray-100);
+}
+
+.bg-kemenag {
+    background-color: var(--kemenag-green) !important;
+    color: var(--white);
+}
+
+.text-kemenag {
+    color: var(--kemenag-green) !important;
+}
+
+.btn-kemenag {
+    background-color: var(--kemenag-green);
+    color: var(--white);
+    border-color: var(--kemenag-green);
+}
+
+.btn-kemenag:hover {
+    background-color: var(--kemenag-dark);
+    color: var(--white);
+}
+
+.sidebar {
+    min-height: 100vh;
+    background-color: var(--kemenag-dark);
+    color: var(--white);
+}
+
+.sidebar .nav-link {
+    color: rgba(255,255,255,0.8);
+    padding: 12px 20px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.sidebar .nav-link:hover, .sidebar .nav-link.active {
+    background-color: var(--kemenag-light);
+    color: var(--white);
+}
+
+.sidebar .nav-link i {
+    width: 25px;
+}
+
+.main-content {
+    padding: 20px;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    border-radius: 10px;
+}
+
+.card-header {
+    background-color: var(--white);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-weight: 600;
+    color: var(--kemenag-dark);
+}
+
+/* Login Page */
+.login-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--kemenag-dark) 0%, var(--kemenag-green) 100%);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    border-radius: 15px;
+    background: var(--white);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.login-logo {
+    width: 80px;
+    height: 80px;
+    background-color: var(--kemenag-green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: white;
+    font-size: 2rem;
+}
