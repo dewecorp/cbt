@@ -61,6 +61,7 @@ if (isset($_POST['add'])) {
     } else {
         $query = "INSERT INTO users (username, password, password_plain, nama_lengkap, foto, level, mengajar_kelas, mengajar_mapel) VALUES ('$username', '$password_hash', '$password_plain', '$nama_lengkap', '$foto', 'guru', '$mengajar_kelas', '$mengajar_mapel')";
         if(mysqli_query($koneksi, $query)) {
+            log_activity('create', 'guru', 'tambah guru ' . $username);
             echo "<script>
                 Swal.fire({
                     icon: 'success',
@@ -125,6 +126,7 @@ if (isset($_POST['edit'])) {
     $query_str .= " WHERE id_user='$id_user'";
     
     if(mysqli_query($koneksi, $query_str)) {
+        log_activity('update', 'guru', 'edit guru ' . $username);
         echo "<script>
             Swal.fire({
                 icon: 'success',
@@ -182,6 +184,7 @@ if (isset($_POST['import'])) {
                     }
                 }
                 
+                log_activity('import', 'guru', 'import guru berhasil ' . $success . ', gagal ' . $failed);
                 echo "<script>
                     Swal.fire({
                         icon: 'success',
@@ -212,6 +215,7 @@ if (isset($_GET['delete'])) {
     }
     
     if(mysqli_query($koneksi, "DELETE FROM users WHERE id_user='$id_user'")) {
+        log_activity('delete', 'guru', 'hapus guru ' . $id_user);
         echo "<script>
             Swal.fire({
                 icon: 'success',

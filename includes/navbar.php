@@ -93,5 +93,47 @@ document.addEventListener("DOMContentLoaded", function(event) {
            overlay.classList.remove('show');
        });
    }
+
+   document.querySelectorAll('a[href$="logout.php"]').forEach(function(el){
+       el.addEventListener('click', function(e){
+           e.preventDefault();
+           const href = el.getAttribute('href');
+           Swal.fire({
+               title: 'Konfirmasi Logout',
+               text: 'Anda yakin ingin keluar?',
+               icon: 'warning',
+               showCancelButton: true,
+               confirmButtonColor: '#d33',
+               cancelButtonColor: '#3085d6',
+               confirmButtonText: 'Ya, Logout',
+               cancelButtonText: 'Batal'
+           }).then((result) => {
+               if (result.isConfirmed) {
+                   window.location.href = href;
+               }
+           });
+       });
+   });
+
+   document.addEventListener('click', function(e){
+       const anchor = e.target.closest('a[href$="logout.php"]');
+       if (!anchor) return;
+       e.preventDefault();
+       const href = anchor.getAttribute('href');
+       Swal.fire({
+           title: 'Konfirmasi Logout',
+           text: 'Anda yakin ingin keluar?',
+           icon: 'warning',
+           showCancelButton: true,
+           confirmButtonColor: '#d33',
+           cancelButtonColor: '#3085d6',
+           confirmButtonText: 'Ya, Logout',
+           cancelButtonText: 'Batal'
+       }).then((result) => {
+           if (result.isConfirmed) {
+               window.location.href = href;
+           }
+       });
+   });
 });
 </script>

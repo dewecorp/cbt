@@ -66,6 +66,15 @@ if ($d_setting_dash && isset($d_setting_dash['admin_welcome_text']) && !empty($d
     $admin_welcome_text = $d_setting_dash['admin_welcome_text'];
 }
 
+function time_ago_str($datetime) {
+    $ts = strtotime($datetime);
+    $diff = time() - $ts;
+    if ($diff < 60) return $diff . " detik lalu";
+    if ($diff < 3600) return floor($diff / 60) . " menit lalu";
+    if ($diff < 86400) return floor($diff / 3600) . " jam lalu";
+    return floor($diff / 86400) . " hari lalu";
+}
+
 // Data untuk guru
 if($level === 'guru') {
     $id_guru = $_SESSION['user_id'];
@@ -225,6 +234,79 @@ if($level === 'siswa') {
                 </div>
                 <div class="card-body">
                     <div><?php echo $admin_welcome_text; ?></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Aktivitas Pengguna (24 Jam)</h6>
+                    <div>
+                        <?php
+                        $log_count_24h = 0;
+                        $rs_cnt = mysqli_query($koneksi, "SELECT COUNT(*) AS c FROM activity_log WHERE created_at >= (NOW() - INTERVAL 1 DAY)");
+                        if ($rs_cnt) { $row_cnt = mysqli_fetch_assoc($rs_cnt); $log_count_24h = (int)$row_cnt['c']; }
+                        ?>
+                        <span class="badge bg-primary rounded-pill"><?php echo $log_count_24h; ?> Aktivitas</span>
+                    </div>
+                </div>
+                <div class="card-body" style="max-height: 420px; overflow-y: auto;">
+                    <?php
+                    $logs = mysqli_query($koneksi, "SELECT * FROM activity_log ORDER BY created_at DESC LIMIT 100");
+                    ?>
+                    <style>
+                        .timeline { position: relative; padding-left: 1.5rem; }
+                        .timeline::before { content: ''; position: absolute; left: 0.6rem; top: 0; bottom: 0; width: 2px; background: #e9ecef; }
+                        .timeline-item { position: relative; margin-bottom: 1rem; padding-left: 1rem; }
+                        .timeline-item::before { content: ''; position: absolute; left: -0.1rem; top: 0.9rem; width: 10px; height: 10px; background: #4e73df; border-radius: 50%; box-shadow: 0 0 0 3px rgba(78,115,223,0.15); }
+                        .timeline-meta { font-size: 0.85rem; color: #6c757d; }
+                        .timeline-title { font-weight: 600; }
+                        .timeline-badge { display: inline-flex; align-items: center; gap: 0.35rem; }
+                        .timeline-badge i { color: #4e73df; }
+                        .timeline-card { background: #fff; border: 1px solid #e9ecef; border-radius: 0.5rem; padding: 0.75rem 0.9rem; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-left: 0.5rem; }
+                        .timeline-card .timeline-title { letter-spacing: 0.02em; }
+                        .timeline-card.t-login { border-left: 4px solid #0d6efd; }
+                        .timeline-card.t-logout { border-left: 4px solid #dc3545; }
+                        .timeline-card.t-create { border-left: 4px solid #198754; }
+                        .timeline-card.t-update { border-left: 4px solid #ffc107; }
+                        .timeline-card.t-delete { border-left: 4px solid #dc3545; }
+                        .timeline-card.t-import { border-left: 4px solid #0dcaf0; }
+                        .timeline-content { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+                    </style>
+                    <div class="timeline">
+                        <?php while($lg = mysqli_fetch_assoc($logs)): ?>
+                            <?php
+                                $ico = 'fa-circle';
+                                if ($lg['action'] === 'login') $ico = 'fa-sign-in-alt';
+                                elseif ($lg['action'] === 'logout') $ico = 'fa-sign-out-alt';
+                                elseif ($lg['action'] === 'create') $ico = 'fa-plus-circle';
+                                elseif ($lg['action'] === 'update') $ico = 'fa-edit';
+                                elseif ($lg['action'] === 'delete') $ico = 'fa-trash';
+                                elseif ($lg['action'] === 'import') $ico = 'fa-file-import';
+                                $who = trim(($lg['username'] ?? '') . ' ' . ($lg['level'] ? '(' . $lg['level'] . ')' : ''));
+                                $dt = date('d/m/Y H:i:s', strtotime($lg['created_at'])) . ' • ' . time_ago_str($lg['created_at']);
+                                $act_class = 't-' . strtolower($lg['action']);
+                            ?>
+                            <div class="timeline-item">
+                                <div class="timeline-card <?php echo $act_class; ?>">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="timeline-badge">
+                                            <i class="fas <?php echo $ico; ?>"></i>
+                                            <span class="timeline-title"><?php echo strtoupper($lg['action']); ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-content mb-1">
+                                        <span class="badge bg-secondary"><?php echo $lg['module']; ?></span>
+                                        <?php if(!empty($who)): ?><span class="badge bg-light text-dark"><?php echo $who; ?></span><?php endif; ?>
+                                        <?php if(!empty($lg['details'])): ?><span class="text-muted"><?php echo htmlspecialchars($lg['details']); ?></span><?php endif; ?>
+                                    </div>
+                                    <div class="timeline-meta"><?php echo $dt; ?></div>
+                                </div>
+                            </div>
+                        <?php endwhile; ?>
+                    </div>
                 </div>
             </div>
         </div>

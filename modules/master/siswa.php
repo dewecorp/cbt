@@ -37,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         } else {
             $sql = "INSERT INTO siswa (nisn, nama_siswa, tempat_lahir, tanggal_lahir, jk, password, id_kelas) VALUES ('$nisn', '$nama_siswa', '$tempat_lahir', '$tanggal_lahir', '$jk', '$password', '$id_kelas')";
             if (mysqli_query($koneksi, $sql)) {
+                log_activity('create', 'siswa', 'tambah siswa ' . $nisn);
                 echo "<script>
                     Swal.fire({
                         icon: 'success',
@@ -69,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         if (mysqli_query($koneksi, $query_str)) {
+            log_activity('update', 'siswa', 'edit siswa ' . $nisn);
             echo "<script>
                 Swal.fire({
                     icon: 'success',
@@ -155,6 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         $redirect_url .= '?kelas=' . urlencode($_GET['kelas']);
                     }
 
+                    log_activity('import', 'siswa', 'import siswa berhasil ' . $count . ', gagal ' . $err);
                     echo "<script>
                         Swal.fire({
                             title: 'Selesai',
@@ -188,6 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $count++;
         }
         
+        log_activity('update', 'siswa', 'reset semua password kelas ' . $id_kelas . ' total ' . $count);
         echo "<script>
             Swal.fire({
                 icon: 'success',
@@ -211,6 +215,7 @@ if (isset($_POST['reset_password'])) {
     $sql = "UPDATE siswa SET password='$new_password' WHERE id_siswa='$id_siswa'";
     
     if (mysqli_query($koneksi, $sql)) {
+        log_activity('update', 'siswa', 'reset password siswa ' . $id_siswa);
         echo "<script>
             Swal.fire({
                 icon: 'success',
@@ -231,6 +236,7 @@ if (isset($_GET['delete'])) {
     $id_siswa = $_GET['delete'];
     $redirect_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
     mysqli_query($koneksi, "DELETE FROM siswa WHERE id_siswa='$id_siswa'");
+    log_activity('delete', 'siswa', 'hapus siswa ' . $id_siswa);
     echo "<script>window.location.href = 'siswa.php?kelas=$redirect_kelas';</script>";
 }
 
