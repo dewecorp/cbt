@@ -1,4 +1,5 @@
 <?php
+session_start();
 include '../../config/database.php';
 $page_title = 'Pengumuman';
 if (!isset($_SESSION['level'])) { $_SESSION['level'] = 'admin'; }

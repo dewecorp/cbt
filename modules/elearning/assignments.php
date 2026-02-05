@@ -1,14 +1,16 @@
 <?php
+session_start();
 include '../../config/database.php';
 $page_title = 'Tugas';
 if (!isset($_SESSION['level'])) { $_SESSION['level'] = 'admin'; }
 $level = $_SESSION['level'];
-$uid = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
+$uid = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
 $existsA = mysqli_query($koneksi, "SHOW TABLES LIKE 'assignments'");
 if (mysqli_num_rows($existsA) == 0) {
     mysqli_query($koneksi, "CREATE TABLE `assignments` (
         `id_assignment` int(11) NOT NULL AUTO_INCREMENT,
         `course_id` int(11) NOT NULL,
+        `jenis_tugas` varchar(50) DEFAULT 'Lain-lain',
         `judul` varchar(200) NOT NULL,
         `deskripsi` text,
         `deadline` datetime NOT NULL,
@@ -33,13 +35,55 @@ if (mysqli_num_rows($existsS) == 0) {
 if (!is_dir(dirname(__DIR__,2).'/assets/uploads/assignments')) {
     @mkdir(dirname(__DIR__,2).'/assets/uploads/assignments', 0777, true);
 }
+// Delete Assignment
+if (isset($_GET['delete']) && ($level === 'admin' || $level === 'guru')) {
+    $id_del = (int)$_GET['delete'];
+    // Check ownership if guru
+    $check = mysqli_query($koneksi, "SELECT created_by FROM assignments WHERE id_assignment=$id_del");
+    if ($row = mysqli_fetch_assoc($check)) {
+        if ($level === 'admin' || $row['created_by'] == $uid) {
+            mysqli_query($koneksi, "DELETE FROM assignments WHERE id_assignment=$id_del");
+            // Also delete submissions
+            mysqli_query($koneksi, "DELETE FROM submissions WHERE assignment_id=$id_del");
+            header("Location: assignments.php");
+            exit;
+        }
+    }
+}
+
+// Create Assignment
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_assignment'])) {
     $course_id = (int)$_POST['course_id'];
+    $jenis_tugas = mysqli_real_escape_string($koneksi, $_POST['jenis_tugas']);
     $judul = mysqli_real_escape_string($koneksi, $_POST['judul']);
     $deskripsi = mysqli_real_escape_string($koneksi, $_POST['deskripsi']);
     $deadline = mysqli_real_escape_string($koneksi, $_POST['deadline']);
     if ($course_id>0 && !empty($judul) && !empty($deadline)) {
-        mysqli_query($koneksi, "INSERT INTO assignments(course_id,judul,deskripsi,deadline,created_by) VALUES($course_id,'$judul','$deskripsi','$deadline',$uid)");
+        mysqli_query($koneksi, "INSERT INTO assignments(course_id,jenis_tugas,judul,deskripsi,deadline,created_by) VALUES($course_id,'$jenis_tugas','$judul','$deskripsi','$deadline',$uid)");
+        header("Location: assignments.php");
+        exit;
+    }
+}
+
+// Edit Assignment
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_assignment'])) {
+    $id_assignment = (int)$_POST['id_assignment'];
+    $course_id = (int)$_POST['course_id'];
+    $jenis_tugas = mysqli_real_escape_string($koneksi, $_POST['jenis_tugas']);
+    $judul = mysqli_real_escape_string($koneksi, $_POST['judul']);
+    $deskripsi = mysqli_real_escape_string($koneksi, $_POST['deskripsi']);
+    $deadline = mysqli_real_escape_string($koneksi, $_POST['deadline']);
+    
+    // Check ownership if guru
+    $check = mysqli_query($koneksi, "SELECT created_by FROM assignments WHERE id_assignment=$id_assignment");
+    if ($row = mysqli_fetch_assoc($check)) {
+        if ($level === 'admin' || $row['created_by'] == $uid) {
+             if ($course_id>0 && !empty($judul) && !empty($deadline)) {
+                mysqli_query($koneksi, "UPDATE assignments SET course_id=$course_id, jenis_tugas='$jenis_tugas', judul='$judul', deskripsi='$deskripsi', deadline='$deadline' WHERE id_assignment=$id_assignment");
+                header("Location: assignments.php");
+                exit;
+            }
+        }
     }
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_assignment'])) {
@@ -91,6 +135,7 @@ $assignments = mysqli_query($koneksi, "SELECT a.*, c.nama_course, k.nama_kelas, 
                                 <tr>
                                     <th>Kelas</th>
                                     <th>Kelas Online</th>
+                                    <th>Jenis</th>
                                     <th>Judul</th>
                                     <th>Tenggat</th>
                                     <th>Guru</th>
@@ -102,12 +147,17 @@ $assignments = mysqli_query($koneksi, "SELECT a.*, c.nama_course, k.nama_kelas, 
                                 <tr>
                                     <td><?php echo htmlspecialchars($a['nama_kelas']); ?></td>
                                     <td><?php echo htmlspecialchars($a['nama_course']); ?></td>
+                                    <td><span class="badge bg-info"><?php echo htmlspecialchars($a['jenis_tugas']); ?></span></td>
                                     <td><?php echo htmlspecialchars($a['judul']); ?></td>
                                     <td><?php echo date('d/m/Y H:i', strtotime($a['deadline'])); ?></td>
                                     <td><?php echo htmlspecialchars($a['nama_lengkap']); ?></td>
                                     <td>
                                         <?php if($level === 'siswa'): ?>
                                         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalSubmit<?php echo $a['id_assignment']; ?>"><i class="fas fa-upload"></i> Unggah</button>
+                                        <?php endif; ?>
+                                        <?php if($level === 'admin' || ($level === 'guru' && $a['created_by'] == $uid)): ?>
+                                        <button class="btn btn-info btn-sm" onclick="editAssignment(<?php echo htmlspecialchars(json_encode($a)); ?>)"><i class="fas fa-edit"></i></button>
+                                        <a href="assignments.php?delete=<?php echo $a['id_assignment']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Hapus tugas ini?')"><i class="fas fa-trash"></i></a>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -164,6 +214,17 @@ $assignments = mysqli_query($koneksi, "SELECT a.*, c.nama_course, k.nama_kelas, 
             </select>
         </div>
         <div class="mb-2">
+            <label class="form-label">Jenis Tugas</label>
+            <select name="jenis_tugas" class="form-select" required>
+                <option value="Lain-lain">Lain-lain</option>
+                <option value="Merangkum">Merangkum</option>
+                <option value="Observasi">Observasi</option>
+                <option value="Praktik">Praktik</option>
+                <option value="Proyek">Proyek</option>
+                <option value="Latihan Soal">Latihan Soal</option>
+            </select>
+        </div>
+        <div class="mb-2">
             <label class="form-label">Judul</label>
             <input type="text" name="judul" class="form-control" required>
         </div>
@@ -183,5 +244,71 @@ $assignments = mysqli_query($koneksi, "SELECT a.*, c.nama_course, k.nama_kelas, 
     </form>
   </div>
 </div>
+
+<div class="modal fade" id="modalEditAssignment" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="post" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Tugas</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="id_assignment" id="edit_id_assignment">
+        <div class="mb-2">
+            <label class="form-label">Kelas Online</label>
+            <select name="course_id" id="edit_course_id" class="form-select" required>
+                <option value="">Pilih</option>
+                <?php 
+                mysqli_data_seek($courses, 0);
+                while($c = mysqli_fetch_assoc($courses)): ?>
+                    <option value="<?php echo $c['id_course']; ?>"><?php echo $c['nama_kelas'].' - '.$c['nama_mapel'].' - '.$c['nama_course']; ?></option>
+                <?php endwhile; ?>
+            </select>
+        </div>
+        <div class="mb-2">
+            <label class="form-label">Jenis Tugas</label>
+            <select name="jenis_tugas" id="edit_jenis_tugas" class="form-select" required>
+                <option value="Lain-lain">Lain-lain</option>
+                <option value="Merangkum">Merangkum</option>
+                <option value="Observasi">Observasi</option>
+                <option value="Praktik">Praktik</option>
+                <option value="Proyek">Proyek</option>
+                <option value="Latihan Soal">Latihan Soal</option>
+            </select>
+        </div>
+        <div class="mb-2">
+            <label class="form-label">Judul</label>
+            <input type="text" name="judul" id="edit_judul" class="form-control" required>
+        </div>
+        <div class="mb-2">
+            <label class="form-label">Deskripsi</label>
+            <textarea name="deskripsi" id="edit_deskripsi" class="form-control" rows="4"></textarea>
+        </div>
+        <div class="mb-2">
+            <label class="form-label">Tenggat</label>
+            <input type="datetime-local" name="deadline" id="edit_deadline" class="form-control" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="submit" name="edit_assignment" value="1" class="btn btn-primary">Simpan Perubahan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function editAssignment(data) {
+    document.getElementById('edit_id_assignment').value = data.id_assignment;
+    document.getElementById('edit_course_id').value = data.course_id;
+    document.getElementById('edit_jenis_tugas').value = data.jenis_tugas;
+    document.getElementById('edit_judul').value = data.judul;
+    document.getElementById('edit_deskripsi').value = data.deskripsi;
+    document.getElementById('edit_deadline').value = data.deadline.replace(' ', 'T');
+    
+    var myModal = new bootstrap.Modal(document.getElementById('modalEditAssignment'));
+    myModal.show();
+}
+</script>
 <?php endif; ?>
 <?php include '../../includes/footer.php'; ?>

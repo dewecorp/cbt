@@ -1,150 +1,426 @@
 <?php
+session_start();
 include '../../config/database.php';
-$page_title = 'Forum';
+$page_title = 'Forum Diskusi';
 if (!isset($_SESSION['level'])) { $_SESSION['level'] = 'admin'; }
 $level = $_SESSION['level'];
-$uid = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
-$existsT = mysqli_query($koneksi, "SHOW TABLES LIKE 'forum_topics'");
-if (mysqli_num_rows($existsT) == 0) {
-    mysqli_query($koneksi, "CREATE TABLE `forum_topics` (
-        `id_topic` int(11) NOT NULL AUTO_INCREMENT,
-        `course_id` int(11) NOT NULL,
-        `title` varchar(200) NOT NULL,
-        `created_by` int(11) NOT NULL,
-        `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
-        `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        PRIMARY KEY (`id_topic`)
-    )");
-}
-$existsR = mysqli_query($koneksi, "SHOW TABLES LIKE 'forum_replies'");
-if (mysqli_num_rows($existsR) == 0) {
-    mysqli_query($koneksi, "CREATE TABLE `forum_replies` (
-        `id_reply` int(11) NOT NULL AUTO_INCREMENT,
-        `topic_id` int(11) NOT NULL,
-        `user_id` int(11) NOT NULL,
-        `content` text NOT NULL,
-        `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (`id_reply`)
-    )");
-}
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_topic'])) {
-    $course_id = (int)$_POST['course_id'];
-    $title = mysqli_real_escape_string($koneksi, $_POST['title']);
-    if ($course_id>0 && !empty($title)) {
-        mysqli_query($koneksi, "INSERT INTO forum_topics(course_id,title,created_by) VALUES($course_id,'$title',$uid)");
-    }
-}
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_topic'])) {
-    $topic_id = (int)$_POST['topic_id'];
+$uid = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+
+// Handle Post Creation
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
+    $course_id = 0; // Default to Global/General if no course selected
     $content = mysqli_real_escape_string($koneksi, $_POST['content']);
-    if ($topic_id>0 && !empty($content)) {
-        mysqli_query($koneksi, "INSERT INTO forum_replies(topic_id,user_id,content) VALUES($topic_id,$uid,'$content')");
+    $image_path = null;
+    $file_path = null;
+
+    // Handle Image Upload
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+        if (in_array(strtolower($ext), $allowed)) {
+            $new_name = 'img_' . time() . '_' . rand(1000,9999) . '.' . $ext;
+            if (move_uploaded_file($_FILES['image']['tmp_name'], '../../assets/uploads/forum/' . $new_name)) {
+                $image_path = $new_name;
+            }
+        }
+    }
+
+    // Handle File Upload
+    if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
+        $ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+        $allowed = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'rar'];
+        if (in_array(strtolower($ext), $allowed)) {
+            $new_name = 'doc_' . time() . '_' . rand(1000,9999) . '.' . $ext;
+            if (move_uploaded_file($_FILES['file']['tmp_name'], '../../assets/uploads/forum/' . $new_name)) {
+                $file_path = $new_name;
+            }
+        }
+    }
+
+    if (!empty($content) || $image_path || $file_path) {
+        // Title is optional now, set default or empty
+        $title = substr($content, 0, 50) . '...'; 
+        mysqli_query($koneksi, "INSERT INTO forum_topics(course_id, title, content, image, file, created_by) VALUES($course_id, '$title', '$content', '$image_path', '$file_path', $uid)");
+        header("Location: forum.php");
+        exit;
     }
 }
+
+function render_comments($comments, $children, $parent_id = 0) {
+    $list = ($parent_id == 0) ? $comments : (isset($children[$parent_id]) ? $children[$parent_id] : []);
+    
+    foreach ($list as $r) {
+        $r_id = $r['id_reply'];
+        $margin = ($parent_id == 0) ? 'mb-2' : 'mt-2';
+        
+        echo '<div class="d-flex '.$margin.'" id="comment-'.$r_id.'">';
+        echo '  <div class="flex-shrink-0">';
+        echo '      <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 14px;">'.strtoupper(substr($r['nama_lengkap'], 0, 1)).'</div>';
+        echo '  </div>';
+        echo '  <div class="flex-grow-1 ms-2">';
+        echo '      <div class="bg-light p-2 rounded d-inline-block">';
+        echo '          <div class="fw-bold" style="font-size: 0.9rem;">'.htmlspecialchars($r['nama_lengkap']).'</div>';
+        echo '          <div style="font-size: 0.9rem;">'.nl2br(htmlspecialchars($r['content'])).'</div>';
+        echo '      </div>';
+        echo '      <div class="d-flex align-items-center mt-1">';
+        echo '          <small class="text-muted me-3" style="font-size: 0.75rem;">'.date('d/m H:i', strtotime($r['created_at'])).'</small>';
+        echo '          <a href="javascript:void(0)" onclick="showReplyForm('.$r_id.')" class="text-decoration-none fw-bold text-muted" style="font-size: 0.75rem;">Balas</a>';
+        echo '      </div>';
+        
+        // Nested replies container
+        echo '      <div id="replies-'.$r_id.'" class="mt-2 ps-3 border-start">';
+        if (isset($children[$r_id])) {
+            render_comments([], $children, $r_id);
+        }
+        echo '      </div>';
+        
+        // Reply Form
+        echo '      <div id="reply-form-'.$r_id.'" class="mt-2" style="display:none;">';
+        echo '          <div class="d-flex align-items-center">';
+        echo '              <div class="avatar-circle me-2" style="width: 24px; height: 24px; font-size: 10px;">'.strtoupper(substr($_SESSION['nama'] ?? 'U', 0, 1)).'</div>';
+        echo '              <input type="text" class="form-control form-control-sm rounded-pill bg-light border-0" placeholder="Tulis balasan..." id="input-reply-'.$r_id.'" onkeypress="handleReply(event, '.$r['topic_id'].', '.$r_id.')">';
+        echo '          </div>';
+        echo '      </div>';
+        
+        echo '  </div>';
+        echo '</div>';
+    }
+}
+
 include '../../includes/header.php';
-$filterCourse = "";
-if ($level === 'guru') { $filterCourse = " WHERE c.pengampu=".$uid; }
-$courses = mysqli_query($koneksi, "SELECT c.id_course, c.nama_course, k.nama_kelas, m.nama_mapel FROM courses c JOIN kelas k ON c.id_kelas=k.id_kelas JOIN mapel m ON c.id_mapel=m.id_mapel $filterCourse ORDER BY c.nama_course ASC");
+
+// Fetch Posts (Topics)
 $topic_filter = "";
-if ($level === 'siswa') {
+if ($level === 'guru') {
+    // Show posts from courses taught by guru OR Global posts
+    $topic_filter = " WHERE (c.pengampu=".$uid." OR t.course_id=0)";
+} elseif ($level === 'siswa') {
+    // Show posts from courses for student's class OR Global posts
     $id_kelas = isset($_SESSION['id_kelas']) ? $_SESSION['id_kelas'] : 0;
-    $topic_filter = " WHERE c.id_kelas=".$id_kelas;
+    $topic_filter = " WHERE (c.id_kelas=".$id_kelas." OR t.course_id=0)";
 }
-$topics = mysqli_query($koneksi, "SELECT t.*, c.nama_course, k.nama_kelas, u.nama_lengkap, (SELECT COUNT(*) FROM forum_replies r WHERE r.topic_id=t.id_topic) AS jml_reply FROM forum_topics t JOIN courses c ON t.course_id=c.id_course JOIN kelas k ON c.id_kelas=k.id_kelas JOIN users u ON t.created_by=u.id_user $topic_filter ORDER BY t.updated_at DESC");
-$topic_id = isset($_GET['topic_id']) ? (int)$_GET['topic_id'] : 0;
-$replies = null;
-if ($topic_id>0) {
-    $replies = mysqli_query($koneksi, "SELECT r.*, u.nama_lengkap FROM forum_replies r JOIN users u ON r.user_id=u.id_user WHERE r.topic_id=$topic_id ORDER BY r.created_at ASC");
-}
+
+$topicsQ = mysqli_query($koneksi, "
+    SELECT t.*, c.nama_course, k.nama_kelas, u.nama_lengkap, 
+    (SELECT COUNT(*) FROM forum_replies r WHERE r.topic_id=t.id_topic) AS comment_count,
+    (SELECT COUNT(*) FROM forum_likes l WHERE l.topic_id=t.id_topic) AS like_count,
+    (SELECT COUNT(*) FROM forum_likes l2 WHERE l2.topic_id=t.id_topic AND l2.user_id=$uid) AS is_liked
+    FROM forum_topics t 
+    LEFT JOIN courses c ON t.course_id=c.id_course 
+    LEFT JOIN kelas k ON c.id_kelas=k.id_kelas 
+    JOIN users u ON t.created_by=u.id_user 
+    $topic_filter 
+    ORDER BY t.created_at DESC
+");
+
+
 ?>
+
+<style>
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        background-color: #0d6efd;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    .post-card {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .post-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .post-info {
+        margin-left: 10px;
+    }
+    .post-author {
+        font-weight: bold;
+        color: #333;
+        text-decoration: none;
+    }
+    .post-time {
+        font-size: 0.8rem;
+        color: #777;
+    }
+    .post-content {
+        font-size: 1rem;
+        color: #111;
+        margin-bottom: 10px;
+        white-space: pre-wrap;
+    }
+    .post-image {
+        width: 100%;
+        border-radius: 8px;
+        margin-top: 10px;
+        border: 1px solid #eee;
+    }
+    .post-file {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+    }
+    .post-actions {
+        border-top: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+        padding: 5px 0;
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-around;
+    }
+    .action-btn {
+        background: none;
+        border: none;
+        color: #65676b;
+        font-weight: 600;
+        padding: 5px 20px;
+        border-radius: 5px;
+        width: 45%;
+        transition: 0.2s;
+    }
+    .action-btn:hover {
+        background-color: #f0f2f5;
+    }
+    .action-btn.liked {
+        color: #0d6efd;
+    }
+    .comments-section {
+        margin-top: 10px;
+    }
+    .comment-item {
+        display: flex;
+        margin-bottom: 10px;
+    }
+    .comment-bubble {
+        background-color: #f0f2f5;
+        border-radius: 18px;
+        padding: 8px 12px;
+        margin-left: 8px;
+        flex-grow: 1;
+    }
+    .comment-author {
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    .comment-text {
+        font-size: 0.9rem;
+    }
+    .comment-time {
+        font-size: 0.75rem;
+        color: #65676b;
+        margin-left: 12px;
+        margin-top: 2px;
+    }
+    .create-post-card {
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+</style>
+
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Forum Diskusi</h6>
-                    <div>
-                        <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalTopic"><i class="fas fa-comment-medical"></i> Buat Topik</button>
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+        <h4 class="mb-0 text-gray-800"><i class="fas fa-comments text-primary"></i> Forum Kelas</h4>
+    </div>
+
+    <!-- Create Post -->
+    <div class="card create-post-card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                <div class="d-flex mb-3">
+                    <div class="avatar-circle me-2">
+                        <?php 
+                        $my_name = isset($_SESSION['nama']) ? $_SESSION['nama'] : 'U';
+                        echo strtoupper(substr($my_name, 0, 1)); 
+                        ?>
+                    </div>
+                    <div class="w-100">
+                        <textarea name="content" class="form-control" rows="3" placeholder="Apa yang Anda pikirkan?" style="border: none; resize: none; font-size: 1.1rem;"></textarea>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-datatable" width="100%" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th>Kelas</th>
-                                    <th>Kelas Online</th>
-                                    <th>Judul Topik</th>
-                                    <th>Dibuat Oleh</th>
-                                    <th>Balasan</th>
-                                    <th>Terakhir Aktif</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php while($t = mysqli_fetch_assoc($topics)): ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($t['nama_kelas']); ?></td>
-                                    <td><?php echo htmlspecialchars($t['nama_course']); ?></td>
-                                    <td><?php echo htmlspecialchars($t['title']); ?></td>
-                                    <td><?php echo htmlspecialchars($t['nama_lengkap']); ?></td>
-                                    <td><?php echo (int)$t['jml_reply']; ?></td>
-                                    <td><?php echo date('d/m/Y H:i', strtotime($t['updated_at'])); ?></td>
-                                    <td><a href="?topic_id=<?php echo $t['id_topic']; ?>" class="btn btn-primary btn-sm">Lihat</a></td>
-                                </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
+                <div class="border-top pt-2 d-flex justify-content-between align-items-center">
+                    <div>
+                        <label class="btn btn-light btn-sm text-success" title="Upload Gambar">
+                            <i class="fas fa-image fa-lg"></i> <input type="file" name="image" accept="image/*" style="display: none;"> Foto
+                        </label>
+                        <label class="btn btn-light btn-sm text-danger" title="Upload File">
+                            <i class="fas fa-paperclip fa-lg"></i> <input type="file" name="file" style="display: none;"> File
+                        </label>
                     </div>
-                    <?php if($topic_id>0 && $replies): ?>
-                    <div class="card mt-3">
-                        <div class="card-header">Balasan</div>
-                        <div class="card-body">
-                            <?php while($r = mysqli_fetch_assoc($replies)): ?>
-                                <div class="mb-2"><strong><?php echo htmlspecialchars($r['nama_lengkap']); ?></strong> • <?php echo date('d/m/Y H:i', strtotime($r['created_at'])); ?><div><?php echo nl2br(htmlspecialchars($r['content'])); ?></div></div>
-                            <?php endwhile; ?>
-                            <form method="post" class="mt-3">
-                                <input type="hidden" name="topic_id" value="<?php echo $topic_id; ?>">
-                                <div class="mb-2">
-                                    <textarea name="content" class="form-control" rows="3" required></textarea>
-                                </div>
-                                <button type="submit" name="reply_topic" value="1" class="btn btn-primary btn-sm">Kirim Balasan</button>
-                            </form>
-                        </div>
+                    <button type="submit" name="create_post" value="1" class="btn btn-primary btn-sm px-4">Kirim</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Feed -->
+    <?php while($t = mysqli_fetch_assoc($topicsQ)): ?>
+    <div class="card post-card">
+        <div class="card-body">
+            <div class="post-header">
+                <div class="avatar-circle">
+                    <?php echo strtoupper(substr($t['nama_lengkap'], 0, 1)); ?>
+                </div>
+                <div class="post-info">
+                    <div class="post-author"><?php echo htmlspecialchars($t['nama_lengkap']); ?></div>
+                    <div class="post-time">
+                        <i class="fas fa-globe-asia"></i> 
+                        <?php echo date('d M Y H:i', strtotime($t['created_at'])); ?> • 
+                        <span class="badge bg-light text-dark border"><?php echo $t['nama_course'] ? htmlspecialchars($t['nama_kelas'].' - '.$t['nama_course']) : 'Umum'; ?></span>
                     </div>
-                    <?php endif; ?>
+                </div>
+            </div>
+            
+            <?php if(!empty($t['content'])): ?>
+                <div class="post-content"><?php echo nl2br(htmlspecialchars($t['content'])); ?></div>
+            <?php endif; ?>
+
+            <?php if(!empty($t['image'])): ?>
+                <img src="../../assets/uploads/forum/<?php echo $t['image']; ?>" class="post-image" alt="Post Image">
+            <?php endif; ?>
+
+            <?php if(!empty($t['file'])): ?>
+                <div class="post-file">
+                    <i class="fas fa-file-alt fa-2x text-primary me-3"></i>
+                    <div>
+                        <div class="fw-bold"><?php echo $t['file']; ?></div>
+                        <a href="../../assets/uploads/forum/<?php echo $t['file']; ?>" target="_blank" class="text-decoration-none small">Download File</a>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <div class="d-flex justify-content-between text-muted small mt-3 px-2">
+                <span id="like-count-<?php echo $t['id_topic']; ?>">
+                    <?php if($t['like_count'] > 0) echo '<i class="fas fa-thumbs-up text-primary"></i> ' . $t['like_count']; ?>
+                </span>
+                <span><?php echo $t['comment_count']; ?> Komentar</span>
+            </div>
+
+            <div class="post-actions">
+                <button class="action-btn <?php echo ($t['is_liked'] > 0) ? 'liked' : ''; ?>" onclick="toggleLike(<?php echo $t['id_topic']; ?>)" id="btn-like-<?php echo $t['id_topic']; ?>">
+                    <i class="far fa-thumbs-up"></i> Suka
+                </button>
+                <button class="action-btn" onclick="toggleComments(<?php echo $t['id_topic']; ?>)">
+                    <i class="far fa-comment-alt"></i> Komentar
+                </button>
+            </div>
+
+            <!-- Comments -->
+            <div class="comments-section" id="comments-<?php echo $t['id_topic']; ?>" style="display: <?php echo ($t['comment_count'] > 0) ? 'block' : 'none'; ?>;">
+                <div id="comment-list-<?php echo $t['id_topic']; ?>">
+                    <?php 
+                    $repliesQ = mysqli_query($koneksi, "SELECT r.*, u.nama_lengkap FROM forum_replies r JOIN users u ON r.user_id=u.id_user WHERE r.topic_id=".$t['id_topic']." ORDER BY r.created_at ASC");
+                    $comments = [];
+                    $children = [];
+                    while($r = mysqli_fetch_assoc($repliesQ)) {
+                        if ($r['parent_reply_id'] == 0) {
+                            $comments[] = $r;
+                        } else {
+                            $children[$r['parent_reply_id']][] = $r;
+                        }
+                    }
+                    render_comments($comments, $children);
+                    ?>
+                </div>
+                
+                <div class="d-flex mt-2 align-items-center">
+                    <div class="avatar-circle me-2" style="width: 32px; height: 32px; font-size: 14px;">
+                        <?php echo strtoupper(substr($my_name, 0, 1)); ?>
+                    </div>
+                    <input type="text" class="form-control rounded-pill bg-light border-0" placeholder="Tulis komentar..." id="input-comment-<?php echo $t['id_topic']; ?>" onkeypress="handleComment(event, <?php echo $t['id_topic']; ?>)">
+                    <button class="btn btn-link text-primary p-0 ms-2" onclick="postComment(<?php echo $t['id_topic']; ?>)"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
     </div>
+    <?php endwhile; ?>
 </div>
-<div class="modal fade" id="modalTopic" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="post" class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Buat Topik</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-2">
-            <label class="form-label">Kelas Online</label>
-            <select name="course_id" class="form-select" required>
-                <option value="">Pilih</option>
-                <?php while($c = mysqli_fetch_assoc($courses)): ?>
-                    <option value="<?php echo $c['id_course']; ?>"><?php echo $c['nama_kelas'].' - '.$c['nama_mapel'].' - '.$c['nama_course']; ?></option>
-                <?php endwhile; ?>
-            </select>
-        </div>
-        <div class="mb-2">
-            <label class="form-label">Judul Topik</label>
-            <input type="text" name="title" class="form-control" required>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="submit" name="create_topic" value="1" class="btn btn-info">Simpan</button>
-      </div>
-    </form>
-  </div>
-</div>
+
+<script>
+function toggleLike(topicId) {
+    $.post('forum_ajax.php', { action: 'like_toggle', topic_id: topicId }, function(data) {
+        const res = JSON.parse(data);
+        if (res.status === 'success') {
+            const btn = $('#btn-like-' + topicId);
+            if (res.liked) {
+                btn.addClass('liked');
+                btn.html('<i class="fas fa-thumbs-up"></i> Suka');
+            } else {
+                btn.removeClass('liked');
+                btn.html('<i class="far fa-thumbs-up"></i> Suka');
+            }
+            
+            const countSpan = $('#like-count-' + topicId);
+            if (res.count > 0) {
+                countSpan.html('<i class="fas fa-thumbs-up text-primary"></i> ' + res.count);
+            } else {
+                countSpan.html('');
+            }
+        }
+    });
+}
+
+function toggleComments(topicId) {
+    $('#comments-' + topicId).slideToggle();
+    $('#input-comment-' + topicId).focus();
+}
+
+function showReplyForm(commentId) {
+    $('#reply-form-' + commentId).slideToggle();
+    $('#input-reply-' + commentId).focus();
+}
+
+function handleReply(e, topicId, parentId) {
+    if (e.key === 'Enter') {
+        postComment(topicId, parentId);
+    }
+}
+
+function handleComment(e, topicId) {
+    if (e.key === 'Enter') {
+        postComment(topicId, 0);
+    }
+}
+
+function postComment(topicId, parentId = 0) {
+    let input;
+    if (parentId === 0) {
+        input = $('#input-comment-' + topicId);
+    } else {
+        input = $('#input-reply-' + parentId);
+    }
+    
+    const content = input.val().trim();
+    if (!content) return;
+
+    $.post('forum_ajax.php', { action: 'post_comment', topic_id: topicId, parent_id: parentId, content: content }, function(data) {
+        const res = JSON.parse(data);
+        if (res.status === 'success') {
+            if (res.parent_id == 0) {
+                $('#comment-list-' + topicId).append(res.html);
+            } else {
+                $('#replies-' + res.parent_id).append(res.html);
+                $('#reply-form-' + res.parent_id).hide();
+            }
+            input.val('');
+            
+            // Update comment count if needed (optional)
+        }
+    });
+}
+</script>
+
 <?php include '../../includes/footer.php'; ?>

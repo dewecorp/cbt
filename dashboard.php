@@ -160,6 +160,17 @@ if($level === 'siswa') {
         AND b.id_kelas = '$id_kelas'
         AND NOW() BETWEEN u.tgl_mulai AND u.tgl_selesai
     ");
+    
+    // Announcements for siswa
+    $ann_siswa = mysqli_query($koneksi, "
+        SELECT a.*, c.nama_course, u.nama_lengkap 
+        FROM announcements a 
+        LEFT JOIN courses c ON a.course_id = c.id_course 
+        JOIN users u ON a.created_by = u.id_user 
+        WHERE (a.course_id IS NULL OR c.id_kelas = '$id_kelas')
+        ORDER BY a.created_at DESC 
+        LIMIT 5
+    ");
 }
 ?>
 
@@ -451,6 +462,40 @@ if($level === 'siswa') {
                             <i class="fas fa-id-card fa-2x text-gray-300"></i>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <!-- Announcements Widget -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-bullhorn me-2"></i>Pengumuman Terbaru</h6>
+                </div>
+                <div class="card-body">
+                    <?php if(mysqli_num_rows($ann_siswa) > 0): ?>
+                        <div class="list-group list-group-flush">
+                            <?php while($as = mysqli_fetch_assoc($ann_siswa)): ?>
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1 fw-bold text-primary"><?php echo htmlspecialchars($as['title']); ?></h6>
+                                        <small class="text-muted"><?php echo time_ago_str($as['created_at']); ?></small>
+                                    </div>
+                                    <p class="mb-1 small"><?php echo nl2br(htmlspecialchars($as['body'])); ?></p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-user-circle me-1"></i> <?php echo htmlspecialchars($as['nama_lengkap']); ?> 
+                                        <?php if($as['course_id']): ?>
+                                            &bull; <span class="badge bg-info text-white"><?php echo htmlspecialchars($as['nama_course']); ?></span>
+                                        <?php else: ?>
+                                            &bull; <span class="badge bg-secondary text-white">Global</span>
+                                        <?php endif; ?>
+                                    </small>
+                                </div>
+                            <?php endwhile; ?>
+                        </div>
+                    <?php else: ?>
+                        <p class="text-center text-muted my-3">Belum ada pengumuman.</p>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

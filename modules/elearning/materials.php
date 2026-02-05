@@ -1,9 +1,10 @@
 <?php
+session_start();
 include '../../config/database.php';
 $page_title = 'Materi';
 if (!isset($_SESSION['level'])) { $_SESSION['level'] = 'admin'; }
 $level = $_SESSION['level'];
-$uid = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
+$uid = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
 $exists = mysqli_query($koneksi, "SHOW TABLES LIKE 'materials'");
 if (mysqli_num_rows($exists) == 0) {
     mysqli_query($koneksi, "CREATE TABLE `materials` (
