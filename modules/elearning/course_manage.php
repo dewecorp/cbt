@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_student'])) {
         }
     }
     // Redirect to prevent resubmission
-    header("Location: course_manage.php?course_id=".$course_id."&tab=siswa");
+    header("Location: course_manage.php?course_id=".$course_id."&tab=siswa&status=added");
     exit;
 }
 
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_all'])) {
         )
     ";
     mysqli_query($koneksi, $sql);
-    header("Location: course_manage.php?course_id=".$course_id."&tab=siswa");
+    header("Location: course_manage.php?course_id=".$course_id."&tab=siswa&status=added");
     exit;
 }
 
@@ -83,7 +83,7 @@ if (isset($_GET['remove_id'])) {
     $rid = (int)$_GET['remove_id'];
     if ($rid > 0) {
         mysqli_query($koneksi, "DELETE FROM course_students WHERE id=".$rid." AND course_id=".$course_id);
-        header("Location: course_manage.php?course_id=".$course_id."&tab=siswa");
+        header("Location: course_manage.php?course_id=".$course_id."&tab=siswa&status=removed");
         exit;
     }
 }
@@ -154,7 +154,7 @@ if (!function_exists('render_comments')) {
             echo '      <div class="d-flex align-items-center mt-1">';
             echo '          <small class="text-muted me-3" style="font-size: 0.75rem;">'.date('d/m H:i', strtotime($r['created_at'])).'</small>';
             echo '          <a href="javascript:void(0)" onclick="toggleReplyLike('.$r_id.')" class="text-decoration-none fw-bold text-muted me-2" style="font-size: 0.75rem;">Suka</a>';
-            echo '          <small id="reply-like-count-'.$r_id.'" class="text-muted me-3" style="font-size: 0.75rem;"></small>';
+            echo '          <span id="reply-like-count-'.$r_id.'" class="text-muted me-3" style="font-size: 0.75rem;"></span>';
             echo '          <a href="javascript:void(0)" onclick="showReplyForm('.$r_id.')" class="text-decoration-none fw-bold text-muted" style="font-size: 0.75rem;">Balas</a>';
             echo '      </div>';
             echo '      <div id="replies-'.$r_id.'" class="mt-2 ps-3 border-start">';
@@ -461,13 +461,13 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                             <button class="action-btn <?php echo ($t['is_liked'] > 0) ? 'liked' : ''; ?>" id="btn-like-<?php echo $t['id_topic']; ?>" onclick="toggleLike(<?php echo $t['id_topic']; ?>)">
                                 <i class="<?php echo ($t['is_liked'] > 0) ? 'fas' : 'far'; ?> fa-thumbs-up"></i> Suka <span id="like-count-<?php echo $t['id_topic']; ?>"><?php echo ($t['like_count'] > 0) ? $t['like_count'] : ''; ?></span>
                             </button>
-                            <button class="action-btn" onclick="toggleComments(<?php echo $t['id_topic']; ?>)">
+                            <button class="action-btn" onclick="$('#input-comment-<?php echo $t['id_topic']; ?>').focus()">
                                 <i class="far fa-comment-alt"></i> Komentar (<?php echo $t['comment_count']; ?>)
                             </button>
                         </div>
                         
                         <!-- Comments Section -->
-                        <div class="comments-section" id="comments-<?php echo $t['id_topic']; ?>" style="display:none;">
+                        <div class="comments-section" id="comments-<?php echo $t['id_topic']; ?>">
                             <div id="comment-list-<?php echo $t['id_topic']; ?>">
                                 <?php
                                 $commentsQ = mysqli_query($koneksi, "
@@ -524,7 +524,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                     <h6 class="m-0 font-weight-bold text-primary">Daftar Siswa</h6>
                     <?php if($level === 'guru'): ?>
                         <div>
-                            <form method="post" class="d-inline" onsubmit="return confirm('Tambahkan semua siswa dari kelas ini?');">
+                            <form method="post" class="d-inline" onsubmit="return confirmAddAll(this);">
                                 <input type="hidden" name="add_all" value="1">
                                 <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-users"></i> Tambah Semua</button>
                             </form>
@@ -553,7 +553,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                     <td><?php echo htmlspecialchars($row['nama_siswa']); ?></td>
                                     <?php if($level === 'guru'): ?>
                                     <td class="text-center">
-                                        <a href="?course_id=<?php echo $course_id; ?>&tab=siswa&remove_id=<?php echo $row['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Hapus siswa ini dari kelas online?')"><i class="fas fa-trash"></i></a>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="confirmRemoveStudent('?course_id=<?php echo $course_id; ?>&tab=siswa&remove_id=<?php echo $row['id']; ?>')"><i class="fas fa-user-times"></i> Keluarkan</button>
                                     </td>
                                     <?php endif; ?>
                                 </tr>
@@ -572,28 +572,36 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                     <h6 class="m-0 font-weight-bold text-primary">Daftar Tugas</h6>
                 </div>
                 <div class="card-body">
-                    <div class="list-group">
+                    <div class="row">
                         <?php while($asg = mysqli_fetch_assoc($assignments)): ?>
-                            <div class="list-group-item list-group-item-action flex-column align-items-start">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h5 class="mb-1"><?php echo htmlspecialchars($asg['title']); ?></h5>
-                                    <small><?php echo date('d M Y', strtotime($asg['due_date'])); ?></small>
-                                </div>
-                                <p class="mb-1"><?php echo htmlspecialchars(substr($asg['description'], 0, 100)); ?>...</p>
-                                <div class="mt-2">
-                                    <?php if($level === 'guru'): ?>
-                                        <a href="submissions.php?assignment_id=<?php echo $asg['id']; ?>" class="btn btn-info btn-sm">Lihat Pengumpulan</a>
-                                        <a href="assignments_edit.php?id=<?php echo $asg['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
-                                    <?php else: ?>
-                                        <a href="student_assignments.php?id=<?php echo $asg['id']; ?>" class="btn btn-success btn-sm">Kerjakan</a>
-                                    <?php endif; ?>
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 shadow-sm border-left-primary">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div class="h5 font-weight-bold text-primary text-uppercase mb-1"><?php echo htmlspecialchars($asg['judul']); ?></div>
+                                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                                <i class="fas fa-clock"></i> <?php echo date('d M Y', strtotime($asg['deadline'])); ?>
+                                            </div>
+                                        </div>
+                                        <p class="card-text mb-3"><?php echo htmlspecialchars(substr($asg['deskripsi'] ?? '', 0, 100)); ?>...</p>
+                                        <div class="d-flex justify-content-between">
+                                             <button class="btn btn-secondary btn-sm" onclick="showDetail(<?php echo htmlspecialchars(json_encode($asg), ENT_QUOTES, 'UTF-8'); ?>)">Detail</button>
+                                             <div>
+                                                <?php if($level === 'guru'): ?>
+                                                    <a href="submissions.php?assignment_id=<?php echo $asg['id_assignment']; ?>" class="btn btn-info btn-sm">Lihat Pengumpulan</a>
+                                                <?php else: ?>
+                                                    <a href="student_assignments.php?id=<?php echo $asg['id_assignment']; ?>" class="btn btn-success btn-sm">Kerjakan</a>
+                                                <?php endif; ?>
+                                             </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         <?php endwhile; ?>
-                        <?php if(mysqli_num_rows($assignments) == 0): ?>
-                            <div class="text-center p-3">Belum ada tugas.</div>
-                        <?php endif; ?>
                     </div>
+                    <?php if(mysqli_num_rows($assignments) == 0): ?>
+                        <div class="text-center p-3">Belum ada tugas.</div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -605,26 +613,37 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                     <h6 class="m-0 font-weight-bold text-primary">Materi Pembelajaran</h6>
                 </div>
                 <div class="card-body">
-                    <div class="list-group">
+                    <div class="row">
                          <?php while($mat = mysqli_fetch_assoc($materials)): ?>
-                            <div class="list-group-item list-group-item-action">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h5 class="mb-1"><?php echo htmlspecialchars($mat['title']); ?></h5>
-                                    <small><?php echo date('d M Y', strtotime($mat['created_at'])); ?></small>
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100 shadow-sm border-left-info">
+                                    <div class="card-body text-center">
+                                        <div class="mb-3">
+                                            <?php 
+                                            $icon = 'fa-file-alt';
+                                            if($mat['tipe'] == 'pdf') $icon = 'fa-file-pdf';
+                                            elseif($mat['tipe'] == 'ppt') $icon = 'fa-file-powerpoint';
+                                            elseif($mat['tipe'] == 'video') $icon = 'fa-video';
+                                            elseif($mat['tipe'] == 'link') $icon = 'fa-link';
+                                            ?>
+                                            <i class="fas <?php echo $icon; ?> fa-3x text-primary"></i>
+                                        </div>
+                                        <h5 class="card-title font-weight-bold text-dark mb-1"><?php echo htmlspecialchars($mat['judul']); ?></h5>
+                                        <small class="text-muted d-block mb-3"><?php echo date('d M Y', strtotime($mat['created_at'])); ?></small>
+                                        
+                                        <?php if($mat['tipe'] !== 'link'): ?>
+                                            <a href="../../<?php echo $mat['path']; ?>" class="btn btn-primary btn-sm w-100" target="_blank"><i class="fas fa-download"></i> Download</a>
+                                        <?php else: ?>
+                                            <a href="<?php echo $mat['path']; ?>" class="btn btn-info btn-sm w-100" target="_blank"><i class="fas fa-link"></i> Buka Link</a>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
-                                <p class="mb-1"><?php echo htmlspecialchars($mat['description']); ?></p>
-                                <?php if($mat['file_path']): ?>
-                                    <a href="../../assets/uploads/materials/<?php echo $mat['file_path']; ?>" class="btn btn-sm btn-outline-primary mt-2" target="_blank"><i class="fas fa-download"></i> Download</a>
-                                <?php endif; ?>
-                                <?php if($mat['link_url']): ?>
-                                    <a href="<?php echo $mat['link_url']; ?>" class="btn btn-sm btn-outline-info mt-2" target="_blank"><i class="fas fa-link"></i> Buka Link</a>
-                                <?php endif; ?>
                             </div>
                         <?php endwhile; ?>
-                        <?php if(mysqli_num_rows($materials) == 0): ?>
-                            <div class="text-center p-3">Belum ada materi.</div>
-                        <?php endif; ?>
                     </div>
+                    <?php if(mysqli_num_rows($materials) == 0): ?>
+                        <div class="text-center p-3">Belum ada materi.</div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -661,6 +680,103 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
     </div>
   </div>
 </div>
+
+<!-- Modal Detail Tugas -->
+<div class="modal fade" id="modalDetailAssignment" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detailJudul">Detail Tugas</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h5 id="detailJudulText" class="mb-3"></h5>
+        <p><strong>Tenggat:</strong> <span id="detailDeadline"></span></p>
+        <p><strong>Deskripsi:</strong></p>
+        <div id="detailDeskripsi" class="bg-light p-3 rounded" style="white-space: pre-wrap;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+function showDetail(data) {
+    document.getElementById('detailJudulText').innerText = data.judul;
+    document.getElementById('detailDeadline').innerText = new Date(data.deadline).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' });
+    document.getElementById('detailDeskripsi').innerText = data.deskripsi;
+    var myModal = new bootstrap.Modal(document.getElementById('modalDetailAssignment'));
+    myModal.show();
+}
+
+function confirmRemoveStudent(url) {
+    Swal.fire({
+        title: 'Keluarkan Siswa?',
+        text: "Siswa akan dikeluarkan dari kelas online ini dan akan kembali ke daftar siswa yang tersedia untuk ditambahkan.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Keluarkan!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = url;
+        }
+    })
+}
+
+function confirmAddAll(form) {
+    Swal.fire({
+        title: 'Tambahkan Semua?',
+        text: "Semua siswa yang tersedia di kelas ini akan dimasukkan ke kelas online.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Tambahkan Semua!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    })
+    return false;
+}
+
+// Check for status parameter to show success alerts
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+    
+    if (status === 'removed') {
+        Swal.fire({
+            title: 'Dikeluarkan!',
+            text: 'Siswa berhasil dikeluarkan dari kelas.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        // Clean URL
+        window.history.replaceState(null, null, window.location.pathname + "?course_id=" + urlParams.get('course_id') + "&tab=siswa");
+    } else if (status === 'added') {
+        Swal.fire({
+            title: 'Ditambahkan!',
+            text: 'Siswa berhasil ditambahkan ke kelas.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        // Clean URL
+        window.history.replaceState(null, null, window.location.pathname + "?course_id=" + urlParams.get('course_id') + "&tab=siswa");
+    }
+});
+</script>
 
 <script>
 function toggleLike(topicId) {

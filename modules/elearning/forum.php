@@ -79,7 +79,7 @@ function render_comments($comments, $children, $parent_id = 0) {
         echo '      <div class="d-flex align-items-center mt-1">';
         echo '          <small class="text-muted me-3" style="font-size: 0.75rem;">'.date('d/m H:i', strtotime($r['created_at'])).'</small>';
         echo '          <a href="javascript:void(0)" onclick="toggleReplyLike('.$r_id.')" class="text-decoration-none fw-bold text-muted me-2" style="font-size: 0.75rem;">Suka</a>';
-        echo '          <small id="reply-like-count-'.$r_id.'" class="text-muted me-3" style="font-size: 0.75rem;"></small>';
+        echo '          <span id="reply-like-count-'.$r_id.'" class="text-muted me-3" style="font-size: 0.75rem;"></span>';
         echo '          <a href="javascript:void(0)" onclick="showReplyForm('.$r_id.')" class="text-decoration-none fw-bold text-muted" style="font-size: 0.75rem;">Balas</a>';
         echo '      </div>';
         
@@ -340,13 +340,13 @@ $topicsQ = mysqli_query($koneksi, "
                 <button class="action-btn <?php echo ($t['is_liked'] > 0) ? 'liked' : ''; ?>" onclick="toggleLike(<?php echo $t['id_topic']; ?>)" id="btn-like-<?php echo $t['id_topic']; ?>">
                     <i class="far fa-thumbs-up"></i> Suka
                 </button>
-                <button class="action-btn" onclick="toggleComments(<?php echo $t['id_topic']; ?>)">
+                <button class="action-btn" onclick="$('#input-comment-<?php echo $t['id_topic']; ?>').focus()">
                     <i class="far fa-comment-alt"></i> Komentar
                 </button>
             </div>
 
             <!-- Comments -->
-            <div class="comments-section" id="comments-<?php echo $t['id_topic']; ?>" style="display: <?php echo ($t['comment_count'] > 0) ? 'block' : 'none'; ?>;">
+            <div class="comments-section" id="comments-<?php echo $t['id_topic']; ?>">
                 <div id="comment-list-<?php echo $t['id_topic']; ?>">
                     <?php 
                     $repliesQ = mysqli_query($koneksi, "SELECT r.*, 
