@@ -177,6 +177,7 @@ if ($level === 'admin') {
                                             <table class="table table-hover table-bordered" width="100%" cellspacing="0">
                                                 <thead class="table-light">
                                                     <tr>
+                                                        <th>No</th>
                                                         <th>Kelas</th>
                                                         <th>Kelas Online</th>
                                                         <th>Jenis</th>
@@ -187,8 +188,9 @@ if ($level === 'admin') {
                                                 </thead>
                                                 <tbody>
                                                     <?php if(isset($admin_assignments[$k['id_kelas']]) && count($admin_assignments[$k['id_kelas']]) > 0): ?>
-                                                        <?php foreach($admin_assignments[$k['id_kelas']] as $a): ?>
+                                                        <?php $no=1; foreach($admin_assignments[$k['id_kelas']] as $a): ?>
                                                         <tr>
+                                                            <td><?php echo $no++; ?></td>
                                                             <td><?php echo htmlspecialchars($a['nama_kelas']); ?></td>
                                                             <td><?php echo htmlspecialchars($a['nama_course']); ?></td>
                                                             <td><span class="badge bg-info"><?php echo htmlspecialchars($a['jenis_tugas']); ?></span></td>
@@ -198,7 +200,7 @@ if ($level === 'admin') {
                                                         </tr>
                                                         <?php endforeach; ?>
                                                     <?php else: ?>
-                                                        <tr><td colspan="6" class="text-center text-muted py-4"><i class="fas fa-info-circle me-1"></i> Tidak ada tugas untuk kelas ini.</td></tr>
+                                                        <tr><td colspan="7" class="text-center text-muted py-4"><i class="fas fa-info-circle me-1"></i> Tidak ada tugas untuk kelas ini.</td></tr>
                                                     <?php endif; ?>
                                                 </tbody>
                                             </table>
@@ -217,6 +219,7 @@ if ($level === 'admin') {
                         <table class="table table-bordered table-datatable" width="100%" cellspacing="0">
                             <thead>
                                 <tr>
+                                    <th>No</th>
                                     <th>Kelas</th>
                                     <th>Kelas Online</th>
                                     <th>Jenis</th>
@@ -227,8 +230,9 @@ if ($level === 'admin') {
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php while($a = mysqli_fetch_assoc($assignments)): ?>
+                                <?php $no=1; while($a = mysqli_fetch_assoc($assignments)): ?>
                                 <tr>
+                                    <td><?php echo $no++; ?></td>
                                     <td><?php echo htmlspecialchars($a['nama_kelas']); ?></td>
                                     <td><?php echo htmlspecialchars($a['nama_course']); ?></td>
                                     <td><span class="badge bg-info"><?php echo htmlspecialchars($a['jenis_tugas']); ?></span></td>
