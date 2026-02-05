@@ -483,6 +483,50 @@ function postComment(topicId, parentId = 0) {
         }
     });
 }
+
+function toggleReplyLike(replyId) {
+    $.post('forum_ajax.php', { action: 'reply_like_toggle', reply_id: replyId }, function(data) {
+        const res = JSON.parse(data);
+        if (res.status === 'success') {
+            const countSpan = $('#reply-like-count-' + replyId);
+            if (res.count > 0) {
+                countSpan.text(res.count + ' Suka');
+            } else {
+                countSpan.text('');
+            }
+        }
+    });
+}
+
+function toggleEmojiPicker(inputId, topicId, parentId) {
+    const pickerId = '#emoji-picker-' + (parentId || ('t' + topicId));
+    $(pickerId).slideToggle();
+}
+
+function insertEmoji(inputId, emoji) {
+    const input = $('#' + inputId);
+    const start = input.prop('selectionStart') || input.val().length;
+    const end = input.prop('selectionEnd') || input.val().length;
+    const text = input.val();
+    input.val(text.substring(0, start) + emoji + text.substring(end));
+    input.focus();
+}
+
+function toggleStickerPicker(topicId, parentId) {
+    const pickerId = '#sticker-picker-' + parentId;
+    $(pickerId).slideToggle();
+}
+
+function sendSticker(topicId, parentId, sticker) {
+    $.post('forum_ajax.php', { action: 'post_sticker', topic_id: topicId, parent_id: parentId, sticker: sticker }, function(data) {
+        const res = JSON.parse(data);
+        if (res.status === 'success') {
+            $('#replies-' + res.parent_id).append(res.html);
+            $('#sticker-picker-' + res.parent_id).hide();
+            $('#reply-form-' + res.parent_id).hide();
+        }
+    });
+}
 </script>
 
 <?php include '../../includes/footer.php'; ?>

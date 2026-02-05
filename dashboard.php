@@ -102,6 +102,9 @@ if($level === 'guru') {
     ");
     $jml_ujian_guru = mysqli_fetch_assoc($q_ujian_guru)['count'];
 
+    $q_course_guru = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM courses WHERE pengampu='$id_guru'");
+    $jml_course_guru = mysqli_fetch_assoc($q_course_guru)['count'];
+
     // Data Siswa per Kelas yang diajar
     $teacher_classes = [];
     $jml_mapel_guru = 0;
@@ -378,7 +381,7 @@ if($level === 'siswa') {
             </div>
         </div>
 
-        <div class="col-xl-4 col-md-6 mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-info shadow h-100 py-2 border-start border-4 border-info">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -394,7 +397,7 @@ if($level === 'siswa') {
             </div>
         </div>
 
-        <div class="col-xl-4 col-md-6 mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2 border-start border-4 border-warning">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -410,7 +413,23 @@ if($level === 'siswa') {
             </div>
         </div>
 
-        <div class="col-xl-4 col-md-6 mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Kelas Online</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_course_guru; ?></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-layer-group fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2 border-start border-4 border-primary">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">

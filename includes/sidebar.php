@@ -15,7 +15,7 @@
             <?php if($school_logo): ?>
                 <img src="<?php echo $base_url; ?>assets/img/<?php echo $school_logo; ?>" alt="Logo" class="me-2 sidebar-school-logo">
             <?php endif; ?>
-            <span class="fs-5 fw-bold">Elearning Madrasah</span>
+            <span class="fs-6">Elearning Madrasah</span>
         </a>
         <button class="btn btn-link text-white d-md-none" id="sidebarClose">
             <i class="fas fa-times fa-lg"></i>
