@@ -104,10 +104,18 @@ $assignments = mysqli_query($koneksi, $query);
     </div>
 
     <?php if (isset($_SESSION['success'])): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: '<?php echo $_SESSION['success']; ?>',
+                    icon: 'success',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+        <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
 
     <?php if (isset($_SESSION['error'])): ?>

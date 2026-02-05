@@ -86,11 +86,13 @@
                 </li>
                 <?php endif; ?>
 
+                <?php if($level !== 'siswa'): ?>
                 <li>
                     <a href="<?php echo $base_url; ?>modules/elearning/forum.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/forum.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-comments"></i> Forum
                     </a>
                 </li>
+                <?php endif; ?>
 
                 <?php if($level !== 'siswa'): ?>
                 <li>

@@ -1,34 +1,22 @@
 <?php
 session_start();
 include '../../config/database.php';
-$page_title = 'Forum Diskusi';
-if (!isset($_SESSION['level'])) { $_SESSION['level'] = 'admin'; }
+$page_title = 'Forum Diskusi Guru & Admin';
+
+// Batasi akses: Siswa tidak boleh akses halaman ini
+if (!isset($_SESSION['level']) || $_SESSION['level'] === 'siswa') {
+    header("Location: ../../index.php");
+    exit;
+}
+
 $level = $_SESSION['level'];
 $uid = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
 
-// Fetch Teacher Classes
-$teacher_classes = [];
-if ($level === 'guru') {
-    $tc_q = mysqli_query($koneksi, "SELECT DISTINCT k.id_kelas, k.nama_kelas FROM courses c JOIN kelas k ON c.id_kelas=k.id_kelas WHERE c.pengampu=$uid");
-    while($tc = mysqli_fetch_assoc($tc_q)) {
-        $teacher_classes[] = $tc;
-    }
-}
-
 // Handle Post Creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
+    // Forum Umum: class_id = 0, course_id = 0
     $class_id = 0;
-    $role = ($level === 'admin') ? 'admin' : (($level === 'guru') ? 'guru' : 'siswa');
-
-    if ($level === 'guru') {
-        if (isset($_POST['class_id'])) {
-            $class_id = (int)$_POST['class_id'];
-        } elseif (!empty($teacher_classes)) {
-            $class_id = $teacher_classes[0]['id_kelas'];
-        }
-    } elseif ($level === 'siswa') {
-        $class_id = isset($_SESSION['id_kelas']) ? (int)$_SESSION['id_kelas'] : 0;
-    }
+    $role = ($level === 'admin') ? 'admin' : 'guru';
     
     $content = mysqli_real_escape_string($koneksi, $_POST['content']);
     $image_path = null;
@@ -61,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
     if (!empty($content) || $image_path || $file_path) {
         // Title is optional now, set default or empty
         $title = substr($content, 0, 50) . '...'; 
-        mysqli_query($koneksi, "INSERT INTO forum_topics(class_id, course_id, title, content, image, file, created_by, author_role) VALUES($class_id, 0, '$title', '$content', '$image_path', '$file_path', $uid, '$role')");
+        mysqli_query($koneksi, "INSERT INTO forum_topics(class_id, course_id, title, content, image, file, created_by, author_role) VALUES(0, 0, '$title', '$content', '$image_path', '$file_path', $uid, '$role')");
         header("Location: forum.php");
         exit;
     }
@@ -135,23 +123,11 @@ function render_comments($comments, $children, $parent_id = 0) {
 
 include '../../includes/header.php';
 
-// Fetch Posts (Topics)
-$topic_filter = "";
-if ($level === 'guru') {
-    $class_ids = array_map(function($c) { return $c['id_kelas']; }, $teacher_classes);
-    if (!empty($class_ids)) {
-        $ids = implode(',', $class_ids);
-        $topic_filter = " WHERE t.class_id IN ($ids)";
-    } else {
-        $topic_filter = " WHERE 1=0";
-    }
-} elseif ($level === 'siswa') {
-    $id_kelas = isset($_SESSION['id_kelas']) ? $_SESSION['id_kelas'] : 0;
-    $topic_filter = " WHERE t.class_id=".$id_kelas;
-}
+// Fetch Posts (Topics) - Only General Topics (class_id=0)
+$topic_filter = " WHERE t.class_id=0 AND t.course_id=0 ";
 
 $topicsQ = mysqli_query($koneksi, "
-    SELECT t.*, k.nama_kelas, 
+    SELECT t.*, 
     CASE 
         WHEN t.author_role = 'siswa' THEN s.nama_siswa
         ELSE u.nama_lengkap 
@@ -160,14 +136,11 @@ $topicsQ = mysqli_query($koneksi, "
     (SELECT COUNT(*) FROM forum_likes l WHERE l.topic_id=t.id_topic) AS like_count,
     (SELECT COUNT(*) FROM forum_likes l2 WHERE l2.topic_id=t.id_topic AND l2.user_id=$uid) AS is_liked
     FROM forum_topics t 
-    LEFT JOIN kelas k ON t.class_id=k.id_kelas 
     LEFT JOIN users u ON t.created_by=u.id_user 
     LEFT JOIN siswa s ON t.created_by=s.id_siswa
     $topic_filter 
     ORDER BY t.created_at DESC
 ");
-
-
 ?>
 
 <style>
@@ -287,7 +260,7 @@ $topicsQ = mysqli_query($koneksi, "
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
-        <h4 class="mb-0 text-gray-800"><i class="fas fa-comments text-primary"></i> Forum Kelas</h4>
+        <h4 class="mb-0 text-gray-800"><i class="fas fa-comments text-primary"></i> Forum Guru & Admin</h4>
     </div>
 
     <!-- Create Post -->
@@ -333,7 +306,7 @@ $topicsQ = mysqli_query($koneksi, "
                     <div class="post-time">
                         <i class="fas fa-globe-asia"></i> 
                         <?php echo date('d M Y H:i', strtotime($t['created_at'])); ?> • 
-                        <span class="badge bg-light text-dark border"><?php echo htmlspecialchars($t['nama_kelas'] ?? 'Umum'); ?></span>
+                        <span class="badge bg-light text-dark border">Umum</span>
                     </div>
                 </div>
             </div>

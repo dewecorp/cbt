@@ -19,7 +19,7 @@ if ($assignment_id <= 0) {
 
 // Verify assignment ownership
 $q_assign = mysqli_query($koneksi, "
-    SELECT a.*, c.nama_course, k.nama_kelas, m.nama_mapel 
+    SELECT a.*, c.id_kelas, c.nama_course, k.nama_kelas, m.nama_mapel 
     FROM assignments a 
     JOIN courses c ON a.course_id = c.id_course 
     JOIN kelas k ON c.id_kelas = k.id_kelas
@@ -90,15 +90,23 @@ while($sub = mysqli_fetch_assoc($q_subs)) {
             </p>
         </div>
         <div>
-            <a href="assignments.php" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Kembali</a>
+            <a href="course_manage.php?course_id=<?php echo $assignment['course_id']; ?>&tab=tugas" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Kembali</a>
         </div>
     </div>
 
     <?php if (isset($_SESSION['success'])): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: '<?php echo $_SESSION['success']; ?>',
+                    icon: 'success',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+        <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
 
     <div class="card shadow mb-4">
@@ -182,7 +190,7 @@ while($sub = mysqli_fetch_assoc($q_subs)) {
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Catatan Guru</label>
-                                                        <textarea name="catatan" class="form-control" rows="3"><?php echo htmlspecialchars($sub['catatan']); ?></textarea>
+                                                        <textarea name="catatan" class="form-control" rows="3"><?php echo htmlspecialchars($sub['catatan'] ?? ''); ?></textarea>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">

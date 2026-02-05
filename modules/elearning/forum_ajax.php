@@ -8,6 +8,34 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $uid = (int)$_SESSION['user_id'];
+
+// Ensure tables and columns exist (Cross-version compatible)
+$checkTable = mysqli_query($koneksi, "SHOW TABLES LIKE 'forum_replies'");
+if (mysqli_num_rows($checkTable) == 0) {
+    mysqli_query($koneksi, "CREATE TABLE forum_replies (
+        id_reply INT(11) AUTO_INCREMENT PRIMARY KEY,
+        topic_id INT(11) NOT NULL,
+        user_id INT(11) NOT NULL,
+        user_role VARCHAR(20) NOT NULL,
+        content TEXT NULL,
+        sticker_code VARCHAR(32) NULL,
+        parent_reply_id INT(11) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+} else {
+    $cols = mysqli_query($koneksi, "SHOW COLUMNS FROM forum_replies");
+    $existing_cols = [];
+    while ($c = mysqli_fetch_assoc($cols)) {
+        $existing_cols[] = $c['Field'];
+    }
+    if (!in_array('sticker_code', $existing_cols)) {
+        mysqli_query($koneksi, "ALTER TABLE forum_replies ADD COLUMN sticker_code VARCHAR(32) NULL");
+    }
+    if (!in_array('parent_reply_id', $existing_cols)) {
+        mysqli_query($koneksi, "ALTER TABLE forum_replies ADD COLUMN parent_reply_id INT(11) DEFAULT 0");
+    }
+}
+
 $action = isset($_POST['action']) ? $_POST['action'] : '';
 
 if ($action === 'like_toggle') {
@@ -85,8 +113,8 @@ if ($action === 'post_comment') {
                     </div>
                     <div class="d-flex align-items-center mt-1">
                         <small class="text-muted me-3" style="font-size: 0.75rem;">Baru saja</small>
-                        <a href="javascript:void(0)" onclick="toggleReplyLike('.$last_id.')" class="text-decoration-none fw-bold text-muted me-3" style="font-size: 0.75rem;">Suka</a>
-                        <span id="reply-like-count-'.$last_id.'" class="text-muted" style="font-size: 0.75rem;"></span>
+                        <a href="javascript:void(0)" onclick="toggleReplyLike('.$last_id.')" class="text-decoration-none fw-bold text-muted me-2" style="font-size: 0.75rem;">Suka</a>
+                        <span id="reply-like-count-'.$last_id.'" class="text-muted me-3" style="font-size: 0.75rem;"></span>
                         <a href="javascript:void(0)" onclick="showReplyForm('.$last_id.')" class="text-decoration-none fw-bold text-muted" style="font-size: 0.75rem;">Balas</a>
                     </div>
                     <!-- Container for nested replies -->
@@ -139,7 +167,7 @@ if ($action === 'post_sticker') {
         echo json_encode(['status' => 'error', 'message' => 'Sticker kosong']);
         exit;
     }
-    mysqli_query($koneksi, "ALTER TABLE forum_replies ADD COLUMN IF NOT EXISTS sticker_code VARCHAR(32) NULL");
+    
     $level = isset($_SESSION['level']) ? $_SESSION['level'] : 'siswa';
     $role = ($level === 'admin') ? 'admin' : (($level === 'guru') ? 'guru' : 'siswa');
     $insert = mysqli_query($koneksi, "INSERT INTO forum_replies (topic_id, user_id, user_role, content, sticker_code, parent_reply_id) VALUES ($topic_id, $uid, '$role', '', '".mysqli_real_escape_string($koneksi, $sticker)."', $parent_id)");

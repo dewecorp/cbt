@@ -48,6 +48,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_material'])) {
         mysqli_query($koneksi, "INSERT INTO materials(course_id,judul,tipe,path,owner_id,size_bytes) VALUES($course_id,'$judul','$tipe','$path',$uid,$size)");
     }
 }
+
+// Delete Logic
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_material'])) {
+    $id = (int)$_POST['id_material'];
+    $check = mysqli_query($koneksi, "SELECT * FROM materials WHERE id_material=$id");
+    if ($m = mysqli_fetch_assoc($check)) {
+        if ($level === 'admin' || ($level === 'guru' && $m['owner_id'] == $uid)) {
+            if ($m['tipe'] !== 'link' && file_exists(dirname(__DIR__,2).'/'.$m['path'])) {
+                unlink(dirname(__DIR__,2).'/'.$m['path']);
+            }
+            mysqli_query($koneksi, "DELETE FROM materials WHERE id_material=$id");
+        }
+    }
+}
+
+// Edit Logic
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_material'])) {
+    $id = (int)$_POST['id_material'];
+    $judul = mysqli_real_escape_string($koneksi, $_POST['judul']);
+    $tipe = $_POST['tipe'];
+    
+    $check = mysqli_query($koneksi, "SELECT * FROM materials WHERE id_material=$id");
+    if ($m = mysqli_fetch_assoc($check)) {
+        if ($level === 'admin' || ($level === 'guru' && $m['owner_id'] == $uid)) {
+            $path = $m['path'];
+            $size = $m['size_bytes'];
+            
+            if ($tipe === 'link') {
+                 $path = mysqli_real_escape_string($koneksi, $_POST['link_url']);
+                 $size = 0;
+            } else {
+                if (isset($_FILES['file']['name']) && $_FILES['file']['error'] === 0) {
+                    if ($m['tipe'] !== 'link' && file_exists(dirname(__DIR__,2).'/'.$m['path'])) {
+                        unlink(dirname(__DIR__,2).'/'.$m['path']);
+                    }
+                    
+                    $ext = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
+                    $allowed = ['pdf','ppt','pptx','doc','docx','mp4','mov'];
+                    if (in_array($ext, $allowed)) {
+                        $fname = time().'_'.preg_replace('/[^a-zA-Z0-9\.\-_]/','', $_FILES['file']['name']);
+                        $dest = dirname(__DIR__,2).'/assets/uploads/materials/'.$fname;
+                        if (move_uploaded_file($_FILES['file']['tmp_name'], $dest)) {
+                            $path = 'assets/uploads/materials/'.$fname;
+                            $size = filesize($dest);
+                        }
+                    }
+                }
+            }
+            
+            mysqli_query($koneksi, "UPDATE materials SET judul='$judul', tipe='$tipe', path='$path', size_bytes=$size WHERE id_material=$id");
+        }
+    }
+}
 include '../../includes/header.php';
 $filterCourse = "";
 if ($level === 'guru') { $filterCourse = " WHERE c.pengampu=".$uid; }
@@ -101,6 +154,21 @@ $materials = mysqli_query($koneksi, "SELECT mt.*, c.nama_course, k.nama_kelas, u
                                         <a href="<?php echo $mt['path']; ?>" target="_blank" class="btn btn-info btn-sm"><i class="fas fa-external-link-alt"></i> Buka</a>
                                         <?php else: ?>
                                         <a href="<?php echo '../../'.$mt['path']; ?>" target="_blank" class="btn btn-info btn-sm"><i class="fas fa-download"></i> Unduh</a>
+                                        <?php endif; ?>
+                                        
+                                        <?php if($level === 'admin' || ($level === 'guru' && $mt['owner_id'] == $uid)): ?>
+                                        <button class="btn btn-warning btn-sm btn-edit" 
+                                            data-id="<?php echo $mt['id_material']; ?>"
+                                            data-judul="<?php echo htmlspecialchars($mt['judul']); ?>"
+                                            data-tipe="<?php echo $mt['tipe']; ?>"
+                                            data-path="<?php echo htmlspecialchars($mt['path']); ?>"
+                                            data-bs-toggle="modal" data-bs-target="#modalEditMaterial">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <form method="post" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus?');">
+                                            <input type="hidden" name="id_material" value="<?php echo $mt['id_material']; ?>">
+                                            <button type="submit" name="delete_material" value="1" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                        </form>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -174,6 +242,91 @@ document.addEventListener('DOMContentLoaded', function(){
             fileWrap.classList.remove('d-none');
             linkWrap.classList.add('d-none');
         }
+    });
+});
+</script>
+
+<div class="modal fade" id="modalEditMaterial" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="post" enctype="multipart/form-data" class="modal-content">
+      <input type="hidden" name="id_material" id="edit_id_material">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Materi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2">
+            <label class="form-label">Judul</label>
+            <input type="text" name="judul" id="edit_judul" class="form-control" required>
+        </div>
+        <div class="mb-2">
+            <label class="form-label">Jenis</label>
+            <select name="tipe" class="form-select" id="edit_tipe" required>
+                <option value="pdf">PDF</option>
+                <option value="ppt">PPT</option>
+                <option value="doc">DOC</option>
+                <option value="video">Video</option>
+                <option value="link">Tautan</option>
+            </select>
+        </div>
+        <div class="mb-2" id="edit_fileWrap">
+            <label class="form-label">File (Biarkan kosong jika tidak diubah)</label>
+            <input type="file" name="file" class="form-control">
+            <small class="text-muted" id="current_file_info"></small>
+        </div>
+        <div class="mb-2 d-none" id="edit_linkWrap">
+            <label class="form-label">URL</label>
+            <input type="url" name="link_url" id="edit_link_url" class="form-control">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="submit" name="edit_material" value="1" class="btn btn-primary">Simpan Perubahan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+var editSel = document.getElementById('edit_tipe');
+var editFileWrap = document.getElementById('edit_fileWrap');
+var editLinkWrap = document.getElementById('edit_linkWrap');
+
+if(editSel) {
+    editSel.addEventListener('change', function(){
+        if (editSel.value === 'link') {
+            editFileWrap.classList.add('d-none');
+            editLinkWrap.classList.remove('d-none');
+        } else {
+            editFileWrap.classList.remove('d-none');
+            editLinkWrap.classList.add('d-none');
+        }
+    });
+}
+
+var editButtons = document.querySelectorAll('.btn-edit');
+editButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+        var id = this.getAttribute('data-id');
+        var judul = this.getAttribute('data-judul');
+        var tipe = this.getAttribute('data-tipe');
+        var path = this.getAttribute('data-path');
+        
+        document.getElementById('edit_id_material').value = id;
+        document.getElementById('edit_judul').value = judul;
+        document.getElementById('edit_tipe').value = tipe;
+        
+        if (tipe === 'link') {
+            document.getElementById('edit_link_url').value = path;
+            editFileWrap.classList.add('d-none');
+            editLinkWrap.classList.remove('d-none');
+        } else {
+            editFileWrap.classList.remove('d-none');
+            editLinkWrap.classList.add('d-none');
+        }
+        
+        // Trigger change event manually if needed, or rely on above logic
+        // But setting .value doesn't trigger 'change' automatically
     });
 });
 </script>
