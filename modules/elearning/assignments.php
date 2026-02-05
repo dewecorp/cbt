@@ -114,7 +114,26 @@ if ($level === 'siswa') {
     $id_kelas = isset($_SESSION['id_kelas']) ? $_SESSION['id_kelas'] : 0;
     $assign_filter = " WHERE c.id_kelas=".$id_kelas;
 }
-$assignments = mysqli_query($koneksi, "SELECT a.*, c.nama_course, k.nama_kelas, u.nama_lengkap FROM assignments a JOIN courses c ON a.course_id=c.id_course JOIN kelas k ON c.id_kelas=k.id_kelas JOIN users u ON a.created_by=u.id_user $assign_filter ORDER BY a.created_at DESC");
+$assignments = mysqli_query($koneksi, "SELECT a.*, c.nama_course, k.nama_kelas, k.id_kelas, u.nama_lengkap FROM assignments a JOIN courses c ON a.course_id=c.id_course JOIN kelas k ON c.id_kelas=k.id_kelas JOIN users u ON a.created_by=u.id_user $assign_filter ORDER BY a.created_at DESC");
+
+// Admin specific: Fetch classes and group assignments
+$kelas_arr = [];
+$admin_assignments = [];
+if ($level === 'admin') {
+    $q_kelas = mysqli_query($koneksi, "SELECT * FROM kelas ORDER BY nama_kelas ASC");
+    if ($q_kelas) {
+        while($k = mysqli_fetch_assoc($q_kelas)) {
+            $kelas_arr[] = $k;
+        }
+    }
+    
+    // Group assignments by class
+    while($a = mysqli_fetch_assoc($assignments)) {
+        $admin_assignments[$a['id_kelas']][] = $a;
+    }
+    // Reset pointer for other views
+    mysqli_data_seek($assignments, 0);
+}
 ?>
 <div class="container-fluid">
     <div class="row">
@@ -123,12 +142,77 @@ $assignments = mysqli_query($koneksi, "SELECT a.*, c.nama_course, k.nama_kelas, 
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">Tugas Pembelajaran</h6>
                     <div>
-                        <?php if($level === 'admin' || $level === 'guru'): ?>
+                        <?php if($level === 'guru'): ?>
                         <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalAssignment"><i class="fas fa-plus-circle"></i> Buat Tugas</button>
                         <?php endif; ?>
                     </div>
                 </div>
                 <div class="card-body">
+                    <?php if ($level === 'admin'): ?>
+                        <?php if (!empty($kelas_arr)): ?>
+                            <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+                                <?php foreach($kelas_arr as $index => $k): 
+                                    $count = isset($admin_assignments[$k['id_kelas']]) ? count($admin_assignments[$k['id_kelas']]) : 0;
+                                ?>
+                                    <li class="nav-item me-2" role="presentation">
+                                        <button class="nav-link <?php echo ($index === 0) ? 'active' : ''; ?> d-flex align-items-center gap-2" 
+                                            id="pills-<?php echo $k['id_kelas']; ?>-tab" 
+                                            data-bs-toggle="pill" 
+                                            data-bs-target="#pills-<?php echo $k['id_kelas']; ?>" 
+                                            type="button" 
+                                            role="tab" 
+                                            aria-controls="pills-<?php echo $k['id_kelas']; ?>" 
+                                            aria-selected="<?php echo ($index === 0) ? 'true' : 'false'; ?>">
+                                            <i class="fas fa-chalkboard-teacher"></i>
+                                            <?php echo htmlspecialchars($k['nama_kelas']); ?>
+                                            <span class="badge bg-white text-primary rounded-pill ms-2"><?php echo $count; ?></span>
+                                        </button>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                            <div class="tab-content" id="pills-tabContent">
+                                <?php foreach($kelas_arr as $index => $k): ?>
+                                    <div class="tab-pane fade <?php echo ($index === 0) ? 'show active' : ''; ?>" id="pills-<?php echo $k['id_kelas']; ?>" role="tabpanel" aria-labelledby="pills-<?php echo $k['id_kelas']; ?>-tab">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover table-bordered" width="100%" cellspacing="0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Kelas</th>
+                                                        <th>Kelas Online</th>
+                                                        <th>Jenis</th>
+                                                        <th>Judul</th>
+                                                        <th>Tenggat</th>
+                                                        <th>Guru</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php if(isset($admin_assignments[$k['id_kelas']]) && count($admin_assignments[$k['id_kelas']]) > 0): ?>
+                                                        <?php foreach($admin_assignments[$k['id_kelas']] as $a): ?>
+                                                        <tr>
+                                                            <td><?php echo htmlspecialchars($a['nama_kelas']); ?></td>
+                                                            <td><?php echo htmlspecialchars($a['nama_course']); ?></td>
+                                                            <td><span class="badge bg-info"><?php echo htmlspecialchars($a['jenis_tugas']); ?></span></td>
+                                                            <td><?php echo htmlspecialchars($a['judul']); ?></td>
+                                                            <td><?php echo date('d/m/Y H:i', strtotime($a['deadline'])); ?></td>
+                                                            <td><?php echo htmlspecialchars($a['nama_lengkap']); ?></td>
+                                                        </tr>
+                                                        <?php endforeach; ?>
+                                                    <?php else: ?>
+                                                        <tr><td colspan="6" class="text-center text-muted py-4"><i class="fas fa-info-circle me-1"></i> Tidak ada tugas untuk kelas ini.</td></tr>
+                                                    <?php endif; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-center py-5 text-muted">
+                                <i class="fas fa-folder-open fa-3x mb-3"></i>
+                                <p>Belum ada data kelas.</p>
+                            </div>
+                        <?php endif; ?>
+                    <?php else: ?>
                     <div class="table-responsive">
                         <table class="table table-bordered table-datatable" width="100%" cellspacing="0">
                             <thead>
@@ -155,7 +239,7 @@ $assignments = mysqli_query($koneksi, "SELECT a.*, c.nama_course, k.nama_kelas, 
                                         <?php if($level === 'siswa'): ?>
                                         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalSubmit<?php echo $a['id_assignment']; ?>"><i class="fas fa-upload"></i> Unggah</button>
                                         <?php endif; ?>
-                                        <?php if($level === 'admin' || ($level === 'guru' && $a['created_by'] == $uid)): ?>
+                                        <?php if($level === 'guru' && $a['created_by'] == $uid): ?>
                                         <button class="btn btn-info btn-sm" onclick="editAssignment(<?php echo htmlspecialchars(json_encode($a)); ?>)"><i class="fas fa-edit"></i></button>
                                         <a href="assignments.php?delete=<?php echo $a['id_assignment']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Hapus tugas ini?')"><i class="fas fa-trash"></i></a>
                                         <?php endif; ?>
@@ -190,12 +274,13 @@ $assignments = mysqli_query($koneksi, "SELECT a.*, c.nama_course, k.nama_kelas, 
                       </div>
                     </div>
                     <?php endwhile; endif; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<?php if($level === 'admin' || $level === 'guru'): ?>
+<?php if($level === 'guru'): ?>
 <div class="modal fade" id="modalAssignment" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" class="modal-content">

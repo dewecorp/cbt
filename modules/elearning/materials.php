@@ -110,7 +110,26 @@ if ($level === 'siswa') {
     $id_kelas = isset($_SESSION['id_kelas']) ? $_SESSION['id_kelas'] : 0;
     $mat_filter = " WHERE c.id_kelas=".$id_kelas;
 }
-$materials = mysqli_query($koneksi, "SELECT mt.*, c.nama_course, k.nama_kelas, u.nama_lengkap FROM materials mt JOIN courses c ON mt.course_id=c.id_course JOIN kelas k ON c.id_kelas=k.id_kelas JOIN users u ON mt.owner_id=u.id_user $mat_filter ORDER BY mt.created_at DESC");
+$materials = mysqli_query($koneksi, "SELECT mt.*, c.nama_course, k.nama_kelas, k.id_kelas, u.nama_lengkap FROM materials mt JOIN courses c ON mt.course_id=c.id_course JOIN kelas k ON c.id_kelas=k.id_kelas JOIN users u ON mt.owner_id=u.id_user $mat_filter ORDER BY mt.created_at DESC");
+
+// Admin specific: Fetch classes and group materials
+$kelas_arr = [];
+$admin_materials = [];
+if ($level === 'admin') {
+    $q_kelas = mysqli_query($koneksi, "SELECT * FROM kelas ORDER BY nama_kelas ASC");
+    if ($q_kelas) {
+        while($k = mysqli_fetch_assoc($q_kelas)) {
+            $kelas_arr[] = $k;
+        }
+    }
+    
+    // Group materials by class
+    while($mt = mysqli_fetch_assoc($materials)) {
+        $admin_materials[$mt['id_kelas']][] = $mt;
+    }
+    // Reset pointer for other views if needed (though we'll separate logic)
+    mysqli_data_seek($materials, 0);
+}
 ?>
 <div class="container-fluid">
     <div class="row">
@@ -119,69 +138,139 @@ $materials = mysqli_query($koneksi, "SELECT mt.*, c.nama_course, k.nama_kelas, u
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">Materi</h6>
                     <div>
-                        <?php if($level === 'admin' || $level === 'guru'): ?>
+                        <?php if($level === 'guru'): ?>
                         <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalMaterial"><i class="fas fa-upload"></i> Tambah Materi</button>
                         <?php endif; ?>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-datatable" width="100%" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th>Kelas</th>
-                                    <th>Kelas Online</th>
-                                    <th>Judul</th>
-                                    <th>Jenis</th>
-                                    <th>Ukuran</th>
-                                    <th>Pengunggah</th>
-                                    <th>Tanggal</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php while($mt = mysqli_fetch_assoc($materials)): ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($mt['nama_kelas']); ?></td>
-                                    <td><?php echo htmlspecialchars($mt['nama_course']); ?></td>
-                                    <td><?php echo htmlspecialchars($mt['judul']); ?></td>
-                                    <td><?php echo strtoupper($mt['tipe']); ?></td>
-                                    <td><?php echo $mt['size_bytes'] ? round($mt['size_bytes']/1024,1).' KB' : '-'; ?></td>
-                                    <td><?php echo htmlspecialchars($mt['nama_lengkap']); ?></td>
-                                    <td><?php echo date('d/m/Y H:i', strtotime($mt['created_at'])); ?></td>
-                                    <td>
-                                        <?php if($mt['tipe']==='link'): ?>
-                                        <a href="<?php echo $mt['path']; ?>" target="_blank" class="btn btn-info btn-sm"><i class="fas fa-external-link-alt"></i> Buka</a>
-                                        <?php else: ?>
-                                        <a href="<?php echo '../../'.$mt['path']; ?>" target="_blank" class="btn btn-info btn-sm"><i class="fas fa-download"></i> Unduh</a>
-                                        <?php endif; ?>
-                                        
-                                        <?php if($level === 'admin' || ($level === 'guru' && $mt['owner_id'] == $uid)): ?>
-                                        <button class="btn btn-warning btn-sm btn-edit" 
-                                            data-id="<?php echo $mt['id_material']; ?>"
-                                            data-judul="<?php echo htmlspecialchars($mt['judul']); ?>"
-                                            data-tipe="<?php echo $mt['tipe']; ?>"
-                                            data-path="<?php echo htmlspecialchars($mt['path']); ?>"
-                                            data-bs-toggle="modal" data-bs-target="#modalEditMaterial">
-                                            <i class="fas fa-edit"></i>
+                    <?php if ($level === 'admin'): ?>
+                        <?php if (!empty($kelas_arr)): ?>
+                            <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+                                <?php foreach($kelas_arr as $index => $k): 
+                                    $count = isset($admin_materials[$k['id_kelas']]) ? count($admin_materials[$k['id_kelas']]) : 0;
+                                ?>
+                                    <li class="nav-item me-2" role="presentation">
+                                        <button class="nav-link <?php echo ($index === 0) ? 'active' : ''; ?> d-flex align-items-center gap-2" 
+                                            id="pills-<?php echo $k['id_kelas']; ?>-tab" 
+                                            data-bs-toggle="pill" 
+                                            data-bs-target="#pills-<?php echo $k['id_kelas']; ?>" 
+                                            type="button" 
+                                            role="tab" 
+                                            aria-controls="pills-<?php echo $k['id_kelas']; ?>" 
+                                            aria-selected="<?php echo ($index === 0) ? 'true' : 'false'; ?>">
+                                            <i class="fas fa-chalkboard-teacher"></i>
+                                            <?php echo htmlspecialchars($k['nama_kelas']); ?>
+                                            <span class="badge bg-white text-primary rounded-pill ms-2"><?php echo $count; ?></span>
                                         </button>
-                                        <form method="post" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus?');">
-                                            <input type="hidden" name="id_material" value="<?php echo $mt['id_material']; ?>">
-                                            <button type="submit" name="delete_material" value="1" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
-                                        </form>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                            <div class="tab-content" id="pills-tabContent">
+                                <?php foreach($kelas_arr as $index => $k): ?>
+                                    <div class="tab-pane fade <?php echo ($index === 0) ? 'show active' : ''; ?>" id="pills-<?php echo $k['id_kelas']; ?>" role="tabpanel" aria-labelledby="pills-<?php echo $k['id_kelas']; ?>-tab">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover table-bordered" width="100%" cellspacing="0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Kelas</th>
+                                                        <th>Kelas Online</th>
+                                                        <th>Judul</th>
+                                                        <th>Jenis</th>
+                                                        <th>Ukuran</th>
+                                                        <th>Pengunggah</th>
+                                                        <th>Tanggal</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php if(isset($admin_materials[$k['id_kelas']]) && count($admin_materials[$k['id_kelas']]) > 0): ?>
+                                                        <?php foreach($admin_materials[$k['id_kelas']] as $mt): ?>
+                                                        <tr>
+                                                            <td><?php echo htmlspecialchars($mt['nama_kelas']); ?></td>
+                                                            <td><?php echo htmlspecialchars($mt['nama_course']); ?></td>
+                                                            <td><?php echo htmlspecialchars($mt['judul']); ?></td>
+                                                            <td><?php echo strtoupper($mt['tipe']); ?></td>
+                                                            <td><?php echo $mt['size_bytes'] ? round($mt['size_bytes']/1024,1).' KB' : '-'; ?></td>
+                                                            <td><?php echo htmlspecialchars($mt['nama_lengkap']); ?></td>
+                                                            <td><?php echo date('d/m/Y H:i', strtotime($mt['created_at'])); ?></td>
+                                                        </tr>
+                                                        <?php endforeach; ?>
+                                                    <?php else: ?>
+                                                        <tr><td colspan="7" class="text-center text-muted py-4"><i class="fas fa-info-circle me-1"></i> Tidak ada materi untuk kelas ini.</td></tr>
+                                                    <?php endif; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-center py-5 text-muted">
+                                <i class="fas fa-folder-open fa-3x mb-3"></i>
+                                <p>Belum ada data kelas.</p>
+                            </div>
+                        <?php endif; ?>
+
+                    <?php else: ?>
+                        <!-- Guru/Siswa View -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-datatable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Kelas</th>
+                                        <th>Kelas Online</th>
+                                        <th>Judul</th>
+                                        <th>Jenis</th>
+                                        <th>Ukuran</th>
+                                        <th>Pengunggah</th>
+                                        <th>Tanggal</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php while($mt = mysqli_fetch_assoc($materials)): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($mt['nama_kelas']); ?></td>
+                                        <td><?php echo htmlspecialchars($mt['nama_course']); ?></td>
+                                        <td><?php echo htmlspecialchars($mt['judul']); ?></td>
+                                        <td><?php echo strtoupper($mt['tipe']); ?></td>
+                                        <td><?php echo $mt['size_bytes'] ? round($mt['size_bytes']/1024,1).' KB' : '-'; ?></td>
+                                        <td><?php echo htmlspecialchars($mt['nama_lengkap']); ?></td>
+                                        <td><?php echo date('d/m/Y H:i', strtotime($mt['created_at'])); ?></td>
+                                        <td>
+                                            <?php if($mt['tipe']==='link'): ?>
+                                            <a href="<?php echo $mt['path']; ?>" target="_blank" class="btn btn-info btn-sm"><i class="fas fa-external-link-alt"></i> Buka</a>
+                                            <?php else: ?>
+                                            <a href="<?php echo '../../'.$mt['path']; ?>" target="_blank" class="btn btn-info btn-sm"><i class="fas fa-download"></i> Unduh</a>
+                                            <?php endif; ?>
+                                            
+                                            <?php if($level === 'admin' || ($level === 'guru' && $mt['owner_id'] == $uid)): ?>
+                                            <button class="btn btn-warning btn-sm btn-edit" 
+                                                data-id="<?php echo $mt['id_material']; ?>"
+                                                data-judul="<?php echo htmlspecialchars($mt['judul']); ?>"
+                                                data-tipe="<?php echo $mt['tipe']; ?>"
+                                                data-path="<?php echo htmlspecialchars($mt['path']); ?>"
+                                                data-bs-toggle="modal" data-bs-target="#modalEditMaterial">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <form method="post" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus?');">
+                                                <input type="hidden" name="id_material" value="<?php echo $mt['id_material']; ?>">
+                                                <button type="submit" name="delete_material" value="1" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                    <?php endwhile; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<?php if($level === 'admin' || $level === 'guru'): ?>
+<?php if($level === 'guru'): ?>
 <div class="modal fade" id="modalMaterial" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" enctype="multipart/form-data" class="modal-content">

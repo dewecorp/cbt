@@ -6,7 +6,7 @@
     <footer class="footer mt-auto py-3 text-center">
         <div class="container">
             <span class="text-muted">
-                Copyright &copy; <?php echo date('Y'); ?> <strong>CBT MI Sultan Fattah</strong>. 
+                Copyright &copy; <?php echo date('Y'); ?> <strong>Elearning MI Sultan Fattah</strong>. 
                 <span class="text-kemenag">Madrasah Hebat Bermartabat.</span>
             </span>
         </div>
