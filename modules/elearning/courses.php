@@ -26,6 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_course'])) {
     $pengampu = $uid;
     if (!empty($kode) && !empty($nama) && $id_kelas > 0 && $id_mapel > 0) {
         mysqli_query($koneksi, "INSERT INTO courses(kode_course,nama_course,id_kelas,id_mapel,pengampu) VALUES('$kode','$nama',$id_kelas,$id_mapel,$pengampu)");
+        header("Location: courses.php");
+        exit;
     }
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_course'])) {
@@ -44,6 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_course'])) {
     }
     if ($ok && $id_course>0 && !empty($kode) && !empty($nama) && $id_kelas>0 && $id_mapel>0) {
         mysqli_query($koneksi, "UPDATE courses SET kode_course='$kode', nama_course='$nama', id_kelas=$id_kelas, id_mapel=$id_mapel WHERE id_course=$id_course");
+        header("Location: courses.php");
+        exit;
     }
 }
 if (isset($_GET['delete_id'])) {
