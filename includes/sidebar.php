@@ -78,6 +78,11 @@
                         <i class="fas fa-paper-plane"></i> Kirim Tugas
                     </a>
                 </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/elearning/student_grades.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'student_grades.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-star"></i> Nilai Tugas
+                    </a>
+                </li>
                 <?php else: ?>
                 <li>
                     <a href="<?php echo $base_url; ?>modules/elearning/assignments.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/assignments.php') !== false) ? 'active' : ''; ?>">
