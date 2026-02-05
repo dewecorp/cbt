@@ -1,9 +1,21 @@
         <!-- Sidebar -->
 <div class="sidebar d-flex flex-column p-3 text-white" id="sidebar">
     <div class="d-flex align-items-center justify-content-between mb-3">
+        <?php
+        $school_name = 'CBT MI';
+        $school_logo = '';
+        $rs = mysqli_query($koneksi, "SELECT nama_sekolah, logo FROM setting LIMIT 1");
+        if ($rs && mysqli_num_rows($rs) > 0) {
+            $st = mysqli_fetch_assoc($rs);
+            if (!empty($st['nama_sekolah'])) $school_name = $st['nama_sekolah'];
+            if (!empty($st['logo'])) $school_logo = $st['logo'];
+        }
+        ?>
         <a href="<?php echo $base_url; ?>dashboard.php" class="d-flex align-items-center text-white text-decoration-none">
-            <i class="fas fa-school fa-2x me-2"></i>
-            <span class="fs-5 fw-bold">CBT MI</span>
+            <?php if($school_logo): ?>
+                <img src="<?php echo $base_url; ?>assets/img/<?php echo $school_logo; ?>" alt="Logo" class="me-2 sidebar-school-logo">
+            <?php endif; ?>
+            <span class="fs-5 fw-bold">Elearning Madrasah</span>
         </a>
         <button class="btn btn-link text-white d-md-none" id="sidebarClose">
             <i class="fas fa-times fa-lg"></i>
@@ -43,6 +55,35 @@
                     </a>
                 </li>
                 <?php endif; ?>
+
+                <li class="nav-item mt-2">
+                    <span class="text-uppercase small text-white-50 ms-3">Elearning</span>
+                </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/elearning/courses.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/courses.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-layer-group"></i> Kelas Online
+                    </a>
+                </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/elearning/materials.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/materials.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-book-open"></i> Materi
+                    </a>
+                </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/elearning/assignments.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/assignments.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-tasks"></i> Tugas
+                    </a>
+                </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/elearning/forum.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/forum.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-comments"></i> Forum
+                    </a>
+                </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/elearning/announcements.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/announcements.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-bullhorn"></i> Pengumuman
+                    </a>
+                </li>
 
                 <li class="nav-item mt-2">
                     <span class="text-uppercase small text-white-50 ms-3">Asesmen</span>
@@ -88,6 +129,35 @@
                     </a>
                 </li>
                 <?php endif; ?>
+
+                <li class="nav-item mt-2">
+                    <span class="text-uppercase small text-white-50 ms-3">Elearning</span>
+                </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/elearning/courses.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/courses.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-layer-group"></i> Kursus
+                    </a>
+                </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/elearning/materials.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/materials.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-book-open"></i> Materi
+                    </a>
+                </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/elearning/assignments.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/assignments.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-tasks"></i> Tugas
+                    </a>
+                </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/elearning/forum.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/forum.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-comments"></i> Forum
+                    </a>
+                </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/elearning/announcements.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/announcements.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-bullhorn"></i> Pengumuman
+                    </a>
+                </li>
 
                 <?php if($level === 'admin'): ?>
                 <li class="nav-item mt-2">

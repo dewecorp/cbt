@@ -3,9 +3,17 @@
         <button class="btn btn-link text-white d-md-none me-3" type="button" id="sidebarToggle">
             <i class="fas fa-bars"></i>
         </button>
-        <a class="navbar-brand" href="#">
-            <i class="fas fa-school me-2"></i> CBT MI Sultan Fattah
-        </a>
+        <?php
+        $school_name_nav = 'CBT MI';
+        if (isset($koneksi)) {
+            $rsn = mysqli_query($koneksi, "SELECT nama_sekolah FROM setting LIMIT 1");
+            if ($rsn && mysqli_num_rows($rsn) > 0) {
+                $sn = mysqli_fetch_assoc($rsn);
+                if (!empty($sn['nama_sekolah'])) $school_name_nav = $sn['nama_sekolah'];
+            }
+        }
+        ?>
+        <a class="navbar-brand" href="#"><?php echo $school_name_nav; ?></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>

@@ -22,6 +22,7 @@ if (isset($_POST['login'])) {
             $_SESSION['username'] = $data['username'];
             $_SESSION['nama'] = $data['nama_lengkap'];
             $_SESSION['level'] = $data['level'];
+            $_SESSION['login_success'] = 1;
             log_activity('login', 'auth', 'login admin/guru');
             header("Location: dashboard.php");
             exit;
@@ -44,6 +45,7 @@ if (isset($_POST['login'])) {
                  $_SESSION['nama'] = $data['nama_siswa'];
                  $_SESSION['level'] = 'siswa';
                  $_SESSION['id_kelas'] = $data['id_kelas'];
+                 $_SESSION['login_success'] = 1;
                  log_activity('login', 'auth', 'login siswa');
                  header("Location: dashboard.php");
                  exit;

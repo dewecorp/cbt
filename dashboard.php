@@ -3,6 +3,19 @@ include 'config/database.php';
 $page_title = 'Dashboard';
 include 'includes/header.php';
 
+if (isset($_SESSION['login_success'])) {
+    echo "<script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Proses Authentication Berhasil',
+            text: 'Akun anda berhasil diverifikasi',
+            showConfirmButton: false,
+            timer: 1600
+        });
+    </script>";
+    unset($_SESSION['login_success']);
+}
+
 // Hitung Data untuk Dashboard
 $q_guru_count = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM users WHERE level='guru'");
 $jml_guru = mysqli_fetch_assoc($q_guru_count)['count'];
