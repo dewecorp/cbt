@@ -304,7 +304,16 @@ if($level === 'siswa') {
                 </div>
                 <div class="card-body" style="max-height: 420px; overflow-y: auto;">
                     <?php
-                    $logs = mysqli_query($koneksi, "SELECT * FROM activity_log ORDER BY created_at DESC LIMIT 100");
+                    $logs = mysqli_query($koneksi, "
+                        SELECT l.*, 
+                               u.nama_lengkap as nama_guru,
+                               s.nama_siswa as nama_siswa
+                        FROM activity_log l
+                        LEFT JOIN users u ON l.user_id = u.id_user AND l.level IN ('admin', 'guru')
+                        LEFT JOIN siswa s ON l.user_id = s.id_siswa AND l.level = 'siswa'
+                        ORDER BY l.created_at DESC 
+                        LIMIT 100
+                    ");
                     ?>
                     <style>
                         .timeline { position: relative; padding-left: 1.5rem; }
@@ -335,7 +344,16 @@ if($level === 'siswa') {
                                 elseif ($lg['action'] === 'update') $ico = 'fa-edit';
                                 elseif ($lg['action'] === 'delete') $ico = 'fa-trash';
                                 elseif ($lg['action'] === 'import') $ico = 'fa-file-import';
-                                $who = trim(($lg['username'] ?? '') . ' ' . ($lg['level'] ? '(' . $lg['level'] . ')' : ''));
+                                
+                                // Determine display name
+                                $display_name = $lg['username']; // Fallback
+                                if ($lg['level'] === 'siswa' && !empty($lg['nama_siswa'])) {
+                                    $display_name = $lg['nama_siswa'];
+                                } elseif (($lg['level'] === 'guru' || $lg['level'] === 'admin') && !empty($lg['nama_guru'])) {
+                                    $display_name = $lg['nama_guru'];
+                                }
+                                
+                                $who = trim(($display_name ?? '') . ' ' . ($lg['level'] ? '(' . $lg['level'] . ')' : ''));
                                 $dt = date('d/m/Y H:i:s', strtotime($lg['created_at'])) . ' • ' . time_ago_str($lg['created_at']);
                                 $act_class = 't-' . strtolower($lg['action']);
                             ?>
