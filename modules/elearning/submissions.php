@@ -3,7 +3,7 @@ session_start();
 include '../../config/database.php';
 
 if (!isset($_SESSION['level']) || ($_SESSION['level'] !== 'guru' && $_SESSION['level'] !== 'admin')) {
-    header("Location: ../../login.php");
+    header("Location: ../../index.php");
     exit;
 }
 

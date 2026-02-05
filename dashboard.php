@@ -171,6 +171,29 @@ if($level === 'siswa') {
         ORDER BY a.created_at DESC 
         LIMIT 5
     ");
+    
+    // Fetch courses with active assignments (tasks)
+    $tugas_courses = [];
+    $uid_siswa = $_SESSION['user_id'];
+    $q_tugas_active = mysqli_query($koneksi, "
+        SELECT c.id_course, c.nama_course, m.nama_mapel, u.nama_lengkap as nama_guru,
+               COUNT(a.id_assignment) as total_active,
+               SUM(CASE WHEN s.id_submission IS NOT NULL THEN 1 ELSE 0 END) as submitted_count
+        FROM assignments a
+        JOIN courses c ON a.course_id = c.id_course
+        JOIN mapel m ON c.id_mapel = m.id_mapel
+        JOIN users u ON c.pengampu = u.id_user
+        LEFT JOIN submissions s ON a.id_assignment = s.assignment_id AND s.siswa_id = '$uid_siswa'
+        WHERE c.id_kelas = '$id_kelas'
+        AND a.deadline >= NOW()
+        GROUP BY c.id_course
+        ORDER BY c.created_at DESC
+    ");
+    if($q_tugas_active) {
+        while($row = mysqli_fetch_assoc($q_tugas_active)) {
+            $tugas_courses[] = $row;
+        }
+    }
 }
 ?>
 
@@ -465,6 +488,82 @@ if($level === 'siswa') {
                 </div>
             </div>
         </div>
+
+        <!-- Pengumuman Widget -->
+        <?php if(mysqli_num_rows($ann_siswa) > 0): ?>
+        <div class="col-12 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-bullhorn me-2"></i>Pengumuman Terbaru</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <?php while($ann = mysqli_fetch_assoc($ann_siswa)): ?>
+                        <div class="col-md-6 mb-3">
+                            <div class="alert alert-info border-left-info shadow-sm h-100">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h5 class="alert-heading font-weight-bold mb-1"><i class="fas fa-info-circle me-1"></i> <?php echo htmlspecialchars($ann['title'] ?? ''); ?></h5>
+                                    <small class="text-muted text-nowrap ms-2"><?php echo time_ago_str($ann['created_at']); ?></small>
+                                </div>
+                                <hr class="my-2">
+                                <p class="mb-2"><?php echo nl2br(htmlspecialchars($ann['body'] ?? '')); ?></p>
+                                <div class="small text-muted mt-2 d-flex justify-content-between">
+                                    <span><i class="fas fa-user me-1"></i> <?php echo htmlspecialchars($ann['nama_lengkap']); ?></span>
+                                    <?php if($ann['nama_course']): ?>
+                                        <span><i class="fas fa-chalkboard me-1"></i> <?php echo htmlspecialchars($ann['nama_course']); ?></span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endwhile; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- Tugas Widget -->
+        <?php if(!empty($tugas_courses)): ?>
+        <div class="col-12 mb-3">
+            <h5 class="font-weight-bold text-gray-800"><i class="fas fa-tasks me-2"></i>Daftar Tugas</h5>
+        </div>
+        <?php foreach($tugas_courses as $tc): 
+            $jml_belum = $tc['total_active'] - $tc['submitted_count'];
+            $border_class = $jml_belum > 0 ? 'border-left-danger border-danger' : 'border-left-success border-success';
+            $text_class = $jml_belum > 0 ? 'text-danger' : 'text-success';
+            $icon_class = $jml_belum > 0 ? 'fa-exclamation-circle' : 'fa-check-circle';
+        ?>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="modules/elearning/course_manage.php?course_id=<?php echo $tc['id_course']; ?>&tab=tugas" class="text-decoration-none">
+                <div class="card <?php echo $border_class; ?> shadow h-100 py-2 border-start border-4">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold <?php echo $text_class; ?> text-uppercase mb-1">
+                                    <?php echo htmlspecialchars($tc['nama_mapel']); ?>
+                                </div>
+                                <div class="h6 mb-0 font-weight-bold text-gray-800 text-truncate" style="max-width: 150px;">
+                                    <?php echo htmlspecialchars($tc['nama_course']); ?>
+                                </div>
+                                <div class="mt-2 small <?php echo $text_class; ?> fw-bold">
+                                    <i class="fas <?php echo $icon_class; ?>"></i> 
+                                    <?php if($jml_belum > 0): ?>
+                                        <?php echo $jml_belum; ?> Tugas Belum Selesai
+                                    <?php else: ?>
+                                        Semua Tugas Selesai
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <?php endforeach; ?>
+        <?php endif; ?>
 
         <div class="col-12">
             <div class="card shadow mb-4">

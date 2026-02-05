@@ -6,9 +6,30 @@ if (!isset($_SESSION['level'])) { $_SESSION['level'] = 'admin'; }
 $level = $_SESSION['level'];
 $uid = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
 
+// Fetch Teacher Classes
+$teacher_classes = [];
+if ($level === 'guru') {
+    $tc_q = mysqli_query($koneksi, "SELECT DISTINCT k.id_kelas, k.nama_kelas FROM courses c JOIN kelas k ON c.id_kelas=k.id_kelas WHERE c.pengampu=$uid");
+    while($tc = mysqli_fetch_assoc($tc_q)) {
+        $teacher_classes[] = $tc;
+    }
+}
+
 // Handle Post Creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
-    $course_id = 0; // Default to Global/General if no course selected
+    $class_id = 0;
+    $role = ($level === 'admin') ? 'admin' : (($level === 'guru') ? 'guru' : 'siswa');
+
+    if ($level === 'guru') {
+        if (isset($_POST['class_id'])) {
+            $class_id = (int)$_POST['class_id'];
+        } elseif (!empty($teacher_classes)) {
+            $class_id = $teacher_classes[0]['id_kelas'];
+        }
+    } elseif ($level === 'siswa') {
+        $class_id = isset($_SESSION['id_kelas']) ? (int)$_SESSION['id_kelas'] : 0;
+    }
+    
     $content = mysqli_real_escape_string($koneksi, $_POST['content']);
     $image_path = null;
     $file_path = null;
@@ -40,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
     if (!empty($content) || $image_path || $file_path) {
         // Title is optional now, set default or empty
         $title = substr($content, 0, 50) . '...'; 
-        mysqli_query($koneksi, "INSERT INTO forum_topics(course_id, title, content, image, file, created_by) VALUES($course_id, '$title', '$content', '$image_path', '$file_path', $uid)");
+        mysqli_query($koneksi, "INSERT INTO forum_topics(class_id, course_id, title, content, image, file, created_by, author_role) VALUES($class_id, 0, '$title', '$content', '$image_path', '$file_path', $uid, '$role')");
         header("Location: forum.php");
         exit;
     }
@@ -55,15 +76,22 @@ function render_comments($comments, $children, $parent_id = 0) {
         
         echo '<div class="d-flex '.$margin.'" id="comment-'.$r_id.'">';
         echo '  <div class="flex-shrink-0">';
-        echo '      <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 14px;">'.strtoupper(substr($r['nama_lengkap'], 0, 1)).'</div>';
+        $dn = isset($r['display_name']) ? $r['display_name'] : ($r['nama_lengkap'] ?? '');
+        echo '      <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 14px;">'.strtoupper(substr($dn, 0, 1)).'</div>';
         echo '  </div>';
         echo '  <div class="flex-grow-1 ms-2">';
         echo '      <div class="bg-light p-2 rounded d-inline-block">';
-        echo '          <div class="fw-bold" style="font-size: 0.9rem;">'.htmlspecialchars($r['nama_lengkap']).'</div>';
-        echo '          <div style="font-size: 0.9rem;">'.nl2br(htmlspecialchars($r['content'])).'</div>';
+        echo '          <div class="fw-bold" style="font-size: 0.9rem;">'.htmlspecialchars($dn).'</div>';
+        if (!empty($r['sticker_code'])) {
+            echo '          <div style="font-size: 2rem; line-height: 1.2;">'.htmlspecialchars($r['sticker_code']).'</div>';
+        } else {
+            echo '          <div style="font-size: 0.9rem;">'.nl2br(htmlspecialchars($r['content'])).'</div>';
+        }
         echo '      </div>';
         echo '      <div class="d-flex align-items-center mt-1">';
         echo '          <small class="text-muted me-3" style="font-size: 0.75rem;">'.date('d/m H:i', strtotime($r['created_at'])).'</small>';
+        echo '          <a href="javascript:void(0)" onclick="toggleReplyLike('.$r_id.')" class="text-decoration-none fw-bold text-muted me-2" style="font-size: 0.75rem;">Suka</a>';
+        echo '          <small id="reply-like-count-'.$r_id.'" class="text-muted me-3" style="font-size: 0.75rem;"></small>';
         echo '          <a href="javascript:void(0)" onclick="showReplyForm('.$r_id.')" class="text-decoration-none fw-bold text-muted" style="font-size: 0.75rem;">Balas</a>';
         echo '      </div>';
         
@@ -79,6 +107,24 @@ function render_comments($comments, $children, $parent_id = 0) {
         echo '          <div class="d-flex align-items-center">';
         echo '              <div class="avatar-circle me-2" style="width: 24px; height: 24px; font-size: 10px;">'.strtoupper(substr($_SESSION['nama'] ?? 'U', 0, 1)).'</div>';
         echo '              <input type="text" class="form-control form-control-sm rounded-pill bg-light border-0" placeholder="Tulis balasan..." id="input-reply-'.$r_id.'" onkeypress="handleReply(event, '.$r['topic_id'].', '.$r_id.')">';
+        echo '              <button class="btn btn-link text-muted p-0 ms-2" onclick="toggleEmojiPicker(\'input-reply-'.$r_id.'\', '.$r['topic_id'].', '.$r_id.')"><i class="far fa-smile"></i></button>';
+        echo '              <button class="btn btn-link text-muted p-0 ms-2" onclick="toggleStickerPicker('.$r['topic_id'].', '.$r_id.')"><i class="far fa-sticky-note"></i></button>';
+        echo '          </div>';
+        echo '          <div id="emoji-picker-'.$r_id.'" class="mt-1" style="display:none;">';
+        echo '              <span class="me-2" onclick="insertEmoji(\'input-reply-'.$r_id.'\', \'😀\')">😀</span>';
+        echo '              <span class="me-2" onclick="insertEmoji(\'input-reply-'.$r_id.'\', \'😎\')">😎</span>';
+        echo '              <span class="me-2" onclick="insertEmoji(\'input-reply-'.$r_id.'\', \'👍\')">👍</span>';
+        echo '              <span class="me-2" onclick="insertEmoji(\'input-reply-'.$r_id.'\', \'❤️\')">❤️</span>';
+        echo '              <span class="me-2" onclick="insertEmoji(\'input-reply-'.$r_id.'\', \'🎉\')">🎉</span>';
+        echo '              <span class="me-2" onclick="insertEmoji(\'input-reply-'.$r_id.'\', \'🙏\')">🙏</span>';
+        echo '          </div>';
+        echo '          <div id="sticker-picker-'.$r_id.'" class="mt-1" style="display:none;">';
+        echo '              <span class="me-2" onclick="sendSticker('.$r['topic_id'].', '.$r_id.', \'😀\')">😀</span>';
+        echo '              <span class="me-2" onclick="sendSticker('.$r['topic_id'].', '.$r_id.', \'😎\')">😎</span>';
+        echo '              <span class="me-2" onclick="sendSticker('.$r['topic_id'].', '.$r_id.', \'👍\')">👍</span>';
+        echo '              <span class="me-2" onclick="sendSticker('.$r['topic_id'].', '.$r_id.', \'❤️\')">❤️</span>';
+        echo '              <span class="me-2" onclick="sendSticker('.$r['topic_id'].', '.$r_id.', \'🎉\')">🎉</span>';
+        echo '              <span class="me-2" onclick="sendSticker('.$r['topic_id'].', '.$r_id.', \'🙏\')">🙏</span>';
         echo '          </div>';
         echo '      </div>';
         
@@ -92,23 +138,31 @@ include '../../includes/header.php';
 // Fetch Posts (Topics)
 $topic_filter = "";
 if ($level === 'guru') {
-    // Show posts from courses taught by guru OR Global posts
-    $topic_filter = " WHERE (c.pengampu=".$uid." OR t.course_id=0)";
+    $class_ids = array_map(function($c) { return $c['id_kelas']; }, $teacher_classes);
+    if (!empty($class_ids)) {
+        $ids = implode(',', $class_ids);
+        $topic_filter = " WHERE t.class_id IN ($ids)";
+    } else {
+        $topic_filter = " WHERE 1=0";
+    }
 } elseif ($level === 'siswa') {
-    // Show posts from courses for student's class OR Global posts
     $id_kelas = isset($_SESSION['id_kelas']) ? $_SESSION['id_kelas'] : 0;
-    $topic_filter = " WHERE (c.id_kelas=".$id_kelas." OR t.course_id=0)";
+    $topic_filter = " WHERE t.class_id=".$id_kelas;
 }
 
 $topicsQ = mysqli_query($koneksi, "
-    SELECT t.*, c.nama_course, k.nama_kelas, u.nama_lengkap, 
+    SELECT t.*, k.nama_kelas, 
+    CASE 
+        WHEN t.author_role = 'siswa' THEN s.nama_siswa
+        ELSE u.nama_lengkap 
+    END AS nama_lengkap,
     (SELECT COUNT(*) FROM forum_replies r WHERE r.topic_id=t.id_topic) AS comment_count,
     (SELECT COUNT(*) FROM forum_likes l WHERE l.topic_id=t.id_topic) AS like_count,
     (SELECT COUNT(*) FROM forum_likes l2 WHERE l2.topic_id=t.id_topic AND l2.user_id=$uid) AS is_liked
     FROM forum_topics t 
-    LEFT JOIN courses c ON t.course_id=c.id_course 
-    LEFT JOIN kelas k ON c.id_kelas=k.id_kelas 
-    JOIN users u ON t.created_by=u.id_user 
+    LEFT JOIN kelas k ON t.class_id=k.id_kelas 
+    LEFT JOIN users u ON t.created_by=u.id_user 
+    LEFT JOIN siswa s ON t.created_by=s.id_siswa
     $topic_filter 
     ORDER BY t.created_at DESC
 ");
@@ -272,14 +326,14 @@ $topicsQ = mysqli_query($koneksi, "
         <div class="card-body">
             <div class="post-header">
                 <div class="avatar-circle">
-                    <?php echo strtoupper(substr($t['nama_lengkap'], 0, 1)); ?>
+                    <?php echo strtoupper(substr($t['nama_lengkap'] ?? 'U', 0, 1)); ?>
                 </div>
                 <div class="post-info">
-                    <div class="post-author"><?php echo htmlspecialchars($t['nama_lengkap']); ?></div>
+                    <div class="post-author"><?php echo htmlspecialchars($t['nama_lengkap'] ?? 'Pengguna Tidak Dikenal'); ?></div>
                     <div class="post-time">
                         <i class="fas fa-globe-asia"></i> 
                         <?php echo date('d M Y H:i', strtotime($t['created_at'])); ?> • 
-                        <span class="badge bg-light text-dark border"><?php echo $t['nama_course'] ? htmlspecialchars($t['nama_kelas'].' - '.$t['nama_course']) : 'Umum'; ?></span>
+                        <span class="badge bg-light text-dark border"><?php echo htmlspecialchars($t['nama_kelas'] ?? 'Umum'); ?></span>
                     </div>
                 </div>
             </div>
@@ -322,7 +376,15 @@ $topicsQ = mysqli_query($koneksi, "
             <div class="comments-section" id="comments-<?php echo $t['id_topic']; ?>" style="display: <?php echo ($t['comment_count'] > 0) ? 'block' : 'none'; ?>;">
                 <div id="comment-list-<?php echo $t['id_topic']; ?>">
                     <?php 
-                    $repliesQ = mysqli_query($koneksi, "SELECT r.*, u.nama_lengkap FROM forum_replies r JOIN users u ON r.user_id=u.id_user WHERE r.topic_id=".$t['id_topic']." ORDER BY r.created_at ASC");
+                    $repliesQ = mysqli_query($koneksi, "SELECT r.*, 
+                        CASE 
+                            WHEN r.user_role = 'siswa' THEN sw.nama_siswa 
+                            ELSE u.nama_lengkap 
+                        END AS display_name 
+                        FROM forum_replies r 
+                        LEFT JOIN users u ON r.user_id=u.id_user 
+                        LEFT JOIN siswa sw ON r.user_id=sw.id_siswa 
+                        WHERE r.topic_id=".$t['id_topic']." ORDER BY r.created_at ASC");
                     $comments = [];
                     $children = [];
                     while($r = mysqli_fetch_assoc($repliesQ)) {

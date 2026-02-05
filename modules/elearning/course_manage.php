@@ -184,7 +184,9 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
         <div class="tab-pane fade <?php echo $active_tab == 'tugas' ? 'show active' : ''; ?>" id="tugas" role="tabpanel" aria-labelledby="tugas-tab">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h5 class="m-0 font-weight-bold text-primary"><i class="fas fa-tasks me-2"></i>Daftar Tugas</h5>
+                <?php if($level === 'admin' || $level === 'guru'): ?>
                 <a href="assignments.php" class="btn btn-primary btn-sm shadow-sm"><i class="fas fa-cog me-1"></i> Kelola Tugas</a>
+                <?php endif; ?>
             </div>
             
             <?php if(mysqli_num_rows($assignments) > 0): ?>
@@ -207,7 +209,9 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                 </div>
                                 <div class="d-grid gap-2">
                                     <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTugas<?php echo $a['id_assignment']; ?>">Lihat Detail</button>
+                                    <?php if($level === 'admin' || $level === 'guru'): ?>
                                     <a href="submissions.php?assignment_id=<?php echo $a['id_assignment']; ?>" class="btn btn-primary btn-sm">Lihat Pengumpulan</a>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -265,7 +269,9 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
         <div class="tab-pane fade <?php echo $active_tab == 'materi' ? 'show active' : ''; ?>" id="materi" role="tabpanel" aria-labelledby="materi-tab">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h5 class="m-0 font-weight-bold text-primary"><i class="fas fa-book-open me-2"></i>Daftar Materi</h5>
+                <?php if($level === 'admin' || $level === 'guru'): ?>
                 <a href="materials.php" class="btn btn-primary btn-sm shadow-sm"><i class="fas fa-cog me-1"></i> Kelola Materi</a>
+                <?php endif; ?>
             </div>
 
             <?php if(mysqli_num_rows($materials) > 0): ?>
@@ -322,9 +328,11 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">Siswa Terdaftar (<?php echo $student_count; ?>)</h6>
+                    <?php if($level === 'admin' || $level === 'guru'): ?>
                     <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddStudent">
                         <i class="fas fa-user-plus"></i> Tambah Siswa
                     </button>
+                    <?php endif; ?>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -334,7 +342,9 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                     <th width="50">No</th>
                                     <th>NISN</th>
                                     <th>Nama Siswa</th>
+                                    <?php if($level === 'admin' || $level === 'guru'): ?>
                                     <th width="150">Aksi</th>
+                                    <?php endif; ?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -347,11 +357,13 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                     <td><?php echo $no++; ?></td>
                                     <td><?php echo htmlspecialchars($e['nisn']); ?></td>
                                     <td><?php echo htmlspecialchars($e['nama_siswa']); ?></td>
+                                    <?php if($level === 'admin' || $level === 'guru'): ?>
                                     <td>
                                         <button onclick="confirmAction('course_manage.php?course_id=<?php echo $course_id; ?>&remove_id=<?php echo $e['id']; ?>', 'Keluarkan siswa ini dari kelas?', 'Ya, keluarkan!')" class="btn btn-danger btn-sm">
                                             <i class="fas fa-user-minus"></i> Keluarkan
                                         </button>
                                     </td>
+                                    <?php endif; ?>
                                 </tr>
                                 <?php endwhile; ?>
                             </tbody>
@@ -364,7 +376,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
     </div>
 </div>
 
-<!-- Modal Tambah Siswa -->
+<?php if($level === 'admin' || $level === 'guru'): ?>
 <div class="modal fade" id="modalAddStudent" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" class="modal-content">
@@ -392,5 +404,6 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
     </form>
   </div>
 </div>
+<?php endif; ?>
 
 <?php include '../../includes/footer.php'; ?>

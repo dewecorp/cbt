@@ -3,7 +3,7 @@ session_start();
 include '../../config/database.php';
 
 if (!isset($_SESSION['level']) || $_SESSION['level'] !== 'siswa') {
-    header("Location: ../../login.php");
+    header("Location: ../../index.php");
     exit;
 }
 
@@ -83,13 +83,15 @@ include '../../includes/header.php';
 // Fetch Assignments
 $query = "
     SELECT a.*, c.nama_course, m.nama_mapel, u.nama_lengkap as nama_guru,
-           (SELECT file_path FROM submissions s WHERE s.assignment_id = a.id_assignment AND s.siswa_id = '$id_siswa') as submitted_file,
-           (SELECT submitted_at FROM submissions s WHERE s.assignment_id = a.id_assignment AND s.siswa_id = '$id_siswa') as submitted_at,
-           (SELECT nilai FROM submissions s WHERE s.assignment_id = a.id_assignment AND s.siswa_id = '$id_siswa') as nilai
+           s.file_path as submitted_file,
+           s.submitted_at,
+           s.nilai,
+           s.catatan
     FROM assignments a
     JOIN courses c ON a.course_id = c.id_course
     JOIN mapel m ON c.id_mapel = m.id_mapel
     JOIN users u ON a.created_by = u.id_user
+    LEFT JOIN submissions s ON a.id_assignment = s.assignment_id AND s.siswa_id = '$id_siswa'
     WHERE c.id_kelas = '$id_kelas'
     ORDER BY a.deadline DESC
 ";
@@ -145,8 +147,25 @@ $assignments = mysqli_query($koneksi, $query);
                                 <i class="fas fa-check-circle me-1"></i> Tugas telah dikirim pada <?php echo date('d M Y H:i', strtotime($a['submitted_at'])); ?>
                                 <br>
                                 <a href="../../<?php echo $a['submitted_file']; ?>" target="_blank" class="btn btn-sm btn-link px-0"><i class="fas fa-paperclip"></i> Lihat File Saya</a>
-                                <?php if($a['nilai'] > 0): ?>
-                                    <div class="mt-2 fw-bold text-primary">Nilai: <?php echo $a['nilai']; ?></div>
+                                
+                                <?php if(isset($a['nilai']) && $a['nilai'] !== null && $a['nilai'] != ''): ?>
+                                    <div class="mt-3 p-3 bg-white border rounded shadow-sm">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="display-4 fw-bold text-primary me-3"><?php echo floatval($a['nilai']); ?></div>
+                                            <div>
+                                                <div class="small text-uppercase text-muted fw-bold">Nilai Tugas</div>
+                                                <div class="small text-muted">Dinilai oleh <?php echo htmlspecialchars($a['nama_guru']); ?></div>
+                                            </div>
+                                        </div>
+                                        <?php if(!empty($a['catatan'])): ?>
+                                            <div class="border-top pt-2 mt-2">
+                                                <div class="small fw-bold text-dark mb-1"><i class="fas fa-comment-alt me-1 text-secondary"></i> Catatan Guru:</div>
+                                                <div class="small text-muted fst-italic bg-light p-2 rounded">
+                                                    "<?php echo nl2br(htmlspecialchars($a['catatan'])); ?>"
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>
