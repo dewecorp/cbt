@@ -153,43 +153,64 @@ if (isset($_GET['edit_id'])) {
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-datatable" width="100%" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th>Kode</th>
-                                    <th>Nama Kelas Online</th>
-                                    <th>Kelas</th>
-                                    <th>Mapel</th>
-                                    <th>Jumlah Materi</th>
-                                    <th>Jumlah Tugas</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php while($c = mysqli_fetch_assoc($courses)): ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($c['kode_course']); ?></td>
-                                    <td><?php echo htmlspecialchars($c['nama_course']); ?></td>
-                                    <td><?php echo htmlspecialchars($c['nama_kelas']); ?></td>
-                                    <td><?php echo htmlspecialchars($c['nama_mapel']); ?></td>
-                                    <td><?php echo (int)$c['jml_materi']; ?></td>
-                                    <td><?php echo (int)$c['jml_tugas']; ?></td>
-                                    <td>
+                    <?php if(mysqli_num_rows($courses) > 0): ?>
+                    <div class="row">
+                        <?php while($c = mysqli_fetch_assoc($courses)): ?>
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="card shadow h-100 border-start border-4 border-primary hover-shadow transition-300">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="badge bg-primary"><?php echo htmlspecialchars($c['nama_kelas']); ?></span>
+                                        <small class="text-muted fw-bold"><?php echo htmlspecialchars($c['kode_course']); ?></small>
+                                    </div>
+                                    <h5 class="card-title font-weight-bold text-dark mb-2 text-truncate" title="<?php echo htmlspecialchars($c['nama_course']); ?>">
+                                        <?php echo htmlspecialchars($c['nama_course']); ?>
+                                    </h5>
+                                    <p class="text-muted small mb-3">
+                                        <i class="fas fa-book me-1"></i> <?php echo htmlspecialchars($c['nama_mapel']); ?>
+                                    </p>
+                                    
+                                    <div class="row text-center mb-3 g-2">
+                                        <div class="col-6">
+                                            <div class="bg-light p-2 rounded border">
+                                                <div class="h5 mb-0 font-weight-bold text-primary"><?php echo (int)$c['jml_materi']; ?></div>
+                                                <div class="small text-muted" style="font-size: 0.75rem;">Materi</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="bg-light p-2 rounded border">
+                                                <div class="h5 mb-0 font-weight-bold text-success"><?php echo (int)$c['jml_tugas']; ?></div>
+                                                <div class="small text-muted" style="font-size: 0.75rem;">Tugas</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid gap-2">
+                                        <a href="course_manage.php?course_id=<?php echo $c['id_course']; ?>" class="btn btn-primary">
+                                            <i class="fas fa-door-open me-1"></i> Masuk Kelas
+                                        </a>
                                         <?php if($level === 'admin' || (int)$c['pengampu'] === $uid): ?>
-                                        <a href="courses.php?edit_id=<?php echo $c['id_course']; ?>" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
-                                        <a href="course_manage.php?course_id=<?php echo $c['id_course']; ?>" class="btn btn-primary btn-sm"><i class="fas fa-door-open"></i> Masuk</a>
-                                        <a href="#" onclick="confirmDelete('courses.php?delete_id=<?php echo $c['id_course']; ?>'); return false;" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Hapus</a>
-                                        <?php else: ?>
-                                        <a href="course_manage.php?course_id=<?php echo $c['id_course']; ?>" class="btn btn-primary btn-sm"><i class="fas fa-door-open"></i> Masuk</a>
-                                        <!-- Debug: Level=<?php echo $level; ?>, Pengampu=<?php echo $c['pengampu']; ?>, UID=<?php echo $uid; ?> -->
+                                        <div class="btn-group">
+                                            <a href="courses.php?edit_id=<?php echo $c['id_course']; ?>" class="btn btn-outline-warning btn-sm">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <a href="#" onclick="confirmDelete('courses.php?delete_id=<?php echo $c['id_course']; ?>'); return false;" class="btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-trash"></i> Hapus
+                                            </a>
+                                        </div>
                                         <?php endif; ?>
-                                    </td>
-                                </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endwhile; ?>
                     </div>
+                    <?php else: ?>
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-layer-group fa-4x mb-3 text-gray-300"></i>
+                        <p>Belum ada kelas online.</p>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

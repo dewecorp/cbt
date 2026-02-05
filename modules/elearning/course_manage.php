@@ -205,8 +205,9 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                 <div class="text-muted small mb-3">
                                     <i class="far fa-calendar-alt me-1"></i> Tenggat: <?php echo date('d M Y, H:i', strtotime($a['deadline'])); ?>
                                 </div>
-                                <div class="d-grid">
+                                <div class="d-grid gap-2">
                                     <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTugas<?php echo $a['id_assignment']; ?>">Lihat Detail</button>
+                                    <a href="submissions.php?assignment_id=<?php echo $a['id_assignment']; ?>" class="btn btn-primary btn-sm">Lihat Pengumpulan</a>
                                 </div>
                             </div>
                         </div>
