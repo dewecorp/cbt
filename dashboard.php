@@ -280,7 +280,7 @@ if($level === 'siswa') {
         <div class="col-lg-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Selamat Datang di CBT MI Sultan Fattah Sukosono</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Selamat Datang di Elearning MI Sultan Fattah Sukosono</h6>
                 </div>
                 <div class="card-body">
                     <div><?php echo $admin_welcome_text; ?></div>

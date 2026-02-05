@@ -9,7 +9,14 @@ body {
     background-color: #f8f9fa;
     overflow-x: hidden;
     font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem; /* Reduced app font size */
 }
+
+/* Force UI elements to match reduced body font size */
+.btn, .form-control, .form-select, .input-group-text {
+    font-size: 0.9rem !important;
+}
+
 
 /* Sidebar Styling - Fixed & Gradient */
 #sidebar {
@@ -74,6 +81,11 @@ body {
     background: linear-gradient(90deg, #2e7d32 0%, #1b5e20 100%) !important;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     z-index: 1020;
+    font-size: 0.85rem; /* Reduced font size */
+}
+
+.navbar-custom .navbar-brand {
+    font-size: 1.1rem !important; /* Slightly smaller brand */
 }
 
 .navbar-custom .navbar-brand, .navbar-custom .nav-link {
