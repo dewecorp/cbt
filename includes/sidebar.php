@@ -64,26 +64,41 @@
                         <i class="fas fa-layer-group"></i> Kelas Online
                     </a>
                 </li>
+                <?php if($level !== 'siswa'): ?>
                 <li>
                     <a href="<?php echo $base_url; ?>modules/elearning/materials.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/materials.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-book-open"></i> Materi
                     </a>
                 </li>
+                <?php endif; ?>
+
+                <?php if($level === 'siswa'): ?>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/elearning/student_assignments.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'student_assignments.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-paper-plane"></i> Kirim Tugas
+                    </a>
+                </li>
+                <?php else: ?>
                 <li>
                     <a href="<?php echo $base_url; ?>modules/elearning/assignments.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/assignments.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-tasks"></i> Tugas
                     </a>
                 </li>
+                <?php endif; ?>
+
                 <li>
                     <a href="<?php echo $base_url; ?>modules/elearning/forum.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/forum.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-comments"></i> Forum
                     </a>
                 </li>
+
+                <?php if($level !== 'siswa'): ?>
                 <li>
                     <a href="<?php echo $base_url; ?>modules/elearning/announcements.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/announcements.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-bullhorn"></i> Pengumuman
                     </a>
                 </li>
+                <?php endif; ?>
 
                 <li class="nav-item mt-2">
                     <span class="text-uppercase small text-white-50 ms-3">Asesmen</span>
