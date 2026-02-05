@@ -175,8 +175,19 @@ if (isset($_POST['simpan'])) {
 </div>
 
 <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+<style>
+/* Sembunyikan notifikasi upgrade CKEditor */
+.cke_notifications_area, .cke_notification { display: none !important; }
+</style>
 <script>
-CKEDITOR.replace('admin_welcome_text');
+document.addEventListener('DOMContentLoaded', function(){
+    var el = document.getElementById('admin_welcome_text');
+    if (el && window.CKEDITOR && CKEDITOR.replace) {
+        CKEDITOR.replace('admin_welcome_text', {
+            removePlugins: 'notification,notificationaggregator'
+        });
+    }
+});
 </script>
 
 <?php include '../../includes/footer.php'; ?>
