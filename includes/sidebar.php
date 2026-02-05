@@ -45,7 +45,7 @@
                 <?php endif; ?>
 
                 <li class="nav-item mt-2">
-                    <span class="text-uppercase small text-white-50 ms-3">Ujian</span>
+                    <span class="text-uppercase small text-white-50 ms-3">Asesmen</span>
                 </li>
                 
                 <?php if($level === 'admin' || $level === 'guru'): ?>
@@ -61,7 +61,7 @@
                 </li>
                 <li>
                     <a href="<?php echo $base_url; ?>modules/tes/hasil_ujian.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'hasil_ujian.php') !== false) ? 'active' : ''; ?>">
-                        <i class="fas fa-poll"></i> Hasil Tes
+                        <i class="fas fa-poll"></i> Hasil Asesmen
                     </a>
                 </li>
                 <li>
@@ -79,7 +79,7 @@
                 <?php if($level === 'siswa'): ?>
                 <li>
                     <a href="<?php echo $base_url; ?>modules/tes/hasil_ujian.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'hasil_ujian.php') !== false) ? 'active' : ''; ?>">
-                        <i class="fas fa-poll"></i> Hasil Tes
+                        <i class="fas fa-poll"></i> Hasil Asesmen
                     </a>
                 </li>
                 <li>

@@ -156,7 +156,7 @@ if (isset($_POST['import'])) {
                     for ($i = 1; $i < count($rows); $i++) {
                         $row = $rows[$i];
                         // Format Excel: NUPTK, Nama Lengkap, Password
-                        if (count($row) >= 3) {
+                        if (is_array($row) && count($row) >= 3) {
                             $username = mysqli_real_escape_string($koneksi, $row[0]);
                             $nama = mysqli_real_escape_string($koneksi, $row[1]);
                             $pass = mysqli_real_escape_string($koneksi, $row[2]);

@@ -1,6 +1,6 @@
 <?php
 include '../../config/database.php';
-$page_title = 'Monitoring Ujian';
+$page_title = 'Monitoring Asesmen';
 include '../../includes/header.php';
 include '../../includes/sidebar.php';
 
@@ -58,7 +58,7 @@ $q_siswa = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_kelas='$id_kelas
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Monitoring Ujian</h1>
+        <h1 class="h2">Monitoring Asesmen</h1>
         <a href="jadwal_ujian.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
     </div>
 

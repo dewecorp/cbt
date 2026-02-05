@@ -75,7 +75,7 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ujian Berlangsung - <?php echo isset($ujian['nama_ujian']) ? $ujian['nama_ujian'] : 'CBT MI Sultan Fattah'; ?> - CBT MI Sultan Fattah</title>
+    <title>Asesmen Berlangsung - <?php echo isset($ujian['nama_ujian']) ? $ujian['nama_ujian'] : 'CBT MI Sultan Fattah'; ?> - CBT MI Sultan Fattah</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -224,7 +224,7 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
                     <?php if($no_soal < $total_soal): ?>
                         <a href="javascript:void(0)" onclick="navigateTo('kerjakan.php?id=<?php echo $id_ujian; ?>&no=<?php echo $no_soal+1; ?>')" class="btn btn-primary">Selanjutnya <i class="fas fa-chevron-right"></i></a>
                     <?php else: ?>
-                        <button type="button" class="btn btn-success" onclick="selesaiUjian()">Selesai Ujian <i class="fas fa-check"></i></button>
+                        <button type="button" class="btn btn-success" onclick="selesaiUjian()">Selesai Asesmen <i class="fas fa-check"></i></button>
                     <?php endif; ?>
                 </div>
             </div>
@@ -335,7 +335,7 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
 
     function selesaiUjian() {
         Swal.fire({
-            title: 'Selesai Ujian?',
+            title: 'Selesai Asesmen?',
             text: "Apakah anda yakin ingin mengakhiri ujian ini? Pastikan semua jawaban sudah terisi.",
             icon: 'question',
             showCancelButton: true,
@@ -366,7 +366,7 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
         
         Swal.fire({
             title: 'PELANGGARAN TERDETEKSI!',
-            text: 'Anda meninggalkan halaman ujian (membuka tab lain/minimize). Ujian Anda otomatis dihentikan!',
+            text: 'Anda meninggalkan halaman asesmen (membuka tab lain/minimize). Asesmen Anda otomatis dihentikan!',
             icon: 'error',
             allowOutsideClick: false,
             confirmButtonText: 'Keluar',

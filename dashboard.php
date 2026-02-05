@@ -205,7 +205,7 @@ if($level === 'siswa') {
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Ujian Aktif</div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Asesmen Aktif</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_ujian; ?></div>
                         </div>
                         <div class="col-auto">
@@ -239,7 +239,7 @@ if($level === 'siswa') {
                     <div class="row align-items-center">
                         <div class="col mr-2">
                             <div class="h5 font-weight-bold text-primary text-uppercase mb-1">Selamat Datang, <?php echo $_SESSION['nama']; ?></div>
-                            <p class="mb-0">Selamat datang di halaman Dashboard Guru. Anda dapat mengelola Bank Soal dan Jadwal Ujian.</p>
+                            <p class="mb-0">Selamat datang di halaman Dashboard Guru. Anda dapat mengelola Bank Soal dan Jadwal Asesmen.</p>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
@@ -270,7 +270,7 @@ if($level === 'siswa') {
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Ujian Aktif Anda</div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Asesmen Aktif Anda</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_ujian_guru; ?></div>
                         </div>
                         <div class="col-auto">
@@ -342,13 +342,13 @@ if($level === 'siswa') {
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Kartu Ujian</div>
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Kartu Asesmen</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
                                 <a href="modules/cetak/print_kartu.php?id_siswa=<?php echo $_SESSION['user_id']; ?>" target="_blank" class="btn btn-info btn-icon-split btn-sm">
                                     <span class="icon text-white-50">
                                         <i class="fas fa-print"></i>
                                     </span>
-                                    <span class="text text-white">Cetak Kartu Ujian</span>
+                                    <span class="text text-white">Cetak Kartu Asesmen</span>
                                 </a>
                             </div>
                         </div>
@@ -363,7 +363,7 @@ if($level === 'siswa') {
         <div class="col-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Daftar Ujian Aktif</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Daftar Asesmen Aktif</h6>
                 </div>
                 <div class="card-body">
                     <?php if(mysqli_num_rows($ujian_aktif) > 0): ?>

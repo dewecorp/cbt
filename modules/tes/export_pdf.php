@@ -56,14 +56,14 @@ $result = mysqli_query($koneksi, $query);
     <style>
         body { font-family: 'Times New Roman', serif; font-size: 12pt; }
         .header-section { text-align: center; margin-bottom: 20px; border-bottom: 2px solid black; padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid black; padding: 5px 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; box-sizing: border-box; }
+        th, td { border: 1px solid black; padding: 5px 8px; box-sizing: border-box; word-wrap: break-word; overflow-wrap: anywhere; }
         th { background-color: #f2f2f2; text-align: center; }
         .text-center { text-align: center; }
         @media print {
             .no-print { display: none; }
             @page { size: A4 portrait; margin: 1cm; }
-            .container { max-width: 100% !important; width: 100% !important; padding: 0 !important; }
+            .container { max-width: 100% !important; width: 97% !important; padding: 0 !important; margin: 0 auto !important; }
         }
     </style>
 </head>

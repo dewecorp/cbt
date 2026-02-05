@@ -79,7 +79,7 @@ if($menit > 0) $waktu_pengerjaan .= $menit . " menit ";
 $waktu_pengerjaan .= $detik . " detik";
 
 // Include Header (sudah handle session)
-$page_title = 'Ujian Selesai';
+$page_title = 'Asesmen Selesai';
 include '../../includes/header.php';
 ?>
 
@@ -88,7 +88,7 @@ include '../../includes/header.php';
         <div class="col-md-8">
             <div class="card shadow-lg border-0 rounded-lg">
                 <div class="card-header bg-success text-white text-center py-4">
-                    <h2 class="mb-0"><i class="fas fa-check-circle me-2"></i> Ujian Selesai</h2>
+                    <h2 class="mb-0"><i class="fas fa-check-circle me-2"></i> Asesmen Selesai</h2>
                     <p class="mb-0 mt-2 text-white-50">Terima kasih telah mengerjakan ujian ini.</p>
                 </div>
                 <div class="card-body p-5">
@@ -101,7 +101,7 @@ include '../../includes/header.php';
                             </div>
                             <div>
                                 <h5 class="alert-heading fw-bold">PELANGGARAN TERDETEKSI!</h5>
-                                <p class="mb-0">Sistem mendeteksi Anda membuka tab/jendela lain atau keluar dari halaman ujian. Ujian otomatis dihentikan.</p>
+                                <p class="mb-0">Sistem mendeteksi Anda membuka tab/jendela lain atau keluar dari halaman asesmen. Asesmen otomatis dihentikan.</p>
                             </div>
                         </div>
                     </div>

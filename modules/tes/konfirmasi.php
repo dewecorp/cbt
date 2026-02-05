@@ -1,6 +1,6 @@
 <?php
 include '../../config/database.php';
-$page_title = 'Konfirmasi Ujian';
+$page_title = 'Konfirmasi Asesmen';
 include '../../includes/header.php';
 include '../../includes/sidebar.php';
 
@@ -74,7 +74,7 @@ if (isset($_POST['mulai'])) {
                 <div class="card-body">
                     <table class="table table-striped">
                         <tr>
-                            <td width="30%">Nama Ujian</td>
+                <td width="30%">Nama Asesmen</td>
                             <td width="5%">:</td>
                             <td class="fw-bold"><?php echo $ujian['nama_ujian']; ?></td>
                         </tr>

@@ -1,6 +1,6 @@
 <?php
 include '../../config/database.php';
-$page_title = 'Hasil Ujian';
+$page_title = 'Hasil Asesmen';
 include '../../includes/header.php';
 include '../../includes/sidebar.php';
 
@@ -73,7 +73,7 @@ if ($level == 'admin' || $level == 'guru') {
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Hasil Ujian</h1>
+        <h1 class="h2">Hasil Asesmen</h1>
     </div>
 
     <?php if ($level == 'admin' || $level == 'guru'): ?>
@@ -107,16 +107,16 @@ if ($level == 'admin' || $level == 'guru') {
                 <table class="table table-bordered table-striped" id="dataTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>No</th>
+                            <th class="text-center">No</th>
                             <?php if ($level != 'siswa'): ?>
-                            <th>Nama Siswa</th>
-                            <th>Kelas</th>
+                            <th class="text-center">Nama Siswa</th>
+                            <th class="text-center">Kelas</th>
                             <?php endif; ?>
-                            <th>Mata Pelajaran</th>
-                            <th>Nama Ujian</th>
-                            <th>Nilai</th>
-                            <th>Status</th>
-                            <th>Waktu Selesai</th>
+                            <th class="text-center">Mata Pelajaran</th>
+                            <th class="text-center">Nama Asesmen</th>
+                            <th class="text-center">Nilai</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Waktu Selesai</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -152,7 +152,7 @@ if ($level == 'admin' || $level == 'guru') {
                         else:
                         ?>
                         <tr>
-                            <td colspan="<?php echo ($level != 'siswa') ? '8' : '6'; ?>" class="text-center">Belum ada data hasil ujian.</td>
+                            <td colspan="<?php echo ($level != 'siswa') ? '8' : '6'; ?>" class="text-center">Belum ada data hasil asesmen.</td>
                         </tr>
                         <?php endif; ?>
                     </tbody>

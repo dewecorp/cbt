@@ -1,6 +1,6 @@
 <?php
 include '../../config/database.php';
-$page_title = 'Cetak Kartu Ujian';
+$page_title = 'Cetak Kartu Asesmen';
 include '../../includes/header.php';
 include '../../includes/sidebar.php';
 
@@ -42,7 +42,7 @@ while($k = mysqli_fetch_assoc($q_kelas)) {
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Cetak Kartu Ujian</h1>
+        <h1 class="h2">Cetak Kartu Asesmen</h1>
     </div>
 
     <div class="card shadow mb-4">
@@ -87,7 +87,7 @@ while($k = mysqli_fetch_assoc($q_kelas)) {
                             <th>Aksi</th>
                             <td>
                                 <a href="print_kartu.php?id_siswa=<?php echo $me['id_siswa']; ?>" target="_blank" class="btn btn-primary">
-                                    <i class="fas fa-print"></i> Cetak Kartu Ujian
+                                    <i class="fas fa-print"></i> Cetak Kartu Asesmen
                                 </a>
                             </td>
                         </tr>
@@ -109,9 +109,9 @@ while($k = mysqli_fetch_assoc($q_kelas)) {
                         <input type="hidden" name="id_kelas" value="<?php echo $single_class_id; ?>">
                         <?php endif; ?>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-auto d-flex align-items-end">
                         <?php if(isset($_GET['id_kelas'])): ?>
-                        <a href="print_kartu.php?id_kelas=<?php echo $_GET['id_kelas']; ?>" target="_blank" class="btn btn-success w-100">
+                        <a href="print_kartu.php?id_kelas=<?php echo $_GET['id_kelas']; ?>" target="_blank" class="btn btn-success">
                             <i class="fas fa-print"></i> Cetak Semua
                         </a>
                         <?php endif; ?>

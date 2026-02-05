@@ -128,6 +128,18 @@ body {
     margin-top: auto;
 }
 
+.table thead th {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Ensure DataTables headers are centered */
+.table-datatable thead th,
+table.dataTable thead th {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
 /* Overlay for mobile */
 #overlay {
     position: fixed;

@@ -1,6 +1,6 @@
 <?php
 include '../../config/database.php';
-$page_title = 'Jadwal Ujian';
+$page_title = 'Jadwal Asesmen';
 include '../../includes/header.php';
 include '../../includes/sidebar.php';
 
@@ -105,7 +105,7 @@ if ($_SESSION['level'] == 'guru') {
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Jadwal Ujian</h1>
+        <h1 class="h2">Jadwal Asesmen</h1>
         <?php if($_SESSION['level'] == 'guru'): ?>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
             <i class="fas fa-plus"></i> Tambah Jadwal
@@ -151,7 +151,7 @@ if ($_SESSION['level'] == 'guru') {
                     <thead class="bg-light">
                         <tr>
                             <th width="5%">No</th>
-                            <th>Nama Ujian</th>
+                            <th>Nama Asesmen</th>
                             <th>Bank Soal</th>
                             <th>Waktu</th>
                             <th>Mulai</th>
@@ -195,7 +195,7 @@ if ($_SESSION['level'] == 'guru') {
                                 </td>
                                 <?php if($_SESSION['level'] == 'guru'): ?>
                                 <td>
-                                    <a href="monitoring_ujian.php?id=<?php echo $row['id_ujian']; ?>" class="btn btn-info btn-sm text-white" title="Monitoring Ujian">
+                                    <a href="monitoring_ujian.php?id=<?php echo $row['id_ujian']; ?>" class="btn btn-info btn-sm text-white" title="Monitoring Asesmen">
                                         <i class="fas fa-desktop"></i>
                                     </a>
                                     <button type="button" class="btn btn-warning btn-sm text-white" 
@@ -229,7 +229,7 @@ if ($_SESSION['level'] == 'guru') {
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addModalLabel">Tambah Jadwal Ujian</h5>
+                <h5 class="modal-title" id="addModalLabel">Tambah Jadwal Asesmen</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST">
@@ -270,7 +270,7 @@ if ($_SESSION['level'] == 'guru') {
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="editModalLabel">Edit Jadwal Ujian</h5>
+                <h5 class="modal-title" id="editModalLabel">Edit Jadwal Asesmen</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST">

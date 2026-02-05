@@ -37,12 +37,17 @@ $sql_ujian = "SELECT u.id_ujian, u.nama_ujian, m.nama_mapel, k.nama_kelas
               JOIN mapel m ON b.id_mapel = m.id_mapel
               JOIN kelas k ON b.id_guru = k.id_kelas -- Assuming bank_soal linked to guru/kelas somehow, or simplify
               ORDER BY u.tgl_mulai DESC";
-// Simplified Ujian Query
-$sql_ujian = "SELECT u.id_ujian, b.kode_bank AS nama_ujian, m.nama_mapel 
+// Simplified Ujian Query filtered by class when provided
+$sql_ujian = "SELECT u.id_ujian, b.kode_bank AS nama_ujian, m.nama_mapel, u.tgl_mulai 
               FROM ujian u 
               JOIN bank_soal b ON u.id_bank_soal = b.id_bank_soal
-              JOIN mapel m ON b.id_mapel = m.id_mapel
-              ORDER BY u.tgl_mulai DESC";
+              JOIN mapel m ON b.id_mapel = m.id_mapel";
+if (!empty($id_kelas)) {
+    $sql_ujian .= " WHERE b.id_kelas = '$id_kelas' ";
+} else {
+    $sql_ujian .= " WHERE 1=0 ";
+}
+$sql_ujian .= " ORDER BY u.tgl_mulai DESC";
 $q_ujian = mysqli_query($koneksi, $sql_ujian);
 
 // Query Kelas List
@@ -78,20 +83,6 @@ if ($id_ujian && $id_kelas) {
         <div class="card-body">
             <form method="GET" action="" class="row g-3">
                 <div class="col-md-4">
-                    <label class="form-label">Pilih Asesmen</label>
-                    <select name="id_ujian" class="form-select" onchange="this.form.submit()" required>
-                        <option value="">-- Pilih Asesmen --</option>
-                        <?php 
-                        mysqli_data_seek($q_ujian, 0);
-                        while($u = mysqli_fetch_assoc($q_ujian)): 
-                        ?>
-                        <option value="<?php echo $u['id_ujian']; ?>" <?php echo ($id_ujian == $u['id_ujian']) ? 'selected' : ''; ?>>
-                            <?php echo $u['nama_mapel'] . ' - ' . $u['nama_ujian']; ?>
-                        </option>
-                        <?php endwhile; ?>
-                    </select>
-                </div>
-                <div class="col-md-4">
                     <label class="form-label">Pilih Kelas</label>
                     <select name="id_kelas" class="form-select" onchange="this.form.submit()" <?php echo ($single_class_id) ? 'disabled' : ''; ?> required>
                         <?php if(!$single_class_id): ?>
@@ -110,9 +101,74 @@ if ($id_ujian && $id_kelas) {
                     <input type="hidden" name="id_kelas" value="<?php echo $single_class_id; ?>">
                     <?php endif; ?>
                 </div>
+                <div class="col-md-4">
+                    <label class="form-label">Pilih Asesmen</label>
+                    <select name="id_ujian" class="form-select" onchange="this.form.submit()" required>
+                        <option value=""><?php echo (!empty($id_kelas)) ? '-- Pilih Asesmen --' : '-- Pilih Kelas dulu --'; ?></option>
+                        <?php 
+                        if (!empty($id_kelas)) {
+                            mysqli_data_seek($q_ujian, 0);
+                            while($u = mysqli_fetch_assoc($q_ujian)): 
+                        ?>
+                        <option value="<?php echo $u['id_ujian']; ?>" <?php echo ($id_ujian == $u['id_ujian']) ? 'selected' : ''; ?>>
+                            <?php echo $u['nama_mapel'] . ' - ' . $u['nama_ujian']; ?>
+                        </option>
+                        <?php 
+                            endwhile; 
+                        }
+                        ?>
+                    </select>
+                </div>
             </form>
         </div>
     </div>
+
+    <?php if ($id_kelas && empty($id_ujian)): ?>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Daftar Asesmen di Kelas Ini</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th class="text-center" width="5%">No</th>
+                            <th class="text-center">Mata Pelajaran</th>
+                            <th class="text-center">Nama Asesmen</th>
+                            <th class="text-center">Tanggal</th>
+                            <th class="text-center" width="20%">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        $no = 1;
+                        mysqli_data_seek($q_ujian, 0);
+                        while($u = mysqli_fetch_assoc($q_ujian)): ?>
+                        <tr>
+                            <td class="text-center"><?php echo $no++; ?></td>
+                            <td><?php echo $u['nama_mapel']; ?></td>
+                            <td><?php echo $u['nama_ujian']; ?></td>
+                            <td><?php echo isset($u['tgl_mulai']) ? date('d-m-Y', strtotime($u['tgl_mulai'])) : '-'; ?></td>
+                            <td class="text-center">
+                                <a href="?id_kelas=<?php echo $id_kelas; ?>&id_ujian=<?php echo $u['id_ujian']; ?>" class="btn btn-sm btn-primary">
+                                    Lihat Rekap
+                                </a>
+                                <a href="export_excel.php?id_ujian=<?php echo $u['id_ujian']; ?>&id_kelas=<?php echo $id_kelas; ?>" target="_blank" class="btn btn-sm btn-success">
+                                    Export Excel
+                                </a>
+                                <a href="export_pdf.php?id_ujian=<?php echo $u['id_ujian']; ?>&id_kelas=<?php echo $id_kelas; ?>" target="_blank" class="btn btn-sm btn-danger">
+                                    Export PDF
+                                </a>
+                            </td>
+                        </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <?php if ($id_ujian && $id_kelas): ?>
     <div class="card shadow mb-4">

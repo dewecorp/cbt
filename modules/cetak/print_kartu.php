@@ -20,7 +20,7 @@ $setting = mysqli_fetch_assoc($q_setting);
 if (!$setting) {
     $setting = [];
 }
-$page_title = 'Cetak Kartu Ujian';
+$page_title = 'Cetak Kartu Asesmen';
 if (isset($id_kelas)) {
     // We don't have nama_kelas directly in variable, but it's in the first row of q_siswa
     // However, fetching it moves the pointer. Let's just use generic or fetch one row then reset.
@@ -40,6 +40,7 @@ if (isset($id_kelas)) {
         body { 
             font-family: Arial, sans-serif; 
             -webkit-print-color-adjust: exact; 
+            print-color-adjust: exact;
             margin: 0;
             padding: 0;
         }
@@ -123,7 +124,7 @@ if (isset($id_kelas)) {
                 <img src="../../assets/img/<?php echo $setting['logo']; ?>">
             <?php endif; ?>
             <div class="header-text">
-                <h3>KARTU PESERTA UJIAN</h3>
+                <h3>KARTU PESERTA ASESMEN</h3>
                 <h4><?php echo isset($setting['nama_sekolah']) ? $setting['nama_sekolah'] : 'MI Sultan Fattah'; ?></h4>
                 <small>
                     <?php echo isset($setting['tahun_ajaran']) ? 'Th. '.$setting['tahun_ajaran'] : ''; ?>
@@ -176,7 +177,7 @@ if (isset($id_kelas)) {
                     NIP. <?php echo isset($setting['nip_kepala']) ? $setting['nip_kepala'] : '-'; ?>
                 </div>
                 <div class="sig-box">
-                    Panitia Ujian,<br>
+                    Panitia Asesmen,<br>
                     Ketua<br>
                     <br><br><br>
                     <u><strong><?php echo isset($setting['panitia_ujian']) ? $setting['panitia_ujian'] : '..................'; ?></strong></u>
