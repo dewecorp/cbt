@@ -15,7 +15,7 @@
             <?php if($school_logo): ?>
                 <img src="<?php echo $base_url; ?>assets/img/<?php echo $school_logo; ?>" alt="Logo" class="me-2 sidebar-school-logo">
             <?php endif; ?>
-            <span class="fs-4 fw-bold">Elearning</span>
+            <span class="fs-4 fw-bold">E-Learning</span>
         </a>
         <button class="btn btn-link text-white d-md-none" id="sidebarClose">
             <i class="fas fa-times fa-lg"></i>
@@ -57,7 +57,7 @@
                 <?php endif; ?>
 
                 <li class="nav-item mt-2">
-                    <span class="text-uppercase small text-white-50 ms-3">Elearning</span>
+                    <span class="text-uppercase small text-white-50 ms-3">E-Learning</span>
                 </li>
                 <li>
                     <a href="<?php echo $base_url; ?>modules/elearning/courses.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/courses.php') !== false) ? 'active' : ''; ?>">
