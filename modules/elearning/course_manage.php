@@ -128,26 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
     }
 }
 
-// Handle Attendance Submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_attendance'])) {
-    if ($level == 'siswa') {
-        $status = mysqli_real_escape_string($koneksi, $_POST['status']);
-        $keterangan = isset($_POST['keterangan']) ? mysqli_real_escape_string($koneksi, $_POST['keterangan']) : '';
-        $today = date('Y-m-d');
-        $time = date('H:i:s');
-        
-        // Check if already attended for this course
-        $check = mysqli_query($koneksi, "SELECT id_absensi FROM absensi WHERE id_siswa='$uid' AND id_course='$course_id' AND tanggal='$today'");
-        if (mysqli_num_rows($check) == 0) {
-            $id_kelas_val = $course['id_kelas'];
-            $insert = mysqli_query($koneksi, "INSERT INTO absensi (id_siswa, id_kelas, id_course, tanggal, jam_masuk, status, keterangan) VALUES ('$uid', '$id_kelas_val', '$course_id', '$today', '$time', '$status', '$keterangan')");
-            if ($insert) {
-                 header("Location: course_manage.php?course_id=".$course_id."&tab=kehadiran&status=saved");
-                 exit;
-            }
-        }
-    }
-}
+// Handle Attendance Submission - REMOVED (Moved to Dashboard)
 
 if (!function_exists('get_indo_day')) {
     function get_indo_day($day_en) {
@@ -696,7 +677,79 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
             </div>
         </div>
 
-        <!-- Kehadiran Tab Content Removed -->
+        <!-- KEHADIRAN TAB -->
+        <div class="tab-pane fade <?php echo $active_tab == 'kehadiran' ? 'show active' : ''; ?>" id="kehadiran" role="tabpanel">
+            
+            <!-- Riwayat Kehadiran -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Riwayat Kehadiran Kelas Ini</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Absensi dilakukan melalui halaman Dashboard Utama sesuai jadwal pelajaran.
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Tanggal</th>
+                                    <th>Nama Siswa</th>
+                                    <th>Waktu</th>
+                                    <th>Status</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                if ($level == 'siswa') {
+                                    // Show ONLY attendance for THIS course (linked via Schedule)
+                                    $q_absen = mysqli_query($koneksi, "SELECT a.*, s.nama_siswa FROM absensi a JOIN siswa s ON a.id_siswa=s.id_siswa WHERE a.id_siswa='$uid' AND a.id_course='$course_id' ORDER BY a.tanggal DESC");
+                                } else {
+                                    // Guru sees all students in this class for THIS course
+                                    $q_absen = mysqli_query($koneksi, "
+                                        SELECT a.*, s.nama_siswa 
+                                        FROM absensi a 
+                                        JOIN course_students cs ON a.id_siswa = cs.siswa_id
+                                        JOIN siswa s ON a.id_siswa=s.id_siswa 
+                                        WHERE cs.course_id='$course_id' AND a.id_course='$course_id'
+                                        ORDER BY a.tanggal DESC, a.jam_masuk ASC
+                                    ");
+                                }
+                                
+                                if (mysqli_num_rows($q_absen) > 0) {
+                                    $no = 1;
+                                    while($row = mysqli_fetch_assoc($q_absen)):
+                                    ?>
+                                    <tr>
+                                        <td><?php echo $no++; ?></td>
+                                        <td><?php echo date('d-m-Y', strtotime($row['tanggal'])); ?></td>
+                                        <td><?php echo htmlspecialchars($row['nama_siswa']); ?></td>
+                                        <td><?php echo date('H:i', strtotime($row['jam_masuk'])); ?></td>
+                                        <td>
+                                            <?php 
+                                            $badge = 'secondary';
+                                            if ($row['status'] == 'Hadir') $badge = 'success';
+                                            if ($row['status'] == 'Sakit') $badge = 'warning';
+                                            if ($row['status'] == 'Izin') $badge = 'info';
+                                            if ($row['status'] == 'Alpha') $badge = 'danger';
+                                            ?>
+                                            <span class="badge bg-<?php echo $badge; ?>"><?php echo $row['status']; ?></span>
+                                        </td>
+                                        <td><?php echo htmlspecialchars($row['keterangan']); ?></td>
+                                    </tr>
+                                    <?php endwhile; 
+                                } else {
+                                    echo '<tr><td colspan="6" class="text-center">Belum ada data kehadiran.</td></tr>';
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
 </div>

@@ -187,7 +187,7 @@ if($level === 'guru') {
 if($level === 'siswa') {
     $id_kelas = $_SESSION['id_kelas'];
     
-    // Logic Absensi Siswa (Dashboard - General Attendance)
+    // Logic Absensi Siswa (Dashboard - General Attendance + Scheduled Courses)
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_attendance_dash'])) {
         $status = mysqli_real_escape_string($koneksi, $_POST['status']);
         $keterangan = isset($_POST['keterangan']) ? mysqli_real_escape_string($koneksi, $_POST['keterangan']) : '';
@@ -195,25 +195,49 @@ if($level === 'siswa') {
         $time = date('H:i:s');
         $uid = $_SESSION['user_id'];
         
-        // Check if already attended today (general attendance has id_course = 0 or NULL)
-        // We use id_course = 0 for dashboard/school attendance
+        // 1. Insert General Attendance (id_course = 0)
         $check = mysqli_query($koneksi, "SELECT id_absensi FROM absensi WHERE id_siswa='$uid' AND (id_course='0' OR id_course IS NULL) AND tanggal='$today'");
         if (mysqli_num_rows($check) == 0) {
-            $insert = mysqli_query($koneksi, "INSERT INTO absensi (id_siswa, id_kelas, id_course, tanggal, jam_masuk, status, keterangan) VALUES ('$uid', '$id_kelas', '0', '$today', '$time', '$status', '$keterangan')");
-            if ($insert) {
-                 echo "<script>
-                    Swal.fire({
-                        title: 'Berhasil!',
-                        text: 'Absensi harian berhasil disimpan.',
-                        icon: 'success',
-                        timer: 2000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        window.location.href = 'dashboard.php';
-                    });
-                 </script>";
+            mysqli_query($koneksi, "INSERT INTO absensi (id_siswa, id_kelas, id_course, tanggal, jam_masuk, status, keterangan) VALUES ('$uid', '$id_kelas', '0', '$today', '$time', '$status', '$keterangan')");
+        }
+        
+        // 2. Insert Course-Specific Attendance based on Schedule
+        $hari_indo = get_indo_day(date('l')); // Using existing function
+        
+        $q_jadwal = mysqli_query($koneksi, "SELECT mapel_ids FROM jadwal_pelajaran WHERE id_kelas='$id_kelas' AND hari='$hari_indo'");
+        if (mysqli_num_rows($q_jadwal) > 0) {
+            $row_jadwal = mysqli_fetch_assoc($q_jadwal);
+            if (!empty($row_jadwal['mapel_ids'])) {
+                $mapel_ids = explode(',', $row_jadwal['mapel_ids']);
+                foreach ($mapel_ids as $mid) {
+                    $mid = trim($mid);
+                    if (empty($mid)) continue;
+                    
+                    // Find course for this mapel & class
+                    $q_course = mysqli_query($koneksi, "SELECT id_course FROM courses WHERE id_kelas='$id_kelas' AND id_mapel='$mid'");
+                    if ($r_course = mysqli_fetch_assoc($q_course)) {
+                        $cid = $r_course['id_course'];
+                        // Check duplication
+                        $check_c = mysqli_query($koneksi, "SELECT id_absensi FROM absensi WHERE id_siswa='$uid' AND id_course='$cid' AND tanggal='$today'");
+                        if (mysqli_num_rows($check_c) == 0) {
+                             mysqli_query($koneksi, "INSERT INTO absensi (id_siswa, id_kelas, id_course, tanggal, jam_masuk, status, keterangan) VALUES ('$uid', '$id_kelas', '$cid', '$today', '$time', '$status', '$keterangan')");
+                        }
+                    }
+                }
             }
         }
+
+        echo "<script>
+            Swal.fire({
+                title: 'Berhasil!',
+                text: 'Absensi harian berhasil disimpan.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = 'dashboard.php';
+            });
+         </script>";
     }
 
     $ujian_aktif = mysqli_query($koneksi, "
@@ -644,9 +668,22 @@ if($level === 'siswa') {
         $attendance_today_dash = null;
         $today = date('Y-m-d');
         $uid = $_SESSION['user_id'];
+        
+        // 1. Check Attendance Record
         $qa_dash = mysqli_query($koneksi, "SELECT * FROM absensi WHERE id_siswa='$uid' AND (id_course='0' OR id_course IS NULL) AND tanggal='$today'");
         if ($qa_dash && mysqli_num_rows($qa_dash) > 0) {
             $attendance_today_dash = mysqli_fetch_assoc($qa_dash);
+        }
+
+        // 2. Check Schedule / Holiday
+        $hari_ini_indo = get_indo_day($today);
+        $has_schedule = false;
+        $q_cek_jadwal = mysqli_query($koneksi, "SELECT mapel_ids FROM jadwal_pelajaran WHERE id_kelas='$id_kelas' AND hari='$hari_ini_indo'");
+        if ($q_cek_jadwal && mysqli_num_rows($q_cek_jadwal) > 0) {
+            $row_jadwal_cek = mysqli_fetch_assoc($q_cek_jadwal);
+            if (!empty($row_jadwal_cek['mapel_ids'])) {
+                $has_schedule = true;
+            }
         }
         ?>
         <div class="col-12 mb-4">
@@ -657,7 +694,19 @@ if($level === 'siswa') {
                 <div class="card-body text-center">
                     <p class="mb-4"><?php echo get_indo_day($today) . ', ' . date('d F Y'); ?></p>
                     
-                    <?php if ($attendance_today_dash): ?>
+                    <?php if (!$has_schedule): ?>
+                        <div class="alert alert-info">
+                            <i class="fas fa-calendar-times fa-2x mb-3"></i><br>
+                            <strong>Hari Libur / Tidak Ada Jadwal Pelajaran</strong><br>
+                            Tidak perlu melakukan absensi hari ini.
+                        </div>
+                        <div class="d-grid gap-2 d-md-block opacity-50" style="pointer-events: none;">
+                             <button class="btn btn-secondary btn-lg px-5 mx-2 mb-2" disabled><i class="fas fa-check-circle me-2"></i> HADIR</button>
+                             <button class="btn btn-secondary btn-lg px-5 mx-2 mb-2" disabled><i class="fas fa-procedures me-2"></i> SAKIT</button>
+                             <button class="btn btn-secondary btn-lg px-5 mx-2 mb-2" disabled><i class="fas fa-envelope-open-text me-2"></i> IZIN</button>
+                        </div>
+
+                    <?php elseif ($attendance_today_dash): ?>
                         <div class="alert alert-success">
                             Anda sudah melakukan absensi harian.<br>
                             <strong>Status: <?php echo $attendance_today_dash['status']; ?></strong>
