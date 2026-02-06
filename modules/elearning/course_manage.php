@@ -620,7 +620,11 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                              <button class="btn btn-secondary btn-sm" onclick="showDetail(<?php echo htmlspecialchars(json_encode($asg), ENT_QUOTES, 'UTF-8'); ?>)">Detail</button>
                                              <div>
                                                 <?php if($level === 'guru'): ?>
-                                                    <a href="submissions.php?assignment_id=<?php echo $asg['id_assignment']; ?>" class="btn btn-info btn-sm">Lihat Pengumpulan</a>
+                                                    <?php if($asg['jenis_tugas'] == 'CBT'): ?>
+                                                        <a href="../tes/hasil_ujian.php?id_kelas=<?php echo $course['id_kelas']; ?>" class="btn btn-info btn-sm">Lihat Hasil Asesmen</a>
+                                                    <?php else: ?>
+                                                        <a href="submissions.php?assignment_id=<?php echo $asg['id_assignment']; ?>" class="btn btn-info btn-sm">Lihat Pengumpulan</a>
+                                                    <?php endif; ?>
                                                 <?php else: ?>
                                                     <a href="student_assignments.php?id=<?php echo $asg['id_assignment']; ?>" class="btn btn-success btn-sm">Kerjakan</a>
                                                 <?php endif; ?>
@@ -811,6 +815,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
       </div>
       <div class="modal-body">
         <h5 id="detailJudulText" class="mb-3"></h5>
+        <p><strong>Jenis Tugas:</strong> <span id="detailJenis"></span></p>
         <p><strong>Tenggat:</strong> <span id="detailDeadline"></span></p>
         <p><strong>Deskripsi:</strong></p>
         <div id="detailDeskripsi" class="bg-light p-3 rounded" style="white-space: pre-wrap;"></div>
@@ -828,6 +833,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
 <script>
 function showDetail(data) {
     document.getElementById('detailJudulText').innerText = data.judul;
+    document.getElementById('detailJenis').innerText = data.jenis_tugas;
     document.getElementById('detailDeadline').innerText = new Date(data.deadline).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' });
     document.getElementById('detailDeskripsi').innerText = data.deskripsi;
     var myModal = new bootstrap.Modal(document.getElementById('modalDetailAssignment'));
