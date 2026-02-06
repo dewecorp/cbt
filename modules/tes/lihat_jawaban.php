@@ -120,11 +120,20 @@ $q_soal = mysqli_query($koneksi, $query_soal);
                     sort($j_arr);
                     if($k_arr == $j_arr) $skor_soal = 1;
                 } elseif ($s['jenis'] == 'isian_singkat' || $s['jenis'] == 'essay') {
-                    if($j != '' && $j == $k) {
+                    // Normalisasi teks
+                    $clean_j = strtolower(trim($j));
+                    $clean_j = preg_replace('/[^\w\s]/', '', $clean_j);
+                    $clean_j = preg_replace('/\s+/', ' ', $clean_j);
+
+                    $clean_k = strtolower(trim($k));
+                    $clean_k = preg_replace('/[^\w\s]/', '', $clean_k);
+                    $clean_k = preg_replace('/\s+/', ' ', $clean_k);
+
+                    if($j != '' && $clean_j == $clean_k) {
                         $skor_soal = 1;
                     } elseif ($j != '') {
                          $percent = 0;
-                         similar_text($j, $k, $percent);
+                         similar_text($clean_j, $clean_k, $percent);
                          if($percent >= 50) $skor_soal = 0.5;
                     }
                 } elseif ($s['jenis'] == 'menjodohkan') {

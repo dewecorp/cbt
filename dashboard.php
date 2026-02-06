@@ -122,6 +122,62 @@ function get_indo_day($date) {
 
 // Data untuk guru
 if($level === 'guru') {
+    // Handle Photo Upload
+    if (isset($_POST['upload_foto_guru'])) {
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+        $max_size = 2 * 1024 * 1024; // 2MB
+        
+        if (isset($_FILES['foto_profil']) && $_FILES['foto_profil']['error'] === 0) {
+            $file_type = $_FILES['foto_profil']['type'];
+            $file_size = $_FILES['foto_profil']['size'];
+            
+            if (!in_array($file_type, $allowed_types)) {
+                echo "<script>Swal.fire('Gagal', 'Format file harus JPG, PNG, atau GIF', 'error');</script>";
+            } elseif ($file_size > $max_size) {
+                echo "<script>Swal.fire('Gagal', 'Ukuran file maksimal 2MB', 'error');</script>";
+            } else {
+                $ext = pathinfo($_FILES['foto_profil']['name'], PATHINFO_EXTENSION);
+                $new_name = $_SESSION['user_id'] . '_' . time() . '.' . $ext;
+                $target_dir = "assets/img/guru/";
+                
+                // Create dir if not exists
+                if (!file_exists($target_dir)) {
+                    mkdir($target_dir, 0777, true);
+                }
+                
+                $target_file = $target_dir . $new_name;
+                
+                // Delete old photo
+                $old_photo = isset($_SESSION['foto']) ? $_SESSION['foto'] : '';
+                if (!empty($old_photo) && file_exists($target_dir . $old_photo) && $old_photo != 'default.png') {
+                    unlink($target_dir . $old_photo);
+                }
+                
+                if (move_uploaded_file($_FILES['foto_profil']['tmp_name'], $target_file)) {
+                    // Update DB
+                    $uid = $_SESSION['user_id'];
+                    mysqli_query($koneksi, "UPDATE users SET foto='$new_name' WHERE id_user='$uid'");
+                    
+                    // Update Session
+                    $_SESSION['foto'] = $new_name;
+                    
+                    echo "<script>
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: 'Foto profil berhasil diperbarui.',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = 'dashboard.php';
+                        });
+                    </script>";
+                } else {
+                    echo "<script>Swal.fire('Gagal', 'Gagal mengupload file', 'error');</script>";
+                }
+            }
+        }
+    }
     $id_guru = $_SESSION['user_id'];
     $q_bank_guru = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM bank_soal WHERE id_guru='$id_guru'");
     $jml_bank_soal_guru = mysqli_fetch_assoc($q_bank_guru)['count'];
@@ -466,6 +522,7 @@ if($level === 'siswa') {
             </div>
         </div>
     </div>
+    
     <?php endif; ?>
 
     <?php if($level === 'guru'): ?>
@@ -474,7 +531,25 @@ if($level === 'siswa') {
             <div class="card shadow border-left-primary py-2">
                 <div class="card-body">
                     <div class="row align-items-center">
-                        <div class="col mr-2">
+                        <div class="col-auto pr-3">
+                            <div class="position-relative" style="width: 80px; height: 80px;">
+                                <?php 
+                                $foto_path = 'assets/img/guru/' . ($_SESSION['foto'] ?? 'default.png');
+                                if (empty($_SESSION['foto']) || !file_exists($foto_path)) {
+                                    // Fallback UI if no photo
+                                    echo '<div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white font-weight-bold" style="width: 80px; height: 80px; font-size: 32px;">' . strtoupper(substr($_SESSION['nama'], 0, 1)) . '</div>';
+                                } else {
+                                    echo '<img src="' . $foto_path . '?' . time() . '" class="rounded-circle border border-white shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">';
+                                }
+                                ?>
+                                <button type="button" class="btn btn-sm btn-light rounded-circle shadow-sm position-absolute" 
+                                        style="bottom: 0; right: 0; width: 30px; height: 30px; padding: 0; border: 1px solid #e3e6f0;"
+                                        data-bs-toggle="modal" data-bs-target="#modalEditFotoGuru">
+                                    <i class="fas fa-camera text-primary"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col">
                             <div class="h5 font-weight-bold text-primary text-uppercase mb-1">Selamat Datang, <?php echo $_SESSION['nama']; ?></div>
                             <p class="mb-0">Selamat datang di halaman Dashboard Guru. Anda dapat mengelola Bank Soal dan Jadwal Asesmen.</p>
                         </div>
@@ -621,6 +696,45 @@ if($level === 'siswa') {
             </div>
         </div>
     </div>
+    <!-- Modal Edit Foto Guru -->
+    <div class="modal fade" id="modalEditFotoGuru" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Perbarui Foto Profil</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" enctype="multipart/form-data">
+                    <div class="modal-body text-center">
+                        <div class="mb-3">
+                            <img id="previewFoto" src="<?php echo !empty($_SESSION['foto']) && file_exists('assets/img/guru/'.$_SESSION['foto']) ? 'assets/img/guru/'.$_SESSION['foto'] : 'https://ui-avatars.com/api/?name='.urlencode($_SESSION['nama']).'&size=150&background=random'; ?>" 
+                                 class="img-thumbnail rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                            <p class="text-muted small">Format: JPG, PNG, GIF. Maks: 2MB.</p>
+                        </div>
+                        <div class="mb-3">
+                            <input class="form-control" type="file" name="foto_profil" accept="image/*" onchange="previewImage(this)">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" name="upload_foto_guru" class="btn btn-primary">Simpan Foto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewFoto').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    </script>
     <?php endif; ?>
 
     <?php if($level === 'siswa'): ?>

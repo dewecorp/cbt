@@ -42,6 +42,23 @@ if(isset($_POST['tambah_waktu_submit'])) {
     }
 }
 
+// Handle Reset Status (Izin Lanjut Ujian)
+if(isset($_POST['reset_status_submit'])) {
+    $id_ujian_siswa = $_POST['id_ujian_siswa'];
+    // Reset status to sedang_mengerjakan, clear waktu_selesai
+    // We don't necessarily need to clear nilai, but it's good practice as it's not final anymore.
+    mysqli_query($koneksi, "UPDATE ujian_siswa SET status='sedang_mengerjakan', waktu_selesai=NULL, nilai=0 WHERE id_ujian_siswa='$id_ujian_siswa'");
+    echo "<script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil',
+            text: 'Status ujian berhasil direset. Siswa dapat melanjutkan mengerjakan.',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    </script>";
+}
+
 // Handle Reset Login / Status (Optional, good for monitoring)
 if(isset($_POST['reset_login'])) {
     $id_ujian_siswa = $_POST['id_ujian_siswa'];
@@ -143,6 +160,15 @@ $q_siswa = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_kelas='$id_kelas
                                 <a href="lihat_jawaban.php?id=<?php echo $us['id_ujian_siswa']; ?>" class="btn btn-info btn-sm text-white" title="Lihat Jawaban">
                                     <i class="fas fa-eye"></i>
                                 </a>
+                                <button type="button" class="btn btn-warning btn-sm text-dark" 
+                                    title="Izinkan Lanjut / Reset Pelanggaran"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#resetStatusModal"
+                                    data-id="<?php echo $us['id_ujian_siswa']; ?>"
+                                    data-nama="<?php echo $s['nama_siswa']; ?>"
+                                >
+                                    <i class="fas fa-unlock-alt"></i>
+                                </button>
                                 <?php endif; ?>
 
                                 <?php if($can_add_time): ?>
@@ -191,19 +217,61 @@ $q_siswa = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_kelas='$id_kelas
     </div>
 </div>
 
+<!-- Reset Status Modal -->
+<div class="modal fade" id="resetStatusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Izinkan Lanjut Ujian</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST">
+                <input type="hidden" name="id_ujian_siswa" id="reset_id_ujian_siswa">
+                <div class="modal-body">
+                    <p>Apakah Anda yakin ingin mengizinkan siswa <strong id="reset_nama_siswa"></strong> untuk melanjutkan ujian?</p>
+                    <div class="alert alert-warning">
+                        <small><i class="fas fa-exclamation-triangle"></i> Tindakan ini akan mengubah status ujian dari "Selesai" menjadi "Sedang Mengerjakan". Siswa dapat login kembali dan melanjutkan pengerjaan.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" name="reset_status_submit" class="btn btn-warning">Ya, Izinkan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     var addTimeModal = document.getElementById('addTimeModal');
-    addTimeModal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget;
-        var id = button.getAttribute('data-id');
-        var nama = button.getAttribute('data-nama');
-        
-        var inputId = addTimeModal.querySelector('#time_id_ujian_siswa');
-        var textNama = addTimeModal.querySelector('#time_nama_siswa');
-        
-        inputId.value = id;
-        textNama.textContent = nama;
-    });
+    if (addTimeModal) {
+        addTimeModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var id = button.getAttribute('data-id');
+            var nama = button.getAttribute('data-nama');
+            
+            var inputId = addTimeModal.querySelector('#time_id_ujian_siswa');
+            var textNama = addTimeModal.querySelector('#time_nama_siswa');
+            
+            inputId.value = id;
+            textNama.textContent = nama;
+        });
+    }
+
+    var resetStatusModal = document.getElementById('resetStatusModal');
+    if (resetStatusModal) {
+        resetStatusModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var id = button.getAttribute('data-id');
+            var nama = button.getAttribute('data-nama');
+            
+            var inputId = resetStatusModal.querySelector('#reset_id_ujian_siswa');
+            var textNama = resetStatusModal.querySelector('#reset_nama_siswa');
+            
+            inputId.value = id;
+            textNama.textContent = nama;
+        });
+    }
 </script>
 
 <?php include '../../includes/footer.php'; ?>

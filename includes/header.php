@@ -54,6 +54,8 @@ if (isset($_SESSION['user_id']) && isset($koneksi)) {
                 $_SESSION['level'] = $d_check_u['level'];
             }
             if (!isset($_SESSION['nama'])) $_SESSION['nama'] = $d_check_u['nama_lengkap'];
+            // Update foto session
+            $_SESSION['foto'] = isset($d_check_u['foto']) ? $d_check_u['foto'] : null;
         } else {
             // Tidak ketemu di users? Cek siswa
             $q_check_s = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_siswa='$uid_check'");

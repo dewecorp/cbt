@@ -58,8 +58,32 @@ if (isset($koneksi)) {
 
             <ul class="navbar-nav mb-2 mb-lg-0">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user-circle me-1"></i> <?php echo isset($_SESSION['nama']) ? $_SESSION['nama'] : 'User'; ?>
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <?php 
+                         $u_foto = isset($_SESSION['foto']) ? $_SESSION['foto'] : '';
+                         $u_nama = isset($_SESSION['nama']) ? $_SESSION['nama'] : 'User';
+                         $u_level = isset($_SESSION['level']) ? $_SESSION['level'] : '';
+                         
+                         $root_path = dirname(__DIR__);
+                         $foto_path_web = '';
+                         
+                         if ($u_level == 'guru') {
+                             $foto_file = $root_path . '/assets/img/guru/' . $u_foto;
+                             $foto_path_web = 'assets/img/guru/' . $u_foto;
+                         } else {
+                             // Admin or others (default to users upload)
+                             $foto_file = $root_path . '/assets/uploads/users/' . $u_foto;
+                             $foto_path_web = 'assets/uploads/users/' . $u_foto;
+                         }
+                         
+                         if (!empty($u_foto) && file_exists($foto_file)) {
+                             echo '<img src="'.$base_url.$foto_path_web.'" alt="User" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">';
+                         } else {
+                             $initial = strtoupper(substr($u_nama, 0, 1));
+                             echo '<div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center me-2 fw-bold" style="width: 32px; height: 32px;">'.$initial.'</div>';
+                         }
+                         ?>
+                        <span class="d-none d-lg-inline"><?php echo $u_nama; ?></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                         <li><a class="dropdown-item" href="<?php echo $base_url; ?>logout.php"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>

@@ -9,6 +9,37 @@ if ($_SESSION['level'] != 'admin') {
     exit;
 }
 
+// Check if 'foto' column exists
+$check_col = mysqli_query($koneksi, "SHOW COLUMNS FROM users LIKE 'foto'");
+if (mysqli_num_rows($check_col) == 0) {
+    mysqli_query($koneksi, "ALTER TABLE users ADD COLUMN foto VARCHAR(255) NULL AFTER level");
+}
+?>
+<style>
+    .avatar-initial {
+        width: 40px;
+        height: 40px;
+        background-color: #0d6efd;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+        margin: 0 auto;
+    }
+    .user-photo-thumb {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 50%;
+        margin: 0 auto;
+        display: block;
+    }
+</style>
+<?php
+
 // Handle Tambah User
 if (isset($_POST['tambah_user'])) {
     $nama = mysqli_real_escape_string($koneksi, $_POST['nama']);
@@ -16,12 +47,31 @@ if (isset($_POST['tambah_user'])) {
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $level = $_POST['level'];
     
+    // Upload Foto
+    $foto = null;
+    if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
+        $target_dir = "../../assets/uploads/users/";
+        if (!file_exists($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+        
+        $file_ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+        $allowed_ext = ['jpg', 'jpeg', 'png', 'gif'];
+        
+        if (in_array($file_ext, $allowed_ext)) {
+            $new_name = time() . '_' . rand(1000, 9999) . '.' . $file_ext;
+            if (move_uploaded_file($_FILES['foto']['tmp_name'], $target_dir . $new_name)) {
+                $foto = $new_name;
+            }
+        }
+    }
+    
     // Cek username
     $cek = mysqli_query($koneksi, "SELECT * FROM users WHERE username='$username'");
     if (mysqli_num_rows($cek) > 0) {
         echo "<script>Swal.fire('Error', 'Username sudah digunakan!', 'error');</script>";
     } else {
-        $query = "INSERT INTO users (nama_lengkap, username, password, level, status) VALUES ('$nama', '$username', '$password', '$level', 'aktif')";
+        $query = "INSERT INTO users (nama_lengkap, username, password, level, status, foto) VALUES ('$nama', '$username', '$password', '$level', 'aktif', '$foto')";
         if (mysqli_query($koneksi, $query)) {
             echo "<script>Swal.fire('Berhasil', 'User berhasil ditambahkan', 'success').then(() => { window.location='index.php'; });</script>";
         } else {
@@ -44,7 +94,33 @@ if (isset($_POST['edit_user'])) {
         $pass_query = ", password='$password'";
     }
     
-    $query = "UPDATE users SET nama_lengkap='$nama', username='$username', level='$level', status='$status' $pass_query WHERE id_user='$id'";
+    // Handle Foto
+    $foto_query = "";
+    if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
+        $target_dir = "../../assets/uploads/users/";
+        if (!file_exists($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+        
+        $file_ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+        $allowed_ext = ['jpg', 'jpeg', 'png', 'gif'];
+        
+        if (in_array($file_ext, $allowed_ext)) {
+            // Hapus foto lama
+            $q_old = mysqli_query($koneksi, "SELECT foto FROM users WHERE id_user='$id'");
+            $d_old = mysqli_fetch_assoc($q_old);
+            if ($d_old['foto'] && file_exists($target_dir . $d_old['foto'])) {
+                unlink($target_dir . $d_old['foto']);
+            }
+            
+            $new_name = time() . '_' . rand(1000, 9999) . '.' . $file_ext;
+            if (move_uploaded_file($_FILES['foto']['tmp_name'], $target_dir . $new_name)) {
+                $foto_query = ", foto='$new_name'";
+            }
+        }
+    }
+    
+    $query = "UPDATE users SET nama_lengkap='$nama', username='$username', level='$level', status='$status' $pass_query $foto_query WHERE id_user='$id'";
     
     if (mysqli_query($koneksi, $query)) {
         echo "<script>Swal.fire('Berhasil', 'Data user berhasil diupdate', 'success').then(() => { window.location='index.php'; });</script>";
@@ -81,6 +157,7 @@ if (isset($_GET['hapus'])) {
                     <thead>
                         <tr>
                             <th>No</th>
+                            <th>Foto</th>
                             <th>Nama Lengkap</th>
                             <th>Username</th>
                             <th>Level</th>
@@ -96,6 +173,13 @@ if (isset($_GET['hapus'])) {
                         ?>
                         <tr>
                             <td><?php echo $no++; ?></td>
+                            <td class="text-center">
+                                <?php if (!empty($row['foto']) && file_exists("../../assets/uploads/users/" . $row['foto'])): ?>
+                                    <img src="../../assets/uploads/users/<?php echo $row['foto']; ?>" class="user-photo-thumb" alt="Foto">
+                                <?php else: ?>
+                                    <div class="avatar-initial"><?php echo strtoupper(substr($row['nama_lengkap'], 0, 1)); ?></div>
+                                <?php endif; ?>
+                            </td>
                             <td><?php echo $row['nama_lengkap']; ?></td>
                             <td><?php echo $row['username']; ?></td>
                             <td>
@@ -128,9 +212,20 @@ if (isset($_GET['hapus'])) {
                                         <h5 class="modal-title">Edit User</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
-                                    <form method="POST">
+                                    <form method="POST" enctype="multipart/form-data">
                                         <div class="modal-body">
                                             <input type="hidden" name="id_user" value="<?php echo $row['id_user']; ?>">
+                                            <div class="mb-3 text-center">
+                                                <?php if (!empty($row['foto']) && file_exists("../../assets/uploads/users/" . $row['foto'])): ?>
+                                                    <img src="../../assets/uploads/users/<?php echo $row['foto']; ?>" class="user-photo-thumb mb-2" style="width: 80px; height: 80px;" alt="Foto Saat Ini">
+                                                    <div class="small text-muted">Foto Saat Ini</div>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Ganti Foto</label>
+                                                <input type="file" class="form-control" name="foto" accept=".jpg,.jpeg,.png,.gif">
+                                                <small class="text-muted">Biarkan kosong jika tidak ingin mengubah foto</small>
+                                            </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Nama Lengkap</label>
                                                 <input type="text" class="form-control" name="nama" value="<?php echo $row['nama_lengkap']; ?>" required>
@@ -179,8 +274,13 @@ if (isset($_GET['hapus'])) {
                 <h5 class="modal-title">Tambah User</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Foto Profil</label>
+                        <input type="file" class="form-control" name="foto" accept=".jpg,.jpeg,.png,.gif">
+                        <small class="text-muted">Format: JPG, JPEG, PNG, GIF. Maks: 2MB</small>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Nama Lengkap</label>
                         <input type="text" class="form-control" name="nama" required>

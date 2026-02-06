@@ -4,6 +4,7 @@ $page_title = 'Buat Soal';
 include '../../includes/header.php';
 include '../../includes/sidebar.php';
 require '../../vendor/autoload.php';
+require_once 'import_word_helper.php';
 use Shuchkin\SimpleXLSX;
 
 $id_bank = $_GET['id'];
@@ -71,6 +72,66 @@ if (isset($_POST['import_soal'])) {
         }
     } else {
         echo "<script>Swal.fire('Error', 'Silahkan pilih file terlebih dahulu', 'error');</script>";
+    }
+}
+
+// Handle Import Soal Word
+if (isset($_POST['import_soal_word'])) {
+    if (isset($_FILES['file_word']) && $_FILES['file_word']['error'] == 0) {
+        $questions = parseQuestionsFromDocx($_FILES['file_word']['tmp_name']);
+        
+        if ($questions !== false && !empty($questions)) {
+            $count = 0;
+            foreach ($questions as $q) {
+                $jenis = $q['jenis'];
+                $pertanyaan = mysqli_real_escape_string($koneksi, $q['pertanyaan']);
+                $opsi_a = mysqli_real_escape_string($koneksi, $q['opsi_a']);
+                $opsi_b = mysqli_real_escape_string($koneksi, $q['opsi_b']);
+                $opsi_c = mysqli_real_escape_string($koneksi, $q['opsi_c']);
+                $opsi_d = mysqli_real_escape_string($koneksi, $q['opsi_d']);
+                $opsi_e = mysqli_real_escape_string($koneksi, $q['opsi_e']);
+                $kunci = mysqli_real_escape_string($koneksi, $q['kunci']);
+                
+                // Handle Menjodohkan specific format
+                if ($jenis == 'menjodohkan') {
+                    $kiri = isset($q['kiri']) ? $q['kiri'] : [];
+                    $kanan = isset($q['kanan']) ? $q['kanan'] : [];
+                    $opsi_a = mysqli_real_escape_string($koneksi, json_encode($kiri));
+                    $opsi_b = mysqli_real_escape_string($koneksi, json_encode($kanan));
+                    
+                    // Auto-generate key 0:0, 1:1, etc.
+                    $pairs = [];
+                    for($i=0; $i<count($kiri); $i++) {
+                        $pairs[] = "$i:$i"; 
+                    }
+                    $kunci = implode(",", $pairs);
+                }
+                
+                if (empty($pertanyaan)) continue;
+                
+                $query = "INSERT INTO soal (id_bank_soal, jenis, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, opsi_e, kunci_jawaban) 
+                          VALUES ('$id_bank', '$jenis', '$pertanyaan', '$opsi_a', '$opsi_b', '$opsi_c', '$opsi_d', '$opsi_e', '$kunci')";
+                
+                if(mysqli_query($koneksi, $query)) {
+                    $count++;
+                }
+            }
+            echo "<script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Import Word Berhasil',
+                    text: '$count soal berhasil diimpor dari Word!',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = 'buat_soal.php?id=$id_bank';
+                });
+            </script>";
+        } else {
+             echo "<script>Swal.fire('Error', 'Gagal membaca file Word atau format tidak sesuai. Pastikan menggunakan format yang benar.', 'error');</script>";
+        }
+    } else {
+        echo "<script>Swal.fire('Error', 'Silahkan pilih file Word (.docx) terlebih dahulu', 'error');</script>";
     }
 }
 
@@ -293,7 +354,10 @@ if (isset($_GET['edit_soal'])) {
         </div>
         <div>
             <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">
-                <i class="fas fa-file-excel"></i> Import Soal
+                <i class="fas fa-file-excel"></i> Import Excel
+            </button>
+            <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#importWordModal">
+                <i class="fas fa-file-word"></i> Import Word
             </button>
             <a href="bank_soal.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
         </div>
@@ -549,6 +613,43 @@ if (isset($_GET['edit_soal'])) {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" name="import_soal" class="btn btn-success">Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Import Word Modal -->
+<div class="modal fade" id="importWordModal" tabindex="-1" aria-labelledby="importWordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importWordModalLabel">Import Soal dari Word</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="card bg-primary bg-opacity-10 border border-primary text-primary p-3 rounded mb-3">
+                        <small>
+                            <i class="fas fa-info-circle"></i> <strong>Format Dokumen Word (.docx):</strong><br>
+                            Gunakan template yang telah disediakan agar format sesuai. <br>
+                            <a href="download_template_word.php" class="fw-bold text-decoration-none text-primary"><i class="fas fa-download"></i> Download Template Word</a>
+                            <br><br>
+                            <em>Fitur deteksi otomatis:</em><br>
+                            - Pilihan Ganda (Opsi A-E)<br>
+                            - Pilihan Ganda Kompleks (Kunci: A, B)<br>
+                            - Menjodohkan (Format: Kiri => Kanan)<br>
+                            - Isian / Essay (Tanpa opsi)
+                        </small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Pilih File Word (.docx)</label>
+                        <input type="file" class="form-control" name="file_word" accept=".docx" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" name="import_soal_word" class="btn btn-primary">Import</button>
                 </div>
             </form>
         </div>

@@ -30,6 +30,7 @@ if (isset($_POST['login'])) {
             $_SESSION['user_id'] = $data['id_user'];
             $_SESSION['username'] = $data['username'];
             $_SESSION['nama'] = $data['nama_lengkap'];
+            $_SESSION['foto'] = isset($data['foto']) ? $data['foto'] : null;
             $_SESSION['level'] = $data['level'];
             $_SESSION['login_success'] = 1;
             log_activity('login', 'auth', 'login admin/guru');

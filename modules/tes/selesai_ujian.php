@@ -35,12 +35,22 @@ while($r = mysqli_fetch_assoc($q_jawab)) {
             $skor_soal = 1;
         }
     } elseif($r['jenis'] == 'isian_singkat' || $r['jenis'] == 'essay') {
-        if($j != '' && $j == $k) {
+        // Normalisasi teks untuk perbandingan yang lebih fair
+        $clean_j = strtolower(trim($j));
+        $clean_j = preg_replace('/[^\w\s]/', '', $clean_j); // Hapus tanda baca
+        $clean_j = preg_replace('/\s+/', ' ', $clean_j);    // Spasi ganda jadi satu
+
+        $clean_k = strtolower(trim($k));
+        $clean_k = preg_replace('/[^\w\s]/', '', $clean_k);
+        $clean_k = preg_replace('/\s+/', ' ', $clean_k);
+
+        if($j != '' && $clean_j == $clean_k) {
             $skor_soal = 1;
         } elseif ($j != '') {
             // Cek kemiripan untuk nilai separuh
             $percent = 0;
-            similar_text($j, $k, $percent);
+            // Bandingkan teks yang sudah dibersihkan
+            similar_text($clean_j, $clean_k, $percent);
             if($percent >= 50) {
                 $skor_soal = 0.5;
             }
