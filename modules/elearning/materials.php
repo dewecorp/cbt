@@ -290,7 +290,8 @@ if ($level === 'admin') {
                                             </button>
                                             <form method="post" style="display:inline;" onsubmit="return confirmDelete(event, this);">
                                                 <input type="hidden" name="id_material" value="<?php echo $mt['id_material']; ?>">
-                                                <button type="submit" name="delete_material" value="1" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                                <input type="hidden" name="delete_material" value="1">
+                                                <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
                                             </form>
                                             <?php endif; ?>
                                         </td>
@@ -532,7 +533,10 @@ document.addEventListener('DOMContentLoaded', function(){
                      } else {
                          // Use Proxy URL to bypass X-Frame-Options
                          var proxyUrl = 'proxy_url.php?url=' + encodeURIComponent(fullUrl);
-                         content = '<div class="card bg-info bg-opacity-10 border border-info text-info text-center m-2 p-2 rounded" style="font-size:0.9rem;"><i class="fas fa-info-circle me-1"></i> Menampilkan via Proxy Mode. <a href="' + fullUrl + '" target="_blank" class="fw-bold text-decoration-underline text-info">Buka Link Asli</a> jika tampilan berantakan.</div>';
+                         content = '<div class="alert alert-info alert-dismissible fade show m-2 p-2" role="alert" style="font-size:0.85rem;">';
+                         content += '<i class="fas fa-info-circle me-1"></i> Menampilkan via Proxy Mode. <a href="' + fullUrl + '" target="_blank" class="fw-bold text-decoration-underline alert-link">Buka Link Asli</a> jika tampilan berantakan.';
+                         content += '<button type="button" class="btn-close p-2" data-bs-dismiss="alert" aria-label="Close"></button>';
+                         content += '</div>';
                          content += '<iframe src="' + proxyUrl + '" width="100%" height="600px" style="border:none;" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>';
                      }
                      
