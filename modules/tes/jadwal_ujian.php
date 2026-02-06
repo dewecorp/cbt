@@ -187,11 +187,19 @@ if ($_SESSION['level'] == 'guru') {
                                 <td><?php echo date('d-m-Y H:i', strtotime($row['tgl_selesai'])); ?></td>
                                 <td><span class="badge bg-warning text-dark"><?php echo $row['token']; ?></span></td>
                                 <td>
-                                    <?php if($row['status'] == 'aktif'): ?>
-                                        <span class="badge bg-success">Aktif</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary">Selesai</span>
-                                    <?php endif; ?>
+                                    <?php 
+                                    $now = time();
+                                    $start = strtotime($row['tgl_mulai']);
+                                    $end = strtotime($row['tgl_selesai']);
+                                    
+                                    if ($now > $end) {
+                                        echo '<span class="badge bg-secondary">Selesai</span>';
+                                    } elseif ($now >= $start && $now <= $end) {
+                                        echo '<span class="badge bg-success">Aktif</span>';
+                                    } else {
+                                        echo '<span class="badge bg-warning text-dark">Belum Mulai</span>';
+                                    }
+                                    ?>
                                 </td>
                                 <?php if($_SESSION['level'] == 'guru'): ?>
                                 <td>

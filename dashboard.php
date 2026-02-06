@@ -26,7 +26,7 @@ $jml_siswa = mysqli_fetch_assoc($q_siswa_count)['count'];
 $q_kelas_count = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM kelas");
 $jml_kelas = mysqli_fetch_assoc($q_kelas_count)['count'];
 
-$q_ujian_count = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM ujian WHERE status='aktif'");
+$q_ujian_count = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM ujian WHERE status='aktif' AND NOW() BETWEEN tgl_mulai AND tgl_selesai");
 $jml_ujian = mysqli_fetch_assoc($q_ujian_count)['count'];
 
 // Safe session level
@@ -131,6 +131,7 @@ if($level === 'guru') {
         FROM ujian u 
         JOIN bank_soal b ON u.id_bank_soal = b.id_bank_soal 
         WHERE b.id_guru='$id_guru' AND u.status='aktif'
+        AND NOW() BETWEEN u.tgl_mulai AND u.tgl_selesai
     ");
     $jml_ujian_guru = mysqli_fetch_assoc($q_ujian_guru)['count'];
 

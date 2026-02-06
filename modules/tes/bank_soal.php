@@ -214,7 +214,9 @@ if ($_SESSION['level'] == 'guru') {
                         
                         $query = mysqli_query($koneksi, "
                             SELECT b.*, m.nama_mapel, u.nama_lengkap, k.nama_kelas,
-                            (SELECT COUNT(*) FROM soal WHERE id_bank_soal = b.id_bank_soal) as jml_soal 
+                            (SELECT COUNT(*) FROM soal WHERE id_bank_soal = b.id_bank_soal) as jml_soal,
+                            (SELECT tgl_mulai FROM ujian WHERE id_bank_soal = b.id_bank_soal ORDER BY tgl_mulai DESC LIMIT 1) as tgl_mulai,
+                            (SELECT tgl_selesai FROM ujian WHERE id_bank_soal = b.id_bank_soal ORDER BY tgl_mulai DESC LIMIT 1) as tgl_selesai
                             FROM bank_soal b 
                             JOIN mapel m ON b.id_mapel = m.id_mapel 
                             JOIN users u ON b.id_guru = u.id_user 
@@ -236,11 +238,27 @@ if ($_SESSION['level'] == 'guru') {
                                     <span class="badge bg-info"><?php echo $row['jml_soal']; ?> Soal</span>
                                 </td>
                                 <td>
-                                    <?php if($row['status'] == 'aktif'): ?>
-                                        <span class="badge bg-success">Aktif</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary">Nonaktif</span>
-                                    <?php endif; ?>
+                                    <?php 
+                                    $now = time();
+                                    $start = $row['tgl_mulai'] ? strtotime($row['tgl_mulai']) : 0;
+                                    $end = $row['tgl_selesai'] ? strtotime($row['tgl_selesai']) : 0;
+                                    
+                                    if ($start && $end) {
+                                        if ($now > $end) {
+                                            echo '<span class="badge bg-secondary">Selesai</span>';
+                                        } elseif ($now >= $start && $now <= $end) {
+                                            echo '<span class="badge bg-success">Aktif</span>';
+                                        } else {
+                                            echo '<span class="badge bg-warning text-dark">Belum Mulai</span>';
+                                        }
+                                    } else {
+                                        if($row['status'] == 'aktif') {
+                                            echo '<span class="badge bg-secondary">Belum Dijadwalkan</span>';
+                                        } else {
+                                            echo '<span class="badge bg-secondary">Nonaktif</span>';
+                                        }
+                                    }
+                                    ?>
                                 </td>
                                 <?php if($_SESSION['level'] == 'guru'): ?>
                                 <td>
