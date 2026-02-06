@@ -18,7 +18,7 @@ if (!isset($_GET['id'])) {
 $id_ujian_siswa = mysqli_real_escape_string($koneksi, $_GET['id']);
 
 // Get Student & Exam Info
-$query_info = "SELECT us.*, s.nama_siswa, s.nisn, k.nama_kelas, u.nama_ujian, b.kode_bank, m.nama_mapel, b.id_bank_soal
+$query_info = "SELECT us.*, s.nama_siswa, s.nisn, k.nama_kelas, u.nama_ujian, b.kode_bank, m.nama_mapel, m.kktp, b.id_bank_soal
                FROM ujian_siswa us
                JOIN siswa s ON us.id_siswa = s.id_siswa
                JOIN kelas k ON s.id_kelas = k.id_kelas
@@ -86,7 +86,7 @@ $q_soal = mysqli_query($koneksi, $query_soal);
                         </tr>
                         <tr>
                             <th>Nilai</th>
-                            <td>: <span class="badge bg-<?php echo ($info['nilai'] >= 75) ? 'success' : 'danger'; ?> fs-6"><?php echo number_format($info['nilai'], 2); ?></span></td>
+                            <td>: <span class="badge bg-<?php echo ($info['nilai'] >= ($info['kktp'] ?? 75)) ? 'success' : 'danger'; ?> fs-6"><?php echo number_format($info['nilai'], 2); ?></span></td>
                         </tr>
                     </table>
                 </div>

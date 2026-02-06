@@ -38,7 +38,7 @@ if ($level == 'siswa') {
 
 // Query Data
 if ($level == 'siswa') {
-    $query = "SELECT us.*, u.nama_ujian, u.tgl_mulai, m.nama_mapel 
+    $query = "SELECT us.*, u.nama_ujian, u.tgl_mulai, m.nama_mapel, m.kktp 
               FROM ujian_siswa us
               JOIN ujian u ON us.id_ujian = u.id_ujian
               JOIN bank_soal b ON u.id_bank_soal = b.id_bank_soal
@@ -46,7 +46,7 @@ if ($level == 'siswa') {
               $where
               ORDER BY us.waktu_selesai DESC";
 } else {
-    $query = "SELECT us.*, s.nama_siswa, k.nama_kelas, u.nama_ujian, m.nama_mapel 
+    $query = "SELECT us.*, s.nama_siswa, k.nama_kelas, u.nama_ujian, m.nama_mapel, m.kktp 
               FROM ujian_siswa us
               JOIN siswa s ON us.id_siswa = s.id_siswa
               JOIN kelas k ON s.id_kelas = k.id_kelas
@@ -137,7 +137,8 @@ if ($level == 'admin' || $level == 'guru') {
                             <td><?php echo $row['nama_mapel']; ?></td>
                             <td><?php echo $row['nama_ujian']; ?></td>
                             <td>
-                                <span class="badge bg-<?php echo ($row['nilai'] >= 75) ? 'success' : 'danger'; ?>">
+                                <?php $kktp = isset($row['kktp']) ? $row['kktp'] : 75; ?>
+                                <span class="badge bg-<?php echo ($row['nilai'] >= $kktp) ? 'success' : 'danger'; ?>">
                                     <?php echo number_format($row['nilai'], 2); ?>
                                 </span>
                             </td>

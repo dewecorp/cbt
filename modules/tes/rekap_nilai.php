@@ -61,7 +61,17 @@ $q_kelas = mysqli_query($koneksi, $sql_kelas);
 
 // Data Query
 $data_nilai = [];
+$kktp = 75; // Default
 if ($id_ujian && $id_kelas) {
+    // Get KKTP for this exam
+    $q_kktp = mysqli_query($koneksi, "SELECT m.kktp FROM ujian u 
+                                      JOIN bank_soal b ON u.id_bank_soal = b.id_bank_soal 
+                                      JOIN mapel m ON b.id_mapel = m.id_mapel 
+                                      WHERE u.id_ujian = '$id_ujian'");
+    if($d_kktp = mysqli_fetch_assoc($q_kktp)) {
+        $kktp = $d_kktp['kktp'] ?? 75;
+    }
+
     $query = "SELECT s.nisn, s.nama_siswa, us.nilai, us.status, us.waktu_selesai
               FROM siswa s
               LEFT JOIN ujian_siswa us ON s.id_siswa = us.id_siswa AND us.id_ujian = '$id_ujian'
@@ -203,8 +213,8 @@ if ($id_ujian && $id_kelas) {
                             $nilai = $row['nilai'] ? $row['nilai'] : 0;
                             $status = $row['status'] ? $row['status'] : 'Belum Mengerjakan';
                             if ($status == 'selesai') {
-                                $ket = ($nilai >= 75) ? 'TUNTAS' : 'BELUM TUNTAS';
-                                $bg_ket = ($nilai >= 75) ? 'success' : 'danger';
+                                $ket = ($nilai >= $kktp) ? 'TUNTAS' : 'BELUM TUNTAS';
+                                $bg_ket = ($nilai >= $kktp) ? 'success' : 'danger';
                             } else {
                                 $ket = '-';
                                 $bg_ket = 'secondary';

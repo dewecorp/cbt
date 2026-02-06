@@ -18,7 +18,7 @@ if (empty($id_ujian) || empty($id_kelas)) {
 
 // Get Info Ujian & Kelas
 $q_info = mysqli_query($koneksi, "
-    SELECT b.kode_bank AS nama_ujian, m.nama_mapel, k.nama_kelas, u.tgl_mulai, users.nama_lengkap AS nama_guru 
+    SELECT b.kode_bank AS nama_ujian, m.nama_mapel, k.nama_kelas, u.tgl_mulai, users.nama_lengkap AS nama_guru, m.kktp 
     FROM ujian u 
     JOIN bank_soal b ON u.id_bank_soal = b.id_bank_soal
     JOIN mapel m ON b.id_mapel = m.id_mapel
@@ -70,12 +70,13 @@ $data[] = ['No', 'NISN', 'Nama Siswa', 'Nilai', 'Status', 'Keterangan'];
 
 // Table Data
 $no = 1;
+$kktp = $info['kktp'] ?? 75;
 while($row = mysqli_fetch_assoc($result)) {
     $nilai = $row['nilai'] ? $row['nilai'] : 0;
     $status = $row['status'] ? $row['status'] : 'Belum Mengerjakan';
     
     if ($status == 'selesai') {
-        $ket = ($nilai >= 75) ? 'TUNTAS' : 'BELUM TUNTAS';
+        $ket = ($nilai >= $kktp) ? 'TUNTAS' : 'BELUM TUNTAS';
         $status_text = 'Selesai';
     } elseif ($status == 'sedang_mengerjakan') {
         $ket = '-';

@@ -80,7 +80,7 @@ mysqli_query($koneksi, "UPDATE ujian_siswa SET status='selesai', waktu_selesai=N
 
 // Ambil Detail Hasil untuk Ditampilkan
 $q_hasil = mysqli_query($koneksi, "
-    SELECT u.nama_ujian, u.waktu as durasi_ujian, m.nama_mapel, 
+    SELECT u.nama_ujian, u.waktu as durasi_ujian, m.nama_mapel, m.kktp,
            us.waktu_mulai, us.waktu_selesai, us.nilai 
     FROM ujian_siswa us 
     JOIN ujian u ON us.id_ujian=u.id_ujian 
@@ -166,10 +166,11 @@ include '../../includes/header.php';
 
                     <div class="text-center mt-5">
                         <h5 class="text-muted mb-2">Nilai Akhir Anda</h5>
-                        <h1 class="display-1 fw-bold <?php echo ($hasil['nilai'] >= 75) ? 'text-success' : 'text-danger'; ?>">
+                        <?php $kktp = isset($hasil['kktp']) ? $hasil['kktp'] : 75; ?>
+                        <h1 class="display-1 fw-bold <?php echo ($hasil['nilai'] >= $kktp) ? 'text-success' : 'text-danger'; ?>">
                             <?php echo number_format($hasil['nilai'], 2); ?>
                         </h1>
-                        <?php if($hasil['nilai'] >= 75): ?>
+                        <?php if($hasil['nilai'] >= $kktp): ?>
                             <span class="badge bg-success rounded-pill px-3 py-2">LULUS / TUNTAS</span>
                         <?php else: ?>
                             <span class="badge bg-danger rounded-pill px-3 py-2">BELUM TUNTAS</span>
