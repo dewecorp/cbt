@@ -481,6 +481,9 @@ editButtons.forEach(function(btn){
 
 <!-- PDF.js Library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<!-- Docx Preview Library -->
+<script src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
+<script src="https://unpkg.com/docx-preview/dist/docx-preview.min.js"></script>
 <script>
 // Set worker for PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
@@ -542,16 +545,63 @@ document.addEventListener('DOMContentLoaded', function(){
                      
                      previewContainer.innerHTML = content;
                 } else if (tipe === 'doc' || tipe === 'docx' || tipe === 'ppt' || tipe === 'pptx') {
-                    var fullUrl = path;
-                    if (!path.startsWith('http')) {
-                        // Warning: Office Viewer needs public URL. Localhost won't work.
-                        // We will try anyway, but likely fail on localhost.
-                         var a = document.createElement('a');
-                         a.href = path;
-                         fullUrl = a.href;
+                    // Check if it is DOCX for local rendering
+                    if ((tipe === 'doc' || tipe === 'docx') && path.toLowerCase().endsWith('.docx')) {
+                        previewContainer.innerHTML = '<div class="text-center text-white pt-5"><div class="spinner-border" role="status"></div><br>Memuat dokumen...</div>';
+                        
+                        fetch(path)
+                        .then(res => {
+                            if (!res.ok) throw new Error('Network response was not ok');
+                            return res.blob();
+                        })
+                        .then(blob => {
+                            previewContainer.innerHTML = ''; // Clear spinner
+                            
+                            // Wrapper div for white background
+                            var docDiv = document.createElement('div');
+                            docDiv.className = 'bg-white p-4 shadow-sm w-100';
+                            docDiv.style.minHeight = '600px';
+                            docDiv.style.overflowY = 'auto';
+                            previewContainer.appendChild(docDiv);
+                            
+                            var docxOptions = {
+                                className: "docx-viewer", 
+                                inWrapper: false, 
+                                ignoreWidth: false, 
+                                ignoreHeight: false
+                            };
+                            
+                            docx.renderAsync(blob, docDiv, null, docxOptions)
+                            .then(function () {
+                                console.log("docx: rendered");
+                            })
+                            .catch(function(err){
+                                console.error(err);
+                                previewContainer.innerHTML = '<div class="text-center text-white p-5">Gagal memuat preview DOCX (Format mungkin tidak valid).<br><a href="'+path+'" download class="btn btn-light mt-3">Download File</a></div>';
+                            });
+                        })
+                        .catch(err => {
+                             console.error(err);
+                             previewContainer.innerHTML = '<div class="text-center text-white p-5">Gagal mengambil file.<br><a href="'+path+'" download class="btn btn-light mt-3">Download File</a></div>';
+                        });
+                    } else {
+                        var fullUrl = path;
+                        if (!path.startsWith('http')) {
+                            // Warning: Office Viewer needs public URL. Localhost won't work.
+                             var a = document.createElement('a');
+                             a.href = path;
+                             fullUrl = a.href;
+                        }
+                        
+                        // Check if localhost
+                        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                             content = '<div class="text-center text-white p-5"><i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i><br>Preview untuk format <b>'+tipe.toUpperCase()+'</b> memerlukan hosting publik (Office Online).<br>Karena Anda di Localhost, silakan unduh file.<br><a href="'+path+'" download class="btn btn-light mt-3">Download File</a></div>';
+                             previewContainer.innerHTML = content;
+                        } else {
+                             content = '<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(fullUrl) + '" width="100%" height="600px" style="border:none;"></iframe>';
+                             previewContainer.innerHTML = content;
+                        }
                     }
-                    content = '<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(fullUrl) + '" width="100%" height="600px" style="border:none;"></iframe>';
-                    previewContainer.innerHTML = content;
                 } else {
                     content = '<div class="text-center p-5">Format tidak didukung untuk preview. Silakan unduh file.</div>';
                     previewContainer.innerHTML = content;
