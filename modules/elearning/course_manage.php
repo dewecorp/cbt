@@ -631,11 +631,20 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                         <h5 class="card-title font-weight-bold text-dark mb-1"><?php echo htmlspecialchars($mat['judul']); ?></h5>
                                         <small class="text-muted d-block mb-3"><?php echo date('d M Y', strtotime($mat['created_at'])); ?></small>
                                         
-                                        <?php if($mat['tipe'] !== 'link'): ?>
-                                            <a href="../../<?php echo $mat['path']; ?>" class="btn btn-primary btn-sm w-100" target="_blank"><i class="fas fa-download"></i> Download</a>
-                                        <?php else: ?>
-                                            <a href="<?php echo $mat['path']; ?>" class="btn btn-info btn-sm w-100" target="_blank"><i class="fas fa-link"></i> Buka Link</a>
-                                        <?php endif; ?>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-info btn-sm flex-fill btn-preview" 
+                                                data-id="<?php echo $mat['id_material']; ?>"
+                                                data-tipe="<?php echo $mat['tipe']; ?>"
+                                                data-path="<?php echo ($mat['tipe']=='link') ? $mat['path'] : '../../'.$mat['path']; ?>"
+                                                data-judul="<?php echo htmlspecialchars($mat['judul']); ?>">
+                                                <i class="fas fa-eye"></i> Preview
+                                            </button>
+                                            <?php if($mat['tipe'] == 'link'): ?>
+                                                <a href="<?php echo $mat['path']; ?>" target="_blank" class="btn btn-primary btn-sm flex-fill"><i class="fas fa-external-link-alt"></i> Buka</a>
+                                            <?php else: ?>
+                                                <a href="../../<?php echo $mat['path']; ?>" download class="btn btn-success btn-sm flex-fill"><i class="fas fa-download"></i> Unduh</a>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -886,3 +895,166 @@ function sendSticker(topicId, parentId, sticker) {
 </script>
 
 <?php include '../../includes/footer.php'; ?>
+
+<!-- Modal Preview (Global) -->
+<div class="modal fade" id="modalPreview" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="previewTitle">Preview Materi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0" style="min-height: 500px; background-color: #525659;">
+        <div id="previewContainer" class="w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 500px;">
+            <!-- Content will be loaded here -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a href="#" id="btnDownloadOriginal" target="_blank" class="btn btn-primary"><i class="fas fa-download"></i> Download / Buka Asli</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PDF.js Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>
+// Set worker for PDF.js
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+document.addEventListener('DOMContentLoaded', function(){
+    var modalPreview = new bootstrap.Modal(document.getElementById('modalPreview'));
+    var previewContainer = document.getElementById('previewContainer');
+    var previewTitle = document.getElementById('previewTitle');
+    var btnDownload = document.getElementById('btnDownloadOriginal');
+
+    document.querySelectorAll('.btn-preview').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.preventDefault();
+            var id = this.getAttribute('data-id');
+            var tipe = this.getAttribute('data-tipe');
+            var path = this.getAttribute('data-path');
+            var judul = this.getAttribute('data-judul');
+
+            previewTitle.textContent = judul;
+            btnDownload.href = path;
+            
+            // Reset container
+            previewContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 p-5"><div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            previewContainer.style.backgroundColor = (tipe === 'pdf') ? '#525659' : '#f8f9fa';
+            
+            modalPreview.show();
+
+            setTimeout(function(){
+                var content = '';
+                if (tipe === 'pdf') {
+                    // Use Proxy Script via fetch to bypass IDM
+                    var proxyUrl = 'get_material_content.php?id=' + id;
+                    renderPDF(proxyUrl, previewContainer);
+                } else if (tipe === 'video') {
+                    content = '<video controls width="100%" style="max-height:600px;"><source src="' + path + '" type="video/mp4">Browser anda tidak mendukung tag video.</video>';
+                    previewContainer.innerHTML = content;
+                } else if (tipe === 'link') {
+                     var fullUrl = path;
+                     if (!path.startsWith('http')) {
+                         fullUrl = 'http://' + path;
+                     }
+                     
+                     // Detect YouTube and convert to embed
+                     var youtubeRegExp = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+                     var ytMatch = fullUrl.match(youtubeRegExp);
+                     
+                     if (ytMatch && ytMatch[1]) {
+                         fullUrl = 'https://www.youtube.com/embed/' + ytMatch[1];
+                         content = '<iframe src="' + fullUrl + '" width="100%" height="600px" style="border:none;" allowfullscreen></iframe>';
+                     } else {
+                         // Use Proxy URL to bypass X-Frame-Options
+                         var proxyUrl = 'proxy_url.php?url=' + encodeURIComponent(fullUrl);
+                         content = '<div class="alert alert-info text-center m-2 p-2" style="font-size:0.9rem;">Menampilkan via Proxy Mode. <a href="' + fullUrl + '" target="_blank" class="fw-bold text-decoration-underline">Buka Link Asli</a> jika tampilan berantakan.</div>';
+                         content += '<iframe src="' + proxyUrl + '" width="100%" height="600px" style="border:none;" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>';
+                     }
+                     
+                     previewContainer.innerHTML = content;
+                } else if (tipe === 'doc' || tipe === 'docx' || tipe === 'ppt' || tipe === 'pptx') {
+                    var fullUrl = path;
+                    if (!path.startsWith('http')) {
+                        // Warning: Office Viewer needs public URL. Localhost won't work.
+                        // We will try anyway, but likely fail on localhost.
+                         var a = document.createElement('a');
+                         a.href = path;
+                         fullUrl = a.href;
+                    }
+                    content = '<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(fullUrl) + '" width="100%" height="600px" style="border:none;"></iframe>';
+                    previewContainer.innerHTML = content;
+                } else {
+                    content = '<div class="text-center p-5">Format tidak didukung untuk preview. Silakan unduh file.</div>';
+                    previewContainer.innerHTML = content;
+                }
+            }, 500);
+        });
+    });
+    
+    // Clear content when modal is hidden
+    document.getElementById('modalPreview').addEventListener('hidden.bs.modal', function () {
+        previewContainer.innerHTML = '';
+    });
+
+    function renderPDF(url, container) {
+        container.innerHTML = ''; // Clear spinner
+        
+        // Use Base64 mode to completely bypass IDM interception
+        fetch(url + '&mode=base64')
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.text();
+        })
+        .then(base64 => {
+            // Decode Base64 to Uint8Array
+            var binary_string = window.atob(base64);
+            var len = binary_string.length;
+            var bytes = new Uint8Array(len);
+            for (var i = 0; i < len; i++) {
+                bytes[i] = binary_string.charCodeAt(i);
+            }
+            
+            var loadingTask = pdfjsLib.getDocument({data: bytes});
+            loadingTask.promise.then(function(pdf) {
+                // Loop through all pages
+                for (var pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    pdf.getPage(pageNum).then(function(page) {
+                        var scale = 1.5;
+                        var viewport = page.getViewport({scale: scale});
+
+                        var canvas = document.createElement('canvas');
+                        canvas.className = 'mb-3 shadow-sm';
+                        var context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        
+                        // Center canvas
+                        canvas.style.maxWidth = '100%';
+                        canvas.style.height = 'auto';
+
+                        container.appendChild(canvas);
+
+                        var renderContext = {
+                            canvasContext: context,
+                            viewport: viewport
+                        };
+                        page.render(renderContext);
+                    });
+                }
+            }, function (reason) {
+                // PDF loading error
+                console.error(reason);
+                container.innerHTML = '<div class="text-center text-white p-5">Gagal memuat preview PDF (Corrupt atau Protected).<br><a href="'+url+'" target="_blank" class="btn btn-light mt-3">Download PDF</a></div>';
+            });
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            container.innerHTML = '<div class="text-center text-white p-5">Gagal mengambil data PDF.<br><a href="#" class="btn btn-light mt-3">Coba Lagi</a></div>';
+        });
+    }
+});
+</script>
