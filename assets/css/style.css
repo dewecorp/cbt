@@ -76,7 +76,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--kemenag-dark) 0%, var(--kemenag-green) 100%);
+    background: linear-gradient(180deg, var(--kemenag-dark) 0%, var(--kemenag-green) 100%);
 }
 
 .login-card {
@@ -98,5 +98,4 @@ body {
     justify-content: center;
     margin: 0 auto 1.5rem;
     color: white;
-    font-size: 2rem;
 }
