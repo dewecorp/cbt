@@ -128,6 +128,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
     }
 }
 
+// Handle Attendance Submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_attendance'])) {
+    if ($level == 'siswa') {
+        $status = mysqli_real_escape_string($koneksi, $_POST['status']);
+        $keterangan = isset($_POST['keterangan']) ? mysqli_real_escape_string($koneksi, $_POST['keterangan']) : '';
+        $today = date('Y-m-d');
+        $time = date('H:i:s');
+        
+        // Check if already attended for this course
+        $check = mysqli_query($koneksi, "SELECT id_absensi FROM absensi WHERE id_siswa='$uid' AND id_course='$course_id' AND tanggal='$today'");
+        if (mysqli_num_rows($check) == 0) {
+            $id_kelas_val = $course['id_kelas'];
+            $insert = mysqli_query($koneksi, "INSERT INTO absensi (id_siswa, id_kelas, id_course, tanggal, jam_masuk, status, keterangan) VALUES ('$uid', '$id_kelas_val', '$course_id', '$today', '$time', '$status', '$keterangan')");
+            if ($insert) {
+                 header("Location: course_manage.php?course_id=".$course_id."&tab=kehadiran&status=saved");
+                 exit;
+            }
+        }
+    }
+}
+
+if (!function_exists('get_indo_day')) {
+    function get_indo_day($day_en) {
+        $days = [
+            'Sunday' => 'Minggu',
+            'Monday' => 'Senin',
+            'Tuesday' => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis',
+            'Friday' => 'Jumat',
+            'Saturday' => 'Sabtu'
+        ];
+        return isset($days[$day_en]) ? $days[$day_en] : $day_en;
+    }
+}
+
 // Forum Helper Function
 if (!function_exists('render_comments')) {
     function render_comments($comments, $children, $parent_id = 0) {
@@ -331,6 +367,9 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
         </li>
         <li class="nav-item">
             <a class="nav-link <?php echo $active_tab == 'materi' ? 'active' : ''; ?>" href="?course_id=<?php echo $course_id; ?>&tab=materi">Materi</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <?php echo $active_tab == 'kehadiran' ? 'active' : ''; ?>" href="?course_id=<?php echo $course_id; ?>&tab=kehadiran">Kehadiran</a>
         </li>
     </ul>
 
@@ -657,8 +696,15 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
             </div>
         </div>
 
+        <!-- Kehadiran Tab Content Removed -->
+
     </div>
 </div>
+
+<!-- Modals for Sakit/Izin -->
+<?php if ($level == 'siswa' && isset($attendance_today) && !$attendance_today): ?>
+<!-- Modals Removed as requested -->
+<?php endif; ?>
 
 <!-- Add Student Modal -->
 <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
@@ -793,6 +839,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         // Clean URL
         window.history.replaceState(null, null, window.location.pathname + "?course_id=" + urlParams.get('course_id') + "&tab=info");
+    } else if (status === 'saved') {
+        Swal.fire({
+            title: 'Berhasil!',
+            text: 'Absensi berhasil disimpan.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        // Clean URL
+        window.history.replaceState(null, null, window.location.pathname + "?course_id=" + urlParams.get('course_id') + "&tab=kehadiran");
     }
 });
 </script>

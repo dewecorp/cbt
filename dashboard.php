@@ -68,6 +68,25 @@ if (isset($_SESSION['user_id'])) {
                 $level = 'siswa';
             }
         }
+
+        // Logic Absensi untuk Guru (Rekap Hari Ini)
+        $attendance_summary = [];
+        if (!empty($clean_kelas_ids)) {
+            $ids_str = implode("','", $clean_kelas_ids);
+            $q_att_today = mysqli_query($koneksi, "
+                SELECT a.*, s.nama_siswa, k.nama_kelas 
+                FROM absensi a 
+                JOIN siswa s ON a.id_siswa = s.id_siswa 
+                JOIN kelas k ON a.id_kelas = k.id_kelas 
+                WHERE a.tanggal = CURDATE() AND a.id_kelas IN ('$ids_str')
+                ORDER BY k.nama_kelas ASC, s.nama_siswa ASC
+            ");
+            if($q_att_today) {
+                while($row = mysqli_fetch_assoc($q_att_today)) {
+                    $attendance_summary[] = $row;
+                }
+            }
+        }
     }
 }
 
@@ -86,6 +105,19 @@ function time_ago_str($datetime) {
     if ($diff < 3600) return floor($diff / 60) . " menit lalu";
     if ($diff < 86400) return floor($diff / 3600) . " jam lalu";
     return floor($diff / 86400) . " hari lalu";
+}
+
+function get_indo_day($date) {
+    $days = [
+        'Sunday' => 'Minggu',
+        'Monday' => 'Senin',
+        'Tuesday' => 'Selasa',
+        'Wednesday' => 'Rabu',
+        'Thursday' => 'Kamis',
+        'Friday' => 'Jumat',
+        'Saturday' => 'Sabtu'
+    ];
+    return $days[date('l', strtotime($date))];
 }
 
 // Data untuk guru
@@ -154,6 +186,36 @@ if($level === 'guru') {
 // Data untuk siswa
 if($level === 'siswa') {
     $id_kelas = $_SESSION['id_kelas'];
+    
+    // Logic Absensi Siswa (Dashboard - General Attendance)
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_attendance_dash'])) {
+        $status = mysqli_real_escape_string($koneksi, $_POST['status']);
+        $keterangan = isset($_POST['keterangan']) ? mysqli_real_escape_string($koneksi, $_POST['keterangan']) : '';
+        $today = date('Y-m-d');
+        $time = date('H:i:s');
+        $uid = $_SESSION['user_id'];
+        
+        // Check if already attended today (general attendance has id_course = 0 or NULL)
+        // We use id_course = 0 for dashboard/school attendance
+        $check = mysqli_query($koneksi, "SELECT id_absensi FROM absensi WHERE id_siswa='$uid' AND (id_course='0' OR id_course IS NULL) AND tanggal='$today'");
+        if (mysqli_num_rows($check) == 0) {
+            $insert = mysqli_query($koneksi, "INSERT INTO absensi (id_siswa, id_kelas, id_course, tanggal, jam_masuk, status, keterangan) VALUES ('$uid', '$id_kelas', '0', '$today', '$time', '$status', '$keterangan')");
+            if ($insert) {
+                 echo "<script>
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: 'Absensi harian berhasil disimpan.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = 'dashboard.php';
+                    });
+                 </script>";
+            }
+        }
+    }
+
     $ujian_aktif = mysqli_query($koneksi, "
         SELECT u.*, m.nama_mapel 
         FROM ujian u 
@@ -482,6 +544,57 @@ if($level === 'siswa') {
             </div>
             <?php endforeach; ?>
         <?php endif; ?>
+
+        <!-- Rekap Absensi Hari Ini -->
+        <div class="col-12 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-calendar-check me-2"></i>Rekap Absensi Siswa Hari Ini (<?php echo date('d/m/Y'); ?>)</h6>
+                </div>
+                <div class="card-body">
+                    <?php if(!empty($attendance_summary)): ?>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" id="dataTableAbsensi" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Siswa</th>
+                                    <th>Kelas</th>
+                                    <th>Status</th>
+                                    <th>Keterangan</th>
+                                    <th>Waktu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php $no=1; foreach($attendance_summary as $as): ?>
+                                <tr>
+                                    <td><?php echo $no++; ?></td>
+                                    <td><?php echo htmlspecialchars($as['nama_siswa']); ?></td>
+                                    <td><?php echo htmlspecialchars($as['nama_kelas']); ?></td>
+                                    <td>
+                                        <?php 
+                                        $badge = 'secondary';
+                                        if($as['status'] == 'Hadir') $badge = 'success';
+                                        elseif($as['status'] == 'Sakit') $badge = 'warning';
+                                        elseif($as['status'] == 'Izin') $badge = 'info';
+                                        ?>
+                                        <span class="badge bg-<?php echo $badge; ?>"><?php echo $as['status']; ?></span>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($as['keterangan'] ?? '-'); ?></td>
+                                    <td><?php echo date('H:i', strtotime($as['waktu_absen'])); ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php else: ?>
+                    <div class="alert alert-info text-center">
+                        Belum ada data absensi siswa hari ini untuk kelas yang Anda ampu.
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
     </div>
     <?php endif; ?>
 
@@ -525,6 +638,111 @@ if($level === 'siswa') {
                 </div>
             </div>
         </div>
+
+        <!-- Absensi Widget -->
+        <?php
+        $attendance_today_dash = null;
+        $today = date('Y-m-d');
+        $uid = $_SESSION['user_id'];
+        $qa_dash = mysqli_query($koneksi, "SELECT * FROM absensi WHERE id_siswa='$uid' AND (id_course='0' OR id_course IS NULL) AND tanggal='$today'");
+        if ($qa_dash && mysqli_num_rows($qa_dash) > 0) {
+            $attendance_today_dash = mysqli_fetch_assoc($qa_dash);
+        }
+        ?>
+        <div class="col-12 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Absensi Hari Ini</h6>
+                </div>
+                <div class="card-body text-center">
+                    <p class="mb-4"><?php echo get_indo_day($today) . ', ' . date('d F Y'); ?></p>
+                    
+                    <?php if ($attendance_today_dash): ?>
+                        <div class="alert alert-success">
+                            Anda sudah melakukan absensi harian.<br>
+                            <strong>Status: <?php echo $attendance_today_dash['status']; ?></strong>
+                            <?php if ($attendance_today_dash['status'] != 'Hadir' && !empty($attendance_today_dash['keterangan'])): ?>
+                                <br>Keterangan: <?php echo htmlspecialchars($attendance_today_dash['keterangan']); ?>
+                            <?php endif; ?>
+                            <br>Jam: <?php echo $attendance_today_dash['jam_masuk']; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="d-grid gap-2 d-md-block">
+                            <form method="post" style="display: inline;">
+                                <input type="hidden" name="submit_attendance_dash" value="1">
+                                <input type="hidden" name="status" value="Hadir">
+                                <button type="submit" class="btn btn-success btn-lg px-5 mx-2 mb-2">
+                                    <i class="fas fa-check-circle me-2"></i> HADIR
+                                </button>
+                            </form>
+                            
+                            <button type="button" class="btn btn-warning btn-lg px-5 mx-2 mb-2" data-bs-toggle="modal" data-bs-target="#modalSakitDash">
+                                <i class="fas fa-procedures me-2"></i> SAKIT
+                            </button>
+                            
+                            <button type="button" class="btn btn-info btn-lg px-5 mx-2 mb-2" data-bs-toggle="modal" data-bs-target="#modalIzinDash">
+                                <i class="fas fa-envelope-open-text me-2"></i> IZIN
+                            </button>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modals for Sakit/Izin Dashboard -->
+        <?php if (!$attendance_today_dash): ?>
+        <!-- Modal Sakit -->
+        <div class="modal fade" id="modalSakitDash" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Konfirmasi Sakit (Harian)</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="submit_attendance_dash" value="1">
+                            <input type="hidden" name="status" value="Sakit">
+                            <div class="mb-3">
+                                <label class="form-label">Keterangan / Upload Surat Dokter (Opsional)</label>
+                                <textarea name="keterangan" class="form-control" rows="3" placeholder="Tulis keterangan sakit..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-warning">Kirim Absensi Sakit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal Izin -->
+        <div class="modal fade" id="modalIzinDash" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form method="post">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Konfirmasi Izin (Harian)</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="submit_attendance_dash" value="1">
+                            <input type="hidden" name="status" value="Izin">
+                            <div class="mb-3">
+                                <label class="form-label">Alasan Izin</label>
+                                <textarea name="keterangan" class="form-control" rows="3" placeholder="Tulis alasan izin..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-info">Kirim Absensi Izin</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Pengumuman Widget -->
         <?php if(mysqli_num_rows($ann_siswa) > 0): ?>
