@@ -54,6 +54,11 @@
                         <i class="fas fa-book"></i> Mata Pelajaran
                     </a>
                 </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/master/jadwal_pelajaran.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'jadwal_pelajaran.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-calendar-alt"></i> Jadwal Pelajaran
+                    </a>
+                </li>
                 <?php endif; ?>
 
                 <li class="nav-item mt-2">
