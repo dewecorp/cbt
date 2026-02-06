@@ -12,6 +12,107 @@
         </div>
     </footer>
 
+    <!-- Bottom Navigation (Mobile Only) -->
+    <nav class="bottom-nav d-md-none">
+        <?php 
+        $current_page = basename($_SERVER['PHP_SELF']);
+        $is_dashboard = ($current_page == 'dashboard.php');
+        $is_courses = (strpos($_SERVER['PHP_SELF'], 'elearning/courses.php') !== false);
+        
+        $level = isset($_SESSION['level']) ? $_SESSION['level'] : '';
+        ?>
+        
+        <a href="<?php echo $base_url; ?>dashboard.php" class="nav-item <?php echo $is_dashboard ? 'active' : ''; ?>">
+            <i class="fas fa-home"></i>
+            <span>Beranda</span>
+        </a>
+        
+        <a href="<?php echo $base_url; ?>modules/elearning/courses.php" class="nav-item <?php echo $is_courses ? 'active' : ''; ?>">
+            <i class="fas fa-layer-group"></i>
+            <span>Kelas</span>
+        </a>
+
+        <?php if($level === 'siswa'): ?>
+            <?php 
+            $is_tugas = (strpos($_SERVER['PHP_SELF'], 'student_assignments.php') !== false);
+            $is_nilai = (strpos($_SERVER['PHP_SELF'], 'student_grades.php') !== false);
+            ?>
+            <a href="<?php echo $base_url; ?>modules/elearning/student_assignments.php" class="nav-item <?php echo $is_tugas ? 'active' : ''; ?>">
+                <i class="fas fa-paper-plane"></i>
+                <span>Tugas</span>
+            </a>
+            <a href="<?php echo $base_url; ?>modules/elearning/student_grades.php" class="nav-item <?php echo $is_nilai ? 'active' : ''; ?>">
+                <i class="fas fa-star"></i>
+                <span>Nilai</span>
+            </a>
+        <?php else: ?>
+            <?php 
+            $is_materi = (strpos($_SERVER['PHP_SELF'], 'elearning/materials.php') !== false);
+            $is_tugas_g = (strpos($_SERVER['PHP_SELF'], 'elearning/assignments.php') !== false);
+            ?>
+            <a href="<?php echo $base_url; ?>modules/elearning/materials.php" class="nav-item <?php echo $is_materi ? 'active' : ''; ?>">
+                <i class="fas fa-book-open"></i>
+                <span>Materi</span>
+            </a>
+            <a href="<?php echo $base_url; ?>modules/elearning/assignments.php" class="nav-item <?php echo $is_tugas_g ? 'active' : ''; ?>">
+                <i class="fas fa-tasks"></i>
+                <span>Tugas</span>
+            </a>
+        <?php endif; ?>
+
+        <a href="#" class="nav-item" data-bs-toggle="modal" data-bs-target="#mobileMenuModal">
+            <i class="fas fa-bars"></i>
+            <span>Menu</span>
+        </a>
+    </nav>
+
+    <!-- Mobile Menu Modal -->
+    <div class="modal fade" id="mobileMenuModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen-sm-down">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-th-large me-2"></i> Menu Lengkap</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="list-group list-group-flush">
+                        <?php if($level === 'admin'): ?>
+                            <div class="list-group-item bg-light fw-bold text-uppercase small text-muted">Master Data</div>
+                            <a href="<?php echo $base_url; ?>modules/master/guru.php" class="list-group-item list-group-item-action"><i class="fas fa-chalkboard-teacher me-2 text-success"></i> Data Guru</a>
+                            <a href="<?php echo $base_url; ?>modules/master/siswa.php" class="list-group-item list-group-item-action"><i class="fas fa-user-graduate me-2 text-success"></i> Data Siswa</a>
+                            <a href="<?php echo $base_url; ?>modules/master/kelas.php" class="list-group-item list-group-item-action"><i class="fas fa-school me-2 text-success"></i> Data Kelas</a>
+                            <a href="<?php echo $base_url; ?>modules/master/mapel.php" class="list-group-item list-group-item-action"><i class="fas fa-book me-2 text-success"></i> Mata Pelajaran</a>
+                        <?php endif; ?>
+
+                        <div class="list-group-item bg-light fw-bold text-uppercase small text-muted">E-Learning</div>
+                        <?php if($level !== 'siswa'): ?>
+                            <a href="<?php echo $base_url; ?>modules/elearning/forum.php" class="list-group-item list-group-item-action"><i class="fas fa-comments me-2 text-success"></i> Forum</a>
+                        <?php endif; ?>
+                        <?php if($level === 'guru'): ?>
+                            <a href="<?php echo $base_url; ?>modules/elearning/announcements.php" class="list-group-item list-group-item-action"><i class="fas fa-bullhorn me-2 text-success"></i> Pengumuman</a>
+                        <?php endif; ?>
+
+                        <div class="list-group-item bg-light fw-bold text-uppercase small text-muted">Asesmen</div>
+                        <?php if($level === 'admin' || $level === 'guru'): ?>
+                            <a href="<?php echo $base_url; ?>modules/tes/bank_soal.php" class="list-group-item list-group-item-action"><i class="fas fa-database me-2 text-success"></i> Bank Soal</a>
+                            <a href="<?php echo $base_url; ?>modules/tes/jadwal_ujian.php" class="list-group-item list-group-item-action"><i class="fas fa-calendar-alt me-2 text-success"></i> Administrasi Tes</a>
+                            <a href="<?php echo $base_url; ?>modules/tes/hasil_ujian.php" class="list-group-item list-group-item-action"><i class="fas fa-poll me-2 text-success"></i> Hasil Asesmen</a>
+                            <a href="<?php echo $base_url; ?>modules/tes/rekap_nilai.php" class="list-group-item list-group-item-action"><i class="fas fa-file-alt me-2 text-success"></i> Rekap Nilai</a>
+                            <a href="<?php echo $base_url; ?>modules/cetak/kartu_ujian.php" class="list-group-item list-group-item-action"><i class="fas fa-print me-2 text-success"></i> Cetak Kartu</a>
+                        <?php endif; ?>
+                        <?php if($level === 'siswa'): ?>
+                             <a href="<?php echo $base_url; ?>modules/tes/hasil_ujian.php" class="list-group-item list-group-item-action"><i class="fas fa-poll me-2 text-success"></i> Hasil Asesmen</a>
+                             <a href="<?php echo $base_url; ?>modules/cetak/kartu_ujian.php" class="list-group-item list-group-item-action"><i class="fas fa-print me-2 text-success"></i> Cetak Kartu</a>
+                        <?php endif; ?>
+
+                         <div class="list-group-item bg-light fw-bold text-uppercase small text-muted">Akun</div>
+                         <a href="<?php echo $base_url; ?>logout.php" class="list-group-item list-group-item-action text-danger"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="<?php echo $base_url; ?>assets/vendor/jquery/jquery.min.js"></script>
     <script src="<?php echo $base_url; ?>assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>

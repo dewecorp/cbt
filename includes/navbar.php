@@ -1,8 +1,33 @@
-<nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top w-100">
+<?php
+// Fetch Logo and Name for Mobile Header
+$m_school_name = 'E-Learning';
+$m_school_logo = '';
+if (isset($koneksi)) {
+    $m_rs = mysqli_query($koneksi, "SELECT nama_sekolah, logo FROM setting LIMIT 1");
+    if ($m_rs && mysqli_num_rows($m_rs) > 0) {
+        $m_st = mysqli_fetch_assoc($m_rs);
+        if (!empty($m_st['nama_sekolah'])) $m_school_name = $m_st['nama_sekolah'];
+        if (!empty($m_st['logo'])) $m_school_logo = $m_st['logo'];
+    }
+}
+?>
+
+<!-- Mobile Header (Logo + App Name + Madrasah Name) -->
+<div class="mobile-header d-flex align-items-center justify-content-center py-2 bg-white border-bottom shadow-sm d-md-none sticky-top" style="z-index: 1020;">
+    <div class="d-flex align-items-center">
+        <?php if($m_school_logo): ?>
+            <img src="<?php echo $base_url; ?>assets/img/<?php echo $m_school_logo; ?>" alt="Logo" height="45" class="me-3">
+        <?php endif; ?>
+        <div class="text-start">
+            <div class="fw-bold text-success lh-1 mb-1" style="font-size: 1.25rem; font-family: 'Poppins', sans-serif;">E-Learning</div>
+            <div class="fw-bold text-dark lh-1" style="font-size: 0.9rem; font-family: 'Poppins', sans-serif;"><?php echo $m_school_name; ?></div>
+        </div>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top w-100 d-none d-md-flex">
     <div class="container-fluid">
-        <button class="btn btn-link text-white d-md-none me-3" type="button" id="sidebarToggle">
-            <i class="fas fa-bars"></i>
-        </button>
+        <!-- Sidebar Toggle removed for mobile bottom nav -->
         <?php
         $school_name_nav = 'CBT MI';
         if (isset($koneksi)) {

@@ -2,6 +2,15 @@
 session_start();
 include 'config/database.php';
 
+// Fetch Settings
+$st = ['nama_sekolah' => 'MI Sultan Fattah', 'logo' => '', 'tahun_ajaran' => '', 'semester' => ''];
+if (isset($koneksi)) {
+    $q_st = mysqli_query($koneksi, "SELECT * FROM setting LIMIT 1");
+    if ($q_st && mysqli_num_rows($q_st) > 0) {
+        $st = mysqli_fetch_assoc($q_st);
+    }
+}
+
 if (isset($_SESSION['user_id'])) {
     header("Location: dashboard.php");
     exit;
@@ -64,18 +73,38 @@ if (isset($_POST['login'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - CBT MI Sultan Fattah</title>
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
         <div class="login-card">
-            <div class="login-logo">
-                <i class="fas fa-book-reader"></i>
+            <div class="login-logo mb-3">
+                <?php if (!empty($st['logo']) && file_exists('assets/img/' . $st['logo'])): ?>
+                    <img src="assets/img/<?php echo $st['logo']; ?>" alt="Logo" style="max-height: 100px; width: auto;">
+                <?php else: ?>
+                    <i class="fas fa-book-reader fa-4x text-kemenag"></i>
+                <?php endif; ?>
             </div>
-            <h4 class="text-center mb-4 fw-bold text-kemenag">CBT MI Sultan Fattah</h4>
+            
+            <h4 class="text-center fw-bold text-kemenag mb-1">E-Learning</h4>
+            <h5 class="text-center fw-bold text-dark mb-2 text-uppercase"><?php echo $st['nama_sekolah']; ?></h5>
+            
+            <?php if(!empty($st['tahun_ajaran'])): ?>
+            <p class="text-center text-muted mb-4">
+                Tahun Ajaran <?php echo $st['tahun_ajaran']; ?> Semester <?php echo $st['semester']; ?>
+            </p>
+            <?php else: ?>
             <p class="text-center text-muted mb-4">Silahkan login untuk melanjutkan</p>
+            <?php endif; ?>
             
             <?php if($error): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
