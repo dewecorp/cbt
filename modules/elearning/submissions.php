@@ -155,8 +155,11 @@ while($sub = mysqli_fetch_assoc($q_subs)) {
                                 <?php echo $sub ? date('d/m/Y H:i', strtotime($sub['submitted_at'])) : '-'; ?>
                             </td>
                             <td>
-                                <?php if($sub && $sub['file_path']): ?>
-                                    <a href="../../<?php echo $sub['file_path']; ?>" target="_blank" class="btn btn-sm btn-info">
+                                <?php if($sub && $sub['file_path']): 
+                                    $is_url = (isset($sub['file_provider']) && $sub['file_provider'] == 'gdrive') || filter_var($sub['file_path'], FILTER_VALIDATE_URL);
+                                    $link = $is_url ? $sub['file_path'] : "../../" . $sub['file_path'];
+                                ?>
+                                    <a href="<?php echo $link; ?>" target="_blank" class="btn btn-sm btn-info">
                                         <i class="fas fa-download"></i> Unduh
                                     </a>
                                 <?php else: ?>

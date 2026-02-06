@@ -19,6 +19,14 @@ if (mysqli_num_rows($col_check) == 0) {
     mysqli_query($koneksi, "ALTER TABLE setting ADD COLUMN admin_welcome_text TEXT NULL");
 }
 
+// Ensure columns for submissions exist
+$col_check_sub = mysqli_query($koneksi, "SHOW COLUMNS FROM submissions LIKE 'file_provider'");
+if (mysqli_num_rows($col_check_sub) == 0) {
+    mysqli_query($koneksi, "ALTER TABLE submissions ADD COLUMN file_provider VARCHAR(20) DEFAULT 'local'");
+    mysqli_query($koneksi, "ALTER TABLE submissions ADD COLUMN file_id VARCHAR(255) NULL");
+    mysqli_query($koneksi, "ALTER TABLE submissions ADD COLUMN file_link TEXT NULL");
+}
+
 // Handle Update
 if (isset($_POST['simpan'])) {
     $nama_sekolah = mysqli_real_escape_string($koneksi, $_POST['nama_sekolah']);
@@ -94,6 +102,40 @@ if (isset($_POST['simpan'])) {
         echo "<script>Swal.fire('Error', '".mysqli_error($koneksi)."', 'error');</script>";
     }
 }
+// Handle Year Reset
+elseif (isset($_POST['reset_tahun_ajaran'])) {
+    // Only admin
+    if ($_SESSION['level'] != 'admin') {
+        echo "<script>window.location='../../dashboard.php';</script>";
+        exit;
+    }
+    // Delete submissions files
+    $upload_dir = '../../assets/uploads/submissions/';
+    if (is_dir($upload_dir)) {
+        $files = scandir($upload_dir);
+        foreach ($files as $f) {
+            if ($f === '.' || $f === '..') continue;
+            $path = $upload_dir . $f;
+            if (is_file($path)) {
+                @unlink($path);
+            }
+        }
+    }
+    // Clear database records
+    mysqli_query($koneksi, "DELETE FROM submissions");
+    mysqli_query($koneksi, "DELETE FROM assignments");
+    echo "<script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Reset Berhasil',
+            text: 'Semua tugas dan pengumpulan telah dihapus untuk memulai tahun ajaran baru.',
+            timer: 2000,
+            showConfirmButton: false
+        }).then(() => {
+            window.location.href = 'index.php';
+        });
+    </script>";
+}
 ?>
 
 <div class="container-fluid">
@@ -166,10 +208,34 @@ if (isset($_POST['simpan'])) {
                             <textarea class="form-control" id="admin_welcome_text" name="admin_welcome_text" rows="6"><?php echo isset($setting['admin_welcome_text']) ? $setting['admin_welcome_text'] : 'Aplikasi Computer Based Test (CBT) ini dirancang untuk memudahkan pelaksanaan ujian di MI Sultan Fattah Sukosono. Silahkan gunakan menu di samping untuk mengelola data dan ujian.'; ?></textarea>
                         </div>
 
-                        <button type="submit" name="simpan" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                        <div class="mb-3">
+                            <button type="submit" name="simpan" class="btn btn-success"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                        </div>
                     </form>
                 </div>
             </div>
+
+            <!-- Card Reset Tahun Ajaran -->
+            <div class="card shadow mb-4 border-start border-danger border-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger"><i class="fas fa-trash-alt"></i> Reset Tahun Ajaran</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle"></i> Fitur ini akan menghapus semua <b>tugas</b> yang dibuat guru dan <b>pengumpulan tugas</b> siswa, termasuk file yang diunggah, untuk memulai tahun ajaran baru.
+                    </div>
+                    <form method="POST" action="">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="confirm_reset" required>
+                            <label class="form-check-label text-danger fw-bold" for="confirm_reset">Saya memahami konsekuensinya dan ingin melanjutkan reset.</label>
+                        </div>
+                        <button type="submit" name="reset_tahun_ajaran" class="btn btn-danger" onclick="return confirm('Hapus semua tugas dan pengumpulan? Tindakan ini tidak dapat dibatalkan.');">
+                            <i class="fas fa-exclamation-triangle"></i> Reset Tahun Ajaran (Hapus Tugas & Pengumpulan)
+                        </button>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

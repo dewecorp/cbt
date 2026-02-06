@@ -35,6 +35,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_assignment']))
             
             if (in_array($file_ext, $allowed)) {
                 if ($file_size <= 50 * 1024 * 1024) { // 50MB limit
+                    
+                    // Upload ke server lokal (GDrive dinonaktifkan)
+                    $upload_success = false;
+                    $db_path = '';
+                    $file_provider = 'local';
+                    $file_id_gdrive = null;
+                    $file_link_gdrive = null;
+                    
                     $upload_dir = '../../assets/uploads/submissions/';
                     if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
                     
@@ -43,23 +51,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_assignment']))
                     
                     if (move_uploaded_file($file_tmp, $dest)) {
                         $db_path = 'assets/uploads/submissions/' . $new_name;
-                        
+                        $upload_success = true;
+                    } else {
+                        $_SESSION['error'] = "Gagal mengunggah file ke server lokal.";
+                    }
+
+                    if ($upload_success) {
                         // Check if already submitted (update or insert)
                         $check_sub = mysqli_query($koneksi, "SELECT id_submission FROM submissions WHERE assignment_id='$assignment_id' AND siswa_id='$id_siswa'");
+                        
+                        // Prepare columns for insert/update
+                        // Ensure columns exist (handled in settings page, but assume they exist)
                         
                         if (mysqli_num_rows($check_sub) > 0) {
                             $row = mysqli_fetch_assoc($check_sub);
                             $sid = $row['id_submission'];
                             // Update
-                            mysqli_query($koneksi, "UPDATE submissions SET file_path='$db_path', submitted_at=NOW() WHERE id_submission='$sid'");
+                            $sql = "UPDATE submissions SET file_path='$db_path', submitted_at=NOW()";
+                            
+                            $sql .= ", file_provider='$file_provider'";
+                            
+                            $sql .= " WHERE id_submission='$sid'";
+                            mysqli_query($koneksi, $sql);
                         } else {
                             // Insert
-                            mysqli_query($koneksi, "INSERT INTO submissions (assignment_id, siswa_id, file_path) VALUES ('$assignment_id', '$id_siswa', '$db_path')");
+                            $cols = "assignment_id, siswa_id, file_path, file_provider";
+                            $vals = "'$assignment_id', '$id_siswa', '$db_path', '$file_provider'";
+                            mysqli_query($koneksi, "INSERT INTO submissions ($cols) VALUES ($vals)");
                         }
                         
                         $_SESSION['success'] = "Tugas berhasil dikirim!";
-                    } else {
-                        $_SESSION['error'] = "Gagal mengunggah file.";
                     }
                 } else {
                     $_SESSION['error'] = "Ukuran file terlalu besar (Maks 50MB).";
