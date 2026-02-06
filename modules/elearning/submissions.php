@@ -90,6 +90,8 @@ while($sub = mysqli_fetch_assoc($q_subs)) {
             </p>
         </div>
         <div>
+            <a href="export_submissions_excel.php?assignment_id=<?php echo $assignment_id; ?>" target="_blank" class="btn btn-success btn-sm me-2"><i class="fas fa-file-excel"></i> Export Excel</a>
+            <a href="export_submissions_pdf.php?assignment_id=<?php echo $assignment_id; ?>" target="_blank" class="btn btn-danger btn-sm me-2"><i class="fas fa-file-pdf"></i> Export PDF</a>
             <a href="course_manage.php?course_id=<?php echo $assignment['course_id']; ?>&tab=tugas" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Kembali</a>
         </div>
     </div>
