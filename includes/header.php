@@ -72,7 +72,10 @@ if (isset($_SESSION['user_id']) && isset($koneksi)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($page_title) ? $page_title . ' - CBT MI Sultan Fattah Sukosono' : 'CBT MI Sultan Fattah Sukosono'; ?></title>
+    <title><?php echo isset($page_title) ? $page_title . ' | E-Learning' : 'E-Learning'; ?></title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="<?php echo $base_url; ?>assets/img/logo_1770185899.png">
     
     <!-- Google Fonts: Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
