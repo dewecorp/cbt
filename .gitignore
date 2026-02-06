@@ -1,0 +1,8 @@
+/vendor/google/
+/vendor/composer/39897f00/
+/vendor/composer/f436f662/
+/backups/
+*.zip
+*.log
+.DS_Store
+Thumbs.db

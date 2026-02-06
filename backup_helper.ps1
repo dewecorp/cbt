@@ -1,6 +1,6 @@
 $source = "D:\laragon\www\cbt"
 $dest = "D:\laragon\www\cbt\backups\cbt-backup.zip"
-$exclude = @("\\.git\\", "\\backups\\")
+$exclude = @("\\.git\\", "\\backups\\", "\\vendor\\google\\", "\\vendor\\composer\\39897f00\\", "\\vendor\\composer\\f436f662\\", "\\.vscode\\")
 
 Add-Type -Assembly System.IO.Compression.FileSystem
 
