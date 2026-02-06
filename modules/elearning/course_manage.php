@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
         $title = substr($content, 0, 50) . '...'; 
         $class_id = $course['id_kelas'];
         mysqli_query($koneksi, "INSERT INTO forum_topics(class_id, course_id, title, content, image, file, created_by, author_role) VALUES($class_id, $course_id, '$title', '$content', '$image_path', '$file_path', $uid, '$role')");
-        header("Location: course_manage.php?course_id=".$course_id."&tab=info");
+        header("Location: course_manage.php?course_id=".$course_id."&tab=info&status=posted");
         exit;
     }
 }
@@ -783,6 +783,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         // Clean URL
         window.history.replaceState(null, null, window.location.pathname + "?course_id=" + urlParams.get('course_id') + "&tab=siswa");
+    } else if (status === 'posted') {
+        Swal.fire({
+            title: 'Terposting!',
+            text: 'Postingan berhasil dibuat.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        // Clean URL
+        window.history.replaceState(null, null, window.location.pathname + "?course_id=" + urlParams.get('course_id') + "&tab=info");
     }
 });
 </script>

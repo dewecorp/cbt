@@ -45,7 +45,7 @@ if (isset($_GET['delete']) && ($level === 'admin' || $level === 'guru')) {
             mysqli_query($koneksi, "DELETE FROM assignments WHERE id_assignment=$id_del");
             // Also delete submissions
             mysqli_query($koneksi, "DELETE FROM submissions WHERE assignment_id=$id_del");
-            header("Location: assignments.php");
+            header("Location: assignments.php?status=deleted");
             exit;
         }
     }
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_assignment']))
     $deadline = mysqli_real_escape_string($koneksi, $_POST['deadline']);
     if ($course_id>0 && !empty($judul) && !empty($deadline)) {
         mysqli_query($koneksi, "INSERT INTO assignments(course_id,jenis_tugas,judul,deskripsi,deadline,created_by) VALUES($course_id,'$jenis_tugas','$judul','$deskripsi','$deadline',$uid)");
-        header("Location: assignments.php");
+        header("Location: assignments.php?status=created");
         exit;
     }
 }
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_assignment'])) {
         if ($level === 'admin' || $row['created_by'] == $uid) {
              if ($course_id>0 && !empty($judul) && !empty($deadline)) {
                 mysqli_query($koneksi, "UPDATE assignments SET course_id=$course_id, jenis_tugas='$jenis_tugas', judul='$judul', deskripsi='$deskripsi', deadline='$deadline' WHERE id_assignment=$id_assignment");
-                header("Location: assignments.php");
+                header("Location: assignments.php?status=updated");
                 exit;
             }
         }
@@ -245,7 +245,7 @@ if ($level === 'admin') {
                                         <?php endif; ?>
                                         <?php if($level === 'guru' && $a['created_by'] == $uid): ?>
                                         <button class="btn btn-info btn-sm" onclick="editAssignment(<?php echo htmlspecialchars(json_encode($a)); ?>)"><i class="fas fa-edit"></i></button>
-                                        <a href="assignments.php?delete=<?php echo $a['id_assignment']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Hapus tugas ini?')"><i class="fas fa-trash"></i></a>
+                                        <a href="#" class="btn btn-danger btn-sm" onclick="confirmDeleteAssignment('assignments.php?delete=<?php echo $a['id_assignment']; ?>'); return false;"><i class="fas fa-trash"></i></a>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -306,6 +306,7 @@ if ($level === 'admin') {
             <label class="form-label">Jenis Tugas</label>
             <select name="jenis_tugas" class="form-select" required>
                 <option value="Lain-lain">Lain-lain</option>
+                <option value="CBT">CBT</option>
                 <option value="Merangkum">Merangkum</option>
                 <option value="Observasi">Observasi</option>
                 <option value="Praktik">Praktik</option>
@@ -358,6 +359,7 @@ if ($level === 'admin') {
             <label class="form-label">Jenis Tugas</label>
             <select name="jenis_tugas" id="edit_jenis_tugas" class="form-select" required>
                 <option value="Lain-lain">Lain-lain</option>
+                <option value="CBT">CBT</option>
                 <option value="Merangkum">Merangkum</option>
                 <option value="Observasi">Observasi</option>
                 <option value="Praktik">Praktik</option>
@@ -398,6 +400,57 @@ function editAssignment(data) {
     var myModal = new bootstrap.Modal(document.getElementById('modalEditAssignment'));
     myModal.show();
 }
+
+function confirmDeleteAssignment(url) {
+    Swal.fire({
+        title: 'Hapus Tugas?',
+        text: "Tugas yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = url;
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+    
+    if (status === 'deleted') {
+        Swal.fire({
+            title: 'Berhasil!',
+            text: 'Tugas berhasil dihapus.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        window.history.replaceState(null, null, window.location.pathname);
+    } else if (status === 'created') {
+        Swal.fire({
+            title: 'Berhasil!',
+            text: 'Tugas berhasil dibuat.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        window.history.replaceState(null, null, window.location.pathname);
+    } else if (status === 'updated') {
+        Swal.fire({
+            title: 'Berhasil!',
+            text: 'Tugas berhasil diperbarui.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        window.history.replaceState(null, null, window.location.pathname);
+    }
+});
 </script>
 <?php endif; ?>
 <?php include '../../includes/footer.php'; ?>

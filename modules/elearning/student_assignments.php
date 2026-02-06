@@ -179,12 +179,18 @@ $assignments = mysqli_query($koneksi, $query);
                         <?php endif; ?>
 
                         <div class="d-grid gap-2">
-                            <?php if(!$is_expired || $is_submitted): ?>
-                                <button class="btn btn-<?php echo $is_submitted ? 'warning' : 'primary'; ?>" data-bs-toggle="modal" data-bs-target="#modalSubmit<?php echo $a['id_assignment']; ?>">
-                                    <i class="fas fa-paper-plane me-1"></i> <?php echo $is_submitted ? 'Kirim Ulang / Edit' : 'Kirim Tugas'; ?>
-                                </button>
+                            <?php if($a['jenis_tugas'] === 'CBT'): ?>
+                                <a href="../../index.php" class="btn btn-primary">
+                                    <i class="fas fa-laptop-code me-1"></i> Buka Dashboard CBT
+                                </a>
                             <?php else: ?>
-                                <button class="btn btn-secondary" disabled>Waktu Habis</button>
+                                <?php if(!$is_expired || $is_submitted): ?>
+                                    <button class="btn btn-<?php echo $is_submitted ? 'warning' : 'primary'; ?>" data-bs-toggle="modal" data-bs-target="#modalSubmit<?php echo $a['id_assignment']; ?>">
+                                        <i class="fas fa-paper-plane me-1"></i> <?php echo $is_submitted ? 'Kirim Ulang / Edit' : 'Kirim Tugas'; ?>
+                                    </button>
+                                <?php else: ?>
+                                    <button class="btn btn-secondary" disabled>Waktu Habis</button>
+                                <?php endif; ?>
                             <?php endif; ?>
                             
                             <a href="course_manage.php?course_id=<?php echo $a['course_id']; ?>" class="btn btn-outline-secondary">

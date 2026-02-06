@@ -468,7 +468,7 @@ if (isset($_GET['edit_soal'])) {
                     <h5 class="fw-bold">Soal No. <?php echo $no++; ?> <span class="badge bg-secondary small"><?php echo str_replace('_', ' ', strtoupper($s['jenis'])); ?></span></h5>
                     <div>
                         <a href="buat_soal.php?id=<?php echo $id_bank; ?>&edit_soal=<?php echo $s['id_soal']; ?>" class="btn btn-warning btn-sm text-white me-1"><i class="fas fa-edit"></i></a>
-                        <a href="buat_soal.php?id=<?php echo $id_bank; ?>&delete_soal=<?php echo $s['id_soal']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Hapus soal ini?')"><i class="fas fa-trash"></i></a>
+                        <a href="buat_soal.php?id=<?php echo $id_bank; ?>&delete_soal=<?php echo $s['id_soal']; ?>" class="btn btn-danger btn-sm" onclick="confirmDeleteSoal(event, this.href); return false;"><i class="fas fa-trash"></i></a>
                     </div>
                 </div>
                 <div class="mb-2"><?php echo $s['pertanyaan']; ?></div>
@@ -617,6 +617,24 @@ if (isset($_GET['edit_soal'])) {
         } else {
             Swal.fire('Peringatan', 'Minimal harus ada satu pasangan!', 'warning');
         }
+    }
+
+    function confirmDeleteSoal(e, url) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Hapus Soal?',
+            text: "Soal yang dihapus tidak dapat dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
     }
 </script>
 

@@ -5,6 +5,8 @@ $page_title = 'Materi';
 if (!isset($_SESSION['level'])) { $_SESSION['level'] = 'admin'; }
 $level = $_SESSION['level'];
 $uid = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+$swal_script = ""; // Initialize Swal Script
+
 $exists = mysqli_query($koneksi, "SHOW TABLES LIKE 'materials'");
 if (mysqli_num_rows($exists) == 0) {
     mysqli_query($koneksi, "CREATE TABLE `materials` (
@@ -45,7 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_material'])) {
         }
     }
     if ($course_id>0 && !empty($judul) && !empty($tipe) && !empty($path)) {
-        mysqli_query($koneksi, "INSERT INTO materials(course_id,judul,tipe,path,owner_id,size_bytes) VALUES($course_id,'$judul','$tipe','$path',$uid,$size)");
+        if(mysqli_query($koneksi, "INSERT INTO materials(course_id,judul,tipe,path,owner_id,size_bytes) VALUES($course_id,'$judul','$tipe','$path',$uid,$size)")){
+            $swal_script = "Swal.fire({title: 'Berhasil!', text: 'Materi berhasil ditambahkan.', icon: 'success', timer: 2000, showConfirmButton: false});";
+        }
     }
 }
 
@@ -58,7 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_material'])) {
             if ($m['tipe'] !== 'link' && file_exists(dirname(__DIR__,2).'/'.$m['path'])) {
                 unlink(dirname(__DIR__,2).'/'.$m['path']);
             }
-            mysqli_query($koneksi, "DELETE FROM materials WHERE id_material=$id");
+            if(mysqli_query($koneksi, "DELETE FROM materials WHERE id_material=$id")){
+                $swal_script = "Swal.fire({title: 'Berhasil!', text: 'Materi berhasil dihapus.', icon: 'success', timer: 2000, showConfirmButton: false});";
+            }
         }
     }
 }
@@ -97,7 +103,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_material'])) {
                 }
             }
             
-            mysqli_query($koneksi, "UPDATE materials SET judul='$judul', tipe='$tipe', path='$path', size_bytes=$size WHERE id_material=$id");
+            if(mysqli_query($koneksi, "UPDATE materials SET judul='$judul', tipe='$tipe', path='$path', size_bytes=$size WHERE id_material=$id")){
+                $swal_script = "Swal.fire({title: 'Berhasil!', text: 'Materi berhasil diperbarui.', icon: 'success', timer: 2000, showConfirmButton: false});";
+            }
         }
     }
 }
@@ -280,7 +288,7 @@ if ($level === 'admin') {
                                                 data-bs-toggle="modal" data-bs-target="#modalEditMaterial">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            <form method="post" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus?');">
+                                            <form method="post" style="display:inline;" onsubmit="return confirmDelete(event, this);">
                                                 <input type="hidden" name="id_material" value="<?php echo $mt['id_material']; ?>">
                                                 <button type="submit" name="delete_material" value="1" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
                                             </form>
@@ -610,4 +618,31 @@ document.addEventListener('DOMContentLoaded', function(){
         });
     }
 });
+</script>
+<script>
+// Confirm Delete with SweetAlert2
+function confirmDelete(e, form) {
+    e.preventDefault();
+    Swal.fire({
+        title: 'Yakin ingin menghapus?',
+        text: "Materi yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    });
+    return false;
+}
+
+<?php if(!empty($swal_script)): ?>
+document.addEventListener('DOMContentLoaded', function() {
+    <?php echo $swal_script; ?>
+});
+<?php endif; ?>
 </script>
