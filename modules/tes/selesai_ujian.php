@@ -22,34 +22,49 @@ $q_jawab = mysqli_query($koneksi, "
     WHERE js.id_ujian_siswa='$id_ujian_siswa'
 ");
 
-$total_benar = 0;
+$total_skor = 0;
 $total_soal = mysqli_num_rows($q_jawab);
 
 while($r = mysqli_fetch_assoc($q_jawab)) {
-    if($r['jenis'] == 'pilihan_ganda' || $r['jenis'] == 'isian_singkat') {
-        if(strtoupper(trim($r['jawab_siswa'])) == strtoupper(trim($r['kunci_jawaban']))) {
-            $total_benar++;
+    $skor_soal = 0;
+    $j = strtoupper(trim($r['jawab_siswa']));
+    $k = strtoupper(trim($r['kunci_jawaban']));
+
+    if($r['jenis'] == 'pilihan_ganda') {
+        if($j == $k) {
+            $skor_soal = 1;
+        }
+    } elseif($r['jenis'] == 'isian_singkat' || $r['jenis'] == 'essay') {
+        if($j != '' && $j == $k) {
+            $skor_soal = 1;
+        } elseif ($j != '') {
+            // Cek kemiripan untuk nilai separuh
+            $percent = 0;
+            similar_text($j, $k, $percent);
+            if($percent >= 50) {
+                $skor_soal = 0.5;
+            }
         }
     } elseif($r['jenis'] == 'pilihan_ganda_kompleks') {
         // Logika sederhana: exact match string (A,B == A,B)
-        // Perlu sort dulu biar aman
-        $kunci_arr = explode(',', $r['kunci_jawaban']);
-        $jawab_arr = explode(',', $r['jawab_siswa']);
+        $kunci_arr = explode(',', $k);
+        $jawab_arr = explode(',', $j);
         sort($kunci_arr);
         sort($jawab_arr);
         if($kunci_arr == $jawab_arr) {
-            $total_benar++;
+            $skor_soal = 1;
         }
     } elseif($r['jenis'] == 'menjodohkan') {
         // Logika: exact match string pairs
-        if($r['jawab_siswa'] == $r['kunci_jawaban']) {
-            $total_benar++;
+        if($j == $k) {
+            $skor_soal = 1;
         }
     }
-    // Essay dianggap 0 dulu (perlu koreksi manual)
+    
+    $total_skor += $skor_soal;
 }
 
-$nilai = ($total_soal > 0) ? ($total_benar / $total_soal) * 100 : 0;
+$nilai = ($total_soal > 0) ? ($total_skor / $total_soal) * 100 : 0;
 
 mysqli_query($koneksi, "UPDATE ujian_siswa SET status='selesai', waktu_selesai=NOW(), nilai='$nilai' WHERE id_ujian_siswa='$id_ujian_siswa'");
 

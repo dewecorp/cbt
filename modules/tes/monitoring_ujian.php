@@ -139,6 +139,12 @@ $q_siswa = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_kelas='$id_kelas
                             </td>
                             <td><?php echo $sisa_waktu_str; ?></td>
                             <td>
+                                <?php if($us && $us['status'] == 'selesai'): ?>
+                                <a href="lihat_jawaban.php?id=<?php echo $us['id_ujian_siswa']; ?>" class="btn btn-info btn-sm text-white" title="Lihat Jawaban">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <?php endif; ?>
+
                                 <?php if($can_add_time): ?>
                                 <button type="button" class="btn btn-primary btn-sm" 
                                     data-bs-toggle="modal" 

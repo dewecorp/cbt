@@ -124,7 +124,7 @@
                 </li>
                 <li>
                     <a href="<?php echo $base_url; ?>modules/tes/jadwal_ujian.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'jadwal_ujian.php') !== false) ? 'active' : ''; ?>">
-                        <i class="fas fa-calendar-alt"></i> Administrasi Tes
+                        <i class="fas fa-calendar-alt"></i> Jadwal Asesmen
                     </a>
                 </li>
                 <li>

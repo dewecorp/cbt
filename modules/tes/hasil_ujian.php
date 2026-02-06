@@ -117,6 +117,9 @@ if ($level == 'admin' || $level == 'guru') {
                             <th class="text-center">Nilai</th>
                             <th class="text-center">Status</th>
                             <th class="text-center">Waktu Selesai</th>
+                            <?php if ($level == 'guru' || $level == 'admin'): ?>
+                            <th class="text-center">Aksi</th>
+                            <?php endif; ?>
                         </tr>
                     </thead>
                     <tbody>
@@ -146,13 +149,22 @@ if ($level == 'admin' || $level == 'guru') {
                                 <?php endif; ?>
                             </td>
                             <td><?php echo $row['waktu_selesai']; ?></td>
+                            <?php if ($level == 'guru' || $level == 'admin'): ?>
+                            <td class="text-center">
+                                <?php if($row['status'] == 'selesai'): ?>
+                                <a href="lihat_jawaban.php?id=<?php echo $row['id_ujian_siswa']; ?>" class="btn btn-primary btn-sm" title="Lihat Jawaban">
+                                    <i class="fas fa-eye"></i> Lihat Jawaban
+                                </a>
+                                <?php endif; ?>
+                            </td>
+                            <?php endif; ?>
                         </tr>
                         <?php 
                             endwhile;
                         else:
                         ?>
                         <tr>
-                            <td colspan="<?php echo ($level != 'siswa') ? '8' : '6'; ?>" class="text-center">Belum ada data hasil asesmen.</td>
+                            <td colspan="<?php echo ($level != 'siswa') ? '9' : '6'; ?>" class="text-center">Belum ada data hasil asesmen.</td>
                         </tr>
                         <?php endif; ?>
                     </tbody>
