@@ -356,7 +356,9 @@ $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
         </div>
     </div>
     <?php else: ?>
-        <div class="alert alert-info">Silakan pilih kelas terlebih dahulu untuk menampilkan data siswa.</div>
+        <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded text-center">
+            <i class="fas fa-info-circle me-1"></i> Silakan pilih kelas terlebih dahulu untuk menampilkan data siswa.
+        </div>
     <?php endif; ?>
 </div>
 
@@ -499,10 +501,10 @@ $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                         <label class="form-label">Pilih File Excel (.xlsx)</label>
                         <input type="file" class="form-control" name="file_excel" accept=".xlsx" required>
                     </div>
-                    <div class="alert alert-warning small">
-                        <strong>Format Kolom Excel (Baris 1 Header):</strong><br>
-                        No | NISN | Nama Siswa | Tempat Lahir | Tanggal Lahir (YYYY-MM-DD) | JK (L/P) | ID Kelas
-                    </div>
+                    <div class="card bg-warning bg-opacity-10 border border-warning text-warning p-3 rounded mb-3 small">
+                            <i class="fas fa-exclamation-triangle me-1"></i> <strong>Format Kolom Excel (Baris 1 Header):</strong><br>
+                            No | NISN | Nama Siswa | Tempat Lahir | Tanggal Lahir (YYYY-MM-DD) | JK (L/P) | ID Kelas
+                        </div>
                     <div class="mb-3">
                          <a href="download_template.php<?php echo $selected_kelas ? '?kelas='.$selected_kelas : ''; ?>" class="btn btn-outline-success btn-sm w-100">
                             <i class="fas fa-download"></i> Download Template Excel <?php echo $selected_kelas ? '(Sesuai Kelas)' : ''; ?>

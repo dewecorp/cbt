@@ -307,8 +307,8 @@ while ($row = mysqli_fetch_assoc($result)) {
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
-                <div class="alert alert-info">
-                    Belum ada data kelas. Silakan tambahkan data kelas di menu Master Data.
+                <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded text-center">
+                    <i class="fas fa-info-circle me-1"></i> Belum ada data kelas. Silakan tambahkan data kelas di menu Master Data.
                 </div>
             <?php endif; ?>
         </div>

@@ -532,7 +532,7 @@ document.addEventListener('DOMContentLoaded', function(){
                      } else {
                          // Use Proxy URL to bypass X-Frame-Options
                          var proxyUrl = 'proxy_url.php?url=' + encodeURIComponent(fullUrl);
-                         content = '<div class="alert alert-info text-center m-2 p-2" style="font-size:0.9rem;">Menampilkan via Proxy Mode. <a href="' + fullUrl + '" target="_blank" class="fw-bold text-decoration-underline">Buka Link Asli</a> jika tampilan berantakan.</div>';
+                         content = '<div class="card bg-info bg-opacity-10 border border-info text-info text-center m-2 p-2 rounded" style="font-size:0.9rem;"><i class="fas fa-info-circle me-1"></i> Menampilkan via Proxy Mode. <a href="' + fullUrl + '" target="_blank" class="fw-bold text-decoration-underline text-info">Buka Link Asli</a> jika tampilan berantakan.</div>';
                          content += '<iframe src="' + proxyUrl + '" width="100%" height="600px" style="border:none;" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>';
                      }
                      

@@ -492,8 +492,8 @@ if (isset($_GET['delete'])) {
             </div>
             <form method="POST" enctype="multipart/form-data" id="importForm">
                 <div class="modal-body">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Gunakan format file Excel (.xlsx) dengan urutan kolom:
+                    <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded mb-3 text-center">
+                        <i class="fas fa-info-circle me-1"></i> Gunakan format file Excel (.xlsx) dengan urutan kolom:
                         <strong>NUPTK, Nama Lengkap, Password</strong>.
                     </div>
                     <div class="mb-3">

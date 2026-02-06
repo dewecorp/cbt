@@ -612,8 +612,8 @@ if($level === 'siswa') {
                         </table>
                     </div>
                     <?php else: ?>
-                    <div class="alert alert-info text-center">
-                        Belum ada data absensi siswa hari ini untuk kelas yang Anda ampu.
+                    <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded text-center">
+                        <i class="fas fa-info-circle me-1"></i> Belum ada data absensi siswa hari ini untuk kelas yang Anda ampu.
                     </div>
                     <?php endif; ?>
                 </div>
@@ -695,8 +695,8 @@ if($level === 'siswa') {
                     <p class="mb-4"><?php echo get_indo_day($today) . ', ' . date('d F Y'); ?></p>
                     
                     <?php if (!$has_schedule): ?>
-                        <div class="alert alert-info">
-                            <i class="fas fa-calendar-times fa-2x mb-3"></i><br>
+                        <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded text-center mb-3">
+                            <div class="mb-2"><i class="fas fa-calendar-times fa-2x"></i></div>
                             <strong>Hari Libur / Tidak Ada Jadwal Pelajaran</strong><br>
                             Tidak perlu melakukan absensi hari ini.
                         </div>
@@ -707,13 +707,18 @@ if($level === 'siswa') {
                         </div>
 
                     <?php elseif ($attendance_today_dash): ?>
-                        <div class="alert alert-success">
-                            Anda sudah melakukan absensi harian.<br>
-                            <strong>Status: <?php echo $attendance_today_dash['status']; ?></strong>
-                            <?php if ($attendance_today_dash['status'] != 'Hadir' && !empty($attendance_today_dash['keterangan'])): ?>
-                                <br>Keterangan: <?php echo htmlspecialchars($attendance_today_dash['keterangan']); ?>
-                            <?php endif; ?>
-                            <br>Jam: <?php echo $attendance_today_dash['jam_masuk']; ?>
+                        <div class="card bg-success bg-opacity-10 border border-success text-success p-3 rounded">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-check-circle fa-2x me-3"></i>
+                                <div>
+                                    Anda sudah melakukan absensi harian.<br>
+                                    <strong>Status: <?php echo $attendance_today_dash['status']; ?></strong>
+                                    <?php if ($attendance_today_dash['status'] != 'Hadir' && !empty($attendance_today_dash['keterangan'])): ?>
+                                        <br>Keterangan: <?php echo htmlspecialchars($attendance_today_dash['keterangan']); ?>
+                                    <?php endif; ?>
+                                    <br>Jam: <?php echo $attendance_today_dash['jam_masuk']; ?>
+                                </div>
+                            </div>
                         </div>
                     <?php else: ?>
                         <div class="d-grid gap-2 d-md-block">
@@ -804,14 +809,14 @@ if($level === 'siswa') {
                     <div class="row">
                         <?php while($ann = mysqli_fetch_assoc($ann_siswa)): ?>
                         <div class="col-md-6 mb-3">
-                            <div class="alert alert-info border-left-info shadow-sm h-100">
+                            <div class="card bg-info bg-opacity-10 border border-info text-info shadow-sm h-100 p-3 rounded">
                                 <div class="d-flex justify-content-between align-items-start">
-                                    <h5 class="alert-heading font-weight-bold mb-1"><i class="fas fa-info-circle me-1"></i> <?php echo htmlspecialchars($ann['title'] ?? ''); ?></h5>
+                                    <h5 class="font-weight-bold mb-1"><i class="fas fa-info-circle me-1"></i> <?php echo htmlspecialchars($ann['title'] ?? ''); ?></h5>
                                     <small class="text-muted text-nowrap ms-2"><?php echo time_ago_str($ann['created_at']); ?></small>
                                 </div>
-                                <hr class="my-2">
+                                <hr class="my-2 border-info opacity-25">
                                 <p class="mb-2"><?php echo nl2br(htmlspecialchars($ann['body'] ?? '')); ?></p>
-                                <div class="small text-muted mt-2 d-flex justify-content-between">
+                                <div class="small opacity-75 mt-2 d-flex justify-content-between">
                                     <span><i class="fas fa-user me-1"></i> <?php echo htmlspecialchars($ann['nama_lengkap']); ?></span>
                                     <?php if($ann['nama_course']): ?>
                                         <span><i class="fas fa-chalkboard me-1"></i> <?php echo htmlspecialchars($ann['nama_course']); ?></span>
@@ -907,8 +912,8 @@ if($level === 'siswa') {
                         </table>
                     </div>
                     <?php else: ?>
-                    <div class="alert alert-info">
-                        Tidak ada ujian yang aktif saat ini.
+                    <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded text-center">
+                        <i class="fas fa-info-circle me-1"></i> Tidak ada ujian yang aktif saat ini.
                     </div>
                     <?php endif; ?>
                 </div>

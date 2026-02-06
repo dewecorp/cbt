@@ -55,42 +55,37 @@ $grades = mysqli_query($koneksi, $query);
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if(mysqli_num_rows($grades) > 0): ?>
-                            <?php $no = 1; while($row = mysqli_fetch_assoc($grades)): ?>
-                                <tr>
-                                    <td class="text-center" width="5%"><?php echo $no++; ?></td>
-                                    <td>
-                                        <span class="fw-bold"><?php echo htmlspecialchars($row['nama_mapel']); ?></span><br>
-                                        <small class="text-muted"><?php echo htmlspecialchars($row['nama_course']); ?></small>
-                                    </td>
-                                    <td><?php echo htmlspecialchars($row['judul']); ?></td>
-                                    <td><?php echo date('d/m/Y H:i', strtotime($row['submitted_at'])); ?></td>
-                                    <td class="text-center">
-                                        <?php if(isset($row['nilai']) && $row['nilai'] !== null && $row['nilai'] != ''): ?>
-                                            <span class="badge bg-success fs-6"><?php echo floatval($row['nilai']); ?></span>
-                                        <?php else: ?>
-                                            <span class="badge bg-secondary">Belum Dinilai</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?php if(!empty($row['catatan'])): ?>
-                                            <i class="fas fa-comment-alt text-warning me-1"></i> <?php echo htmlspecialchars($row['catatan']); ?>
-                                        <?php else: ?>
-                                            <span class="text-muted">-</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="text-center">
-                                        <a href="../../<?php echo $row['submitted_file']; ?>" target="_blank" class="btn btn-sm btn-info text-white" title="Lihat File Saya">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endwhile; ?>
-                        <?php else: ?>
+                        <?php $no = 1; ?>
+                        <?php while($row = mysqli_fetch_assoc($grades)): ?>
                             <tr>
-                                <td colspan="7" class="text-center py-4 text-muted">Belum ada tugas yang dikumpulkan.</td>
+                                <td class="text-center" width="5%"><?php echo $no++; ?></td>
+                                <td>
+                                    <span class="fw-bold"><?php echo htmlspecialchars($row['nama_mapel']); ?></span><br>
+                                    <small class="text-muted"><?php echo htmlspecialchars($row['nama_course']); ?></small>
+                                </td>
+                                <td><?php echo htmlspecialchars($row['judul']); ?></td>
+                                <td><?php echo date('d/m/Y H:i', strtotime($row['submitted_at'])); ?></td>
+                                <td class="text-center">
+                                    <?php if(isset($row['nilai']) && $row['nilai'] !== null && $row['nilai'] != ''): ?>
+                                        <span class="badge bg-success fs-6"><?php echo floatval($row['nilai']); ?></span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary">Belum Dinilai</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if(!empty($row['catatan'])): ?>
+                                        <i class="fas fa-comment-alt text-warning me-1"></i> <?php echo htmlspecialchars($row['catatan']); ?>
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-center">
+                                    <a href="../../<?php echo $row['submitted_file']; ?>" target="_blank" class="btn btn-sm btn-info text-white" title="Lihat File Saya">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
                             </tr>
-                        <?php endif; ?>
+                        <?php endwhile; ?>
                     </tbody>
                 </table>
             </div>

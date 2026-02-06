@@ -107,10 +107,16 @@ if (isset($_POST['login'])) {
             <?php endif; ?>
             
             <?php if($error): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <?php echo $error; ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        title: 'Login Gagal',
+                        text: '<?php echo $error; ?>',
+                        icon: 'error',
+                        confirmButtonText: 'Coba Lagi'
+                    });
+                });
+            </script>
             <?php endif; ?>
 
             <form method="POST" action="">
@@ -137,6 +143,7 @@ if (isset($_POST['login'])) {
             </div>
         </div>
     </div>
+    <script src="assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

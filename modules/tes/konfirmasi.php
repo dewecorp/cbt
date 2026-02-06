@@ -95,9 +95,14 @@ if (isset($_POST['mulai'])) {
                         </tr>
                     </table>
 
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Pastikan koneksi internet stabil. Jangan reload halaman saat ujian berlangsung.
+                    <div class="card bg-warning bg-opacity-10 border border-warning text-warning p-3 rounded mb-3">
+                        <div class="d-flex">
+                            <i class="fas fa-exclamation-triangle me-3 mt-1"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Perhatian</h6>
+                                <p class="mb-0">Pastikan koneksi internet stabil. Jangan reload halaman saat ujian berlangsung.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <form method="POST">
@@ -107,12 +112,30 @@ if (isset($_POST['mulai'])) {
                             <input type="text" name="token" class="form-control form-control-lg text-center text-uppercase" placeholder="TOKEN" required autocomplete="off">
                         </div>
                         <?php else: ?>
-                        <div class="alert alert-info">Anda sudah memulai ujian ini sebelumnya. Klik tombol di bawah untuk melanjutkan.</div>
+                        <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded mb-3">
+                            <div class="d-flex">
+                                <i class="fas fa-info-circle me-3 mt-1"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Informasi</h6>
+                                    <p class="mb-0">Anda sudah memulai ujian ini sebelumnya. Klik tombol di bawah untuk melanjutkan.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Lanjutkan Ujian',
+                                    text: 'Anda sudah memulai ujian ini sebelumnya. Klik tombol "Lanjutkan Mengerjakan" untuk kembali ke ujian.',
+                                    confirmButtonText: 'Oke'
+                                });
+                            });
+                        </script>
                         <input type="hidden" name="token" value="<?php echo $ujian['token']; ?>">
                         <?php endif; ?>
                         
                         <div class="d-grid">
-                            <button type="submit" name="mulai" class="btn btn-success btn-lg">MULAI MENGERJAKAN</button>
+                            <button type="submit" name="mulai" class="btn btn-success btn-lg"><?php echo $sudah_mulai ? 'LANJUTKAN MENGERJAKAN' : 'MULAI MENGERJAKAN'; ?></button>
                         </div>
                     </form>
                 </div>

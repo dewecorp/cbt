@@ -511,11 +511,11 @@ if (isset($_GET['edit_soal'])) {
                     </div>
 
                 <?php elseif($s['jenis'] == 'isian_singkat' || $s['jenis'] == 'essay'): ?>
-                    <div class="ms-3 alert alert-secondary p-2">Kunci: <?php echo $s['kunci_jawaban']; ?></div>
+                    <div class="ms-3 card bg-secondary bg-opacity-10 border border-secondary text-secondary p-2 rounded d-inline-block"><strong>Kunci:</strong> <?php echo $s['kunci_jawaban']; ?></div>
                 <?php endif; ?>
             </div>
             <?php endwhile; else: ?>
-            <div class="alert alert-info">Belum ada soal.</div>
+            <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded text-center"><i class="fas fa-info-circle me-1"></i> Belum ada soal.</div>
             <?php endif; ?>
         </div>
     </div>
@@ -534,11 +534,11 @@ if (isset($_GET['edit_soal'])) {
             </div>
             <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
-                    <div class="alert alert-info">
+                    <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded mb-3">
                         <small>
                             <i class="fas fa-info-circle"></i> Gunakan template Excel yang telah disediakan agar format sesuai.
                             <br>
-                            <a href="download_template_soal.php" class="fw-bold text-decoration-none"><i class="fas fa-download"></i> Download Template</a>
+                            <a href="download_template_soal.php" class="fw-bold text-decoration-none text-info"><i class="fas fa-download"></i> Download Template</a>
                         </small>
                     </div>
                     <div class="mb-3">

@@ -42,7 +42,19 @@ if ($course_id > 0) {
 
 if (!$course) {
     include '../../includes/header.php';
-    echo '<div class="container-fluid"><div class="alert alert-danger">Kelas Online tidak ditemukan atau Anda tidak memiliki akses.</div></div>';
+    echo '<script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Swal.fire({
+                title: "Akses Ditolak",
+                text: "Kelas Online tidak ditemukan atau Anda tidak memiliki akses.",
+                icon: "error",
+                confirmButtonText: "Kembali",
+                allowOutsideClick: false
+            }).then((result) => {
+                window.location.href = "../../index.php";
+            });
+        });
+    </script>';
     include '../../includes/footer.php';
     exit;
 }
@@ -686,8 +698,8 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                     <h6 class="m-0 font-weight-bold text-primary">Riwayat Kehadiran Kelas Ini</h6>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Absensi dilakukan melalui halaman Dashboard Utama sesuai jadwal pelajaran.
+                    <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded mb-3">
+                        <i class="fas fa-info-circle me-1"></i> Absensi dilakukan melalui halaman Dashboard Utama sesuai jadwal pelajaran.
                     </div>
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped" width="100%" cellspacing="0">
@@ -1090,7 +1102,7 @@ document.addEventListener('DOMContentLoaded', function(){
                      } else {
                          // Use Proxy URL to bypass X-Frame-Options
                          var proxyUrl = 'proxy_url.php?url=' + encodeURIComponent(fullUrl);
-                         content = '<div class="alert alert-info text-center m-2 p-2" style="font-size:0.9rem;">Menampilkan via Proxy Mode. <a href="' + fullUrl + '" target="_blank" class="fw-bold text-decoration-underline">Buka Link Asli</a> jika tampilan berantakan.</div>';
+                         content = '<div class="card bg-info bg-opacity-10 border border-info text-info text-center m-2 p-2 rounded" style="font-size:0.9rem;"><i class="fas fa-info-circle me-1"></i> Menampilkan via Proxy Mode. <a href="' + fullUrl + '" target="_blank" class="fw-bold text-decoration-underline text-info">Buka Link Asli</a> jika tampilan berantakan.</div>';
                          content += '<iframe src="' + proxyUrl + '" width="100%" height="600px" style="border:none;" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>';
                      }
                      

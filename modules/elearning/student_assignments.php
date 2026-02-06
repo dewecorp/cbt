@@ -119,10 +119,17 @@ $assignments = mysqli_query($koneksi, $query);
     <?php endif; ?>
 
     <?php if (isset($_SESSION['error'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: '<?php echo $_SESSION['error']; ?>',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
+        </script>
+        <?php unset($_SESSION['error']); ?>
     <?php endif; ?>
 
     <div class="row">
@@ -151,30 +158,38 @@ $assignments = mysqli_query($koneksi, $query);
                         </div>
 
                         <?php if($is_submitted): ?>
-                            <div class="alert alert-success py-2">
-                                <i class="fas fa-check-circle me-1"></i> Tugas telah dikirim pada <?php echo date('d M Y H:i', strtotime($a['submitted_at'])); ?>
-                                <br>
-                                <a href="../../<?php echo $a['submitted_file']; ?>" target="_blank" class="btn btn-sm btn-link px-0"><i class="fas fa-paperclip"></i> Lihat File Saya</a>
-                                
-                                <?php if(isset($a['nilai']) && $a['nilai'] !== null && $a['nilai'] != ''): ?>
-                                    <div class="mt-3 p-3 bg-white border rounded shadow-sm">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <div class="h2 fw-bold text-primary me-3"><?php echo floatval($a['nilai']); ?></div>
-                                            <div>
-                                                <div class="small text-uppercase text-muted fw-bold">Nilai Tugas</div>
-                                                <div class="small text-muted">Dinilai oleh <?php echo htmlspecialchars($a['nama_guru']); ?></div>
-                                            </div>
+                            <div class="card bg-success bg-opacity-10 border border-success p-3 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                    <div class="w-100">
+                                        <div class="text-success fw-bold">
+                                            Tugas telah dikirim pada <?php echo date('d M Y H:i', strtotime($a['submitted_at'])); ?>
                                         </div>
-                                        <?php if(!empty($a['catatan'])): ?>
-                                            <div class="border-top pt-2 mt-2">
-                                                <div class="small fw-bold text-dark mb-1"><i class="fas fa-comment-alt me-1 text-secondary"></i> Catatan Guru:</div>
-                                                <div class="small text-muted fst-italic bg-light p-2 rounded">
-                                                    "<?php echo nl2br(htmlspecialchars($a['catatan'])); ?>"
+                                        <div class="mt-2">
+                                            <a href="../../<?php echo $a['submitted_file']; ?>" target="_blank" class="btn btn-sm btn-light border text-primary"><i class="fas fa-paperclip"></i> Lihat File Saya</a>
+                                        </div>
+                                
+                                        <?php if(isset($a['nilai']) && $a['nilai'] !== null && $a['nilai'] != ''): ?>
+                                            <div class="mt-3 p-3 bg-white border rounded shadow-sm">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <div class="h2 fw-bold text-primary me-3"><?php echo floatval($a['nilai']); ?></div>
+                                                    <div>
+                                                        <div class="small text-uppercase text-muted fw-bold">Nilai Tugas</div>
+                                                        <div class="small text-muted">Dinilai oleh <?php echo htmlspecialchars($a['nama_guru']); ?></div>
+                                                    </div>
                                                 </div>
+                                                <?php if(!empty($a['catatan'])): ?>
+                                                    <div class="border-top pt-2 mt-2">
+                                                        <div class="small fw-bold text-dark mb-1"><i class="fas fa-comment-alt me-1 text-secondary"></i> Catatan Guru:</div>
+                                                        <div class="small text-muted fst-italic bg-light p-2 rounded">
+                                                            "<?php echo nl2br(htmlspecialchars($a['catatan'])); ?>"
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
                                             </div>
                                         <?php endif; ?>
                                     </div>
-                                <?php endif; ?>
+                                </div>
                             </div>
                         <?php endif; ?>
 

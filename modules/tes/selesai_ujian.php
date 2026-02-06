@@ -94,17 +94,18 @@ include '../../includes/header.php';
                 <div class="card-body p-5">
                     
                     <?php if (isset($_GET['violation']) && $_GET['violation'] == 'true'): ?>
-                    <div class="alert alert-danger mb-4">
-                        <div class="d-flex">
-                            <div class="me-3">
-                                <i class="fas fa-exclamation-triangle fa-2x"></i>
-                            </div>
-                            <div>
-                                <h5 class="alert-heading fw-bold">PELANGGARAN TERDETEKSI!</h5>
-                                <p class="mb-0">Sistem mendeteksi Anda membuka tab/jendela lain atau keluar dari halaman asesmen. Asesmen otomatis dihentikan.</p>
-                            </div>
-                        </div>
-                    </div>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'PELANGGARAN TERDETEKSI!',
+                                text: 'Sistem mendeteksi Anda membuka tab/jendela lain atau keluar dari halaman asesmen. Asesmen otomatis dihentikan.',
+                                confirmButtonText: 'Mengerti',
+                                confirmButtonColor: '#d33',
+                                allowOutsideClick: false
+                            });
+                        });
+                    </script>
                     <?php endif; ?>
 
                     <h4 class="text-center mb-4 text-primary fw-bold"><?php echo $hasil['nama_ujian']; ?></h4>

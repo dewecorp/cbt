@@ -54,8 +54,11 @@ while($k = mysqli_fetch_assoc($q_kelas)) {
                 $q_me = mysqli_query($koneksi, "SELECT s.*, k.nama_kelas FROM siswa s JOIN kelas k ON s.id_kelas = k.id_kelas WHERE s.id_siswa='$id_siswa'");
                 $me = mysqli_fetch_assoc($q_me);
                 ?>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Berikut adalah kartu ujian Anda. Silahkan klik tombol cetak untuk mengunduh atau mencetak kartu ujian.
+                <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-info-circle me-3 fs-4"></i>
+                        <span>Berikut adalah kartu ujian Anda. Silahkan klik tombol cetak untuk mengunduh atau mencetak kartu ujian.</span>
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-bordered">

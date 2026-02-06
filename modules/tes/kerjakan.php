@@ -109,8 +109,8 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
     </div>
 </nav>
 
-<div class="alert alert-danger text-center m-0 rounded-0 fw-bold">
-    <i class="fas fa-exclamation-triangle"></i> PERINGATAN: DILARANG MEMBUKA TAB LAIN ATAU MINIMIZE BROWSER! UJIAN AKAN OTOMATIS TERHENTI.
+<div class="bg-danger text-white text-center p-2 fw-bold shadow-sm">
+    <i class="fas fa-exclamation-triangle me-2"></i> PERINGATAN: DILARANG MEMBUKA TAB LAIN ATAU MINIMIZE BROWSER! UJIAN AKAN OTOMATIS TERHENTI.
 </div>
 
 <div class="container-fluid mt-4">
