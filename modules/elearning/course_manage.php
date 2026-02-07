@@ -720,19 +720,80 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                             <tbody>
                                 <?php
                                 if ($level == 'siswa') {
+                                    // SELF-HEALING: Sync General Attendance to This Course (and others)
+                                    $today_sync = date('Y-m-d');
+                                    $uid_sync = $_SESSION['user_id'];
+                                    
+                                    // Ensure id_kelas is available
+                                    $id_kelas_sync = isset($_SESSION['id_kelas']) ? $_SESSION['id_kelas'] : '';
+                                    if (empty($id_kelas_sync)) {
+                                         $q_k = mysqli_query($koneksi, "SELECT id_kelas FROM siswa WHERE id_siswa='$uid_sync'");
+                                         if ($r_k = mysqli_fetch_assoc($q_k)) {
+                                             $id_kelas_sync = $r_k['id_kelas'];
+                                         }
+                                    }
+
+                                    // Check General Attendance
+                                    $check_general = mysqli_query($koneksi, "SELECT * FROM absensi WHERE id_siswa='$uid_sync' AND (id_course='0' OR id_course IS NULL) AND tanggal='$today_sync' LIMIT 1");
+                                    
+                                    if (mysqli_num_rows($check_general) > 0) {
+                                        $general_att = mysqli_fetch_assoc($check_general);
+                                        $hari_indo_sync = get_indo_day(date('l')); // Ensure get_indo_day is available or use existing
+                                        
+                                        $q_jadwal_sync = mysqli_query($koneksi, "SELECT mapel_ids FROM jadwal_pelajaran WHERE id_kelas='$id_kelas_sync' AND hari='$hari_indo_sync'");
+                                        if ($q_jadwal_sync && mysqli_num_rows($q_jadwal_sync) > 0) {
+                                            $row_jadwal_sync = mysqli_fetch_assoc($q_jadwal_sync);
+                                            if (!empty($row_jadwal_sync['mapel_ids'])) {
+                                                $mapel_ids_sync = explode(',', $row_jadwal_sync['mapel_ids']);
+                                                foreach ($mapel_ids_sync as $mid_sync) {
+                                                    $mid_sync = trim($mid_sync);
+                                                    if (empty($mid_sync)) continue;
+                                                    
+                                                    // Find course
+                                                    $q_course_sync = mysqli_query($koneksi, "SELECT id_course FROM courses WHERE id_kelas='$id_kelas_sync' AND id_mapel='$mid_sync'");
+                                                    if ($r_course_sync = mysqli_fetch_assoc($q_course_sync)) {
+                                                        $cid_sync = $r_course_sync['id_course'];
+                                                        
+                                                        // Check if exists
+                                                        $check_c_sync = mysqli_query($koneksi, "SELECT id_absensi FROM absensi WHERE id_siswa='$uid_sync' AND id_course='$cid_sync' AND tanggal='$today_sync'");
+                                                        if (mysqli_num_rows($check_c_sync) == 0) {
+                                                            // Backfill
+                                                            $s_stat = $general_att['status'];
+                                                            $s_ket = mysqli_real_escape_string($koneksi, $general_att['keterangan']);
+                                                            $s_time = $general_att['jam_masuk'];
+                                                            
+                                                            mysqli_query($koneksi, "INSERT INTO absensi (id_siswa, id_kelas, id_course, tanggal, jam_masuk, status, keterangan) VALUES ('$uid_sync', '$id_kelas_sync', '$cid_sync', '$today_sync', '$s_time', '$s_stat', '$s_ket')");
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
                                     // Show ONLY attendance for THIS course (linked via Schedule)
-                                    $q_absen = mysqli_query($koneksi, "SELECT a.*, s.nama_siswa FROM absensi a JOIN siswa s ON a.id_siswa=s.id_siswa WHERE a.id_siswa='$uid' AND a.id_course='$course_id' ORDER BY a.tanggal DESC");
-                                } else {
-                                    // Guru sees all students in this class for THIS course
-                                    $q_absen = mysqli_query($koneksi, "
-                                        SELECT a.*, s.nama_siswa 
-                                        FROM absensi a 
-                                        JOIN course_students cs ON a.id_siswa = cs.siswa_id
-                                        JOIN siswa s ON a.id_siswa=s.id_siswa 
-                                        WHERE cs.course_id='$course_id' AND a.id_course='$course_id'
-                                        ORDER BY a.tanggal DESC, a.jam_masuk ASC
-                                    ");
-                                }
+                                    // $q_absen = mysqli_query($koneksi, "SELECT a.*, s.nama_siswa FROM absensi a JOIN siswa s ON a.id_siswa=s.id_siswa WHERE a.id_siswa='$uid' AND a.id_course='$course_id' ORDER BY a.tanggal DESC");
+                                } 
+                                
+                                // Universal Query: Show Attendance for ALL students (Teacher & Student see the same list)
+                                // Modified to show 'Belum Hadir' for students who haven't attended TODAY
+                                $today_date = date('Y-m-d');
+                                $q_absen = mysqli_query($koneksi, "
+                                    SELECT a.tanggal, a.jam_masuk, a.status, a.keterangan, s.nama_siswa 
+                                    FROM absensi a 
+                                    JOIN siswa s ON a.id_siswa=s.id_siswa 
+                                    WHERE a.id_course='$course_id'
+                                    
+                                    UNION ALL
+                                    
+                                    SELECT '$today_date' as tanggal, NULL as jam_masuk, 'Belum Hadir' as status, '-' as keterangan, s.nama_siswa
+                                    FROM siswa s
+                                    WHERE s.id_kelas='{$course['id_kelas']}' AND s.status='aktif'
+                                    AND s.id_siswa NOT IN (
+                                        SELECT id_siswa FROM absensi WHERE id_course='$course_id' AND tanggal='$today_date'
+                                    )
+                                    
+                                    ORDER BY tanggal DESC, nama_siswa ASC
+                                ");
                                 
                                 if (mysqli_num_rows($q_absen) > 0) {
                                     $no = 1;
@@ -742,7 +803,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                         <td><?php echo $no++; ?></td>
                                         <td><?php echo date('d-m-Y', strtotime($row['tanggal'])); ?></td>
                                         <td><?php echo htmlspecialchars($row['nama_siswa']); ?></td>
-                                        <td><?php echo date('H:i', strtotime($row['jam_masuk'])); ?></td>
+                                        <td><?php echo (!empty($row['jam_masuk'])) ? date('H:i', strtotime($row['jam_masuk'])) : '-'; ?></td>
                                         <td>
                                             <?php 
                                             $badge = 'secondary';

@@ -245,6 +245,45 @@ if($level === 'siswa') {
     $id_kelas = $_SESSION['id_kelas'];
     
     // Logic Absensi Siswa (Dashboard - General Attendance + Scheduled Courses)
+    // SELF-HEALING: Sync General Attendance to Course Attendance automatically
+    $today_sync = date('Y-m-d');
+    $uid_sync = $_SESSION['user_id'];
+    $check_general = mysqli_query($koneksi, "SELECT * FROM absensi WHERE id_siswa='$uid_sync' AND (id_course='0' OR id_course IS NULL) AND tanggal='$today_sync' LIMIT 1");
+    
+    if (mysqli_num_rows($check_general) > 0) {
+        $general_att = mysqli_fetch_assoc($check_general);
+        $hari_indo_sync = get_indo_day(date('l'));
+        
+        $q_jadwal_sync = mysqli_query($koneksi, "SELECT mapel_ids FROM jadwal_pelajaran WHERE id_kelas='$id_kelas' AND hari='$hari_indo_sync'");
+        if ($q_jadwal_sync && mysqli_num_rows($q_jadwal_sync) > 0) {
+            $row_jadwal_sync = mysqli_fetch_assoc($q_jadwal_sync);
+            if (!empty($row_jadwal_sync['mapel_ids'])) {
+                $mapel_ids_sync = explode(',', $row_jadwal_sync['mapel_ids']);
+                foreach ($mapel_ids_sync as $mid_sync) {
+                    $mid_sync = trim($mid_sync);
+                    if (empty($mid_sync)) continue;
+                    
+                    // Find course
+                    $q_course_sync = mysqli_query($koneksi, "SELECT id_course FROM courses WHERE id_kelas='$id_kelas' AND id_mapel='$mid_sync'");
+                    if ($r_course_sync = mysqli_fetch_assoc($q_course_sync)) {
+                        $cid_sync = $r_course_sync['id_course'];
+                        
+                        // Check if exists
+                        $check_c_sync = mysqli_query($koneksi, "SELECT id_absensi FROM absensi WHERE id_siswa='$uid_sync' AND id_course='$cid_sync' AND tanggal='$today_sync'");
+                        if (mysqli_num_rows($check_c_sync) == 0) {
+                            // Backfill
+                            $s_stat = $general_att['status'];
+                            $s_ket = mysqli_real_escape_string($koneksi, $general_att['keterangan']);
+                            $s_time = $general_att['jam_masuk'];
+                            
+                            mysqli_query($koneksi, "INSERT INTO absensi (id_siswa, id_kelas, id_course, tanggal, jam_masuk, status, keterangan) VALUES ('$uid_sync', '$id_kelas', '$cid_sync', '$today_sync', '$s_time', '$s_stat', '$s_ket')");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_attendance_dash'])) {
         $status = mysqli_real_escape_string($koneksi, $_POST['status']);
         $keterangan = isset($_POST['keterangan']) ? mysqli_real_escape_string($koneksi, $_POST['keterangan']) : '';
@@ -834,6 +873,32 @@ if($level === 'siswa') {
                                     <br>Jam: <?php echo $attendance_today_dash['jam_masuk']; ?>
                                 </div>
                             </div>
+                            
+                            <?php
+                            // Show Subject Attendance
+                            $q_sub_att = mysqli_query($koneksi, "
+                                SELECT a.*, m.nama_mapel 
+                                FROM absensi a 
+                                JOIN courses c ON a.id_course = c.id_course 
+                                JOIN mapel m ON c.id_mapel = m.id_mapel 
+                                WHERE a.id_siswa='$uid' AND a.tanggal='$today' AND a.id_course > 0
+                            ");
+
+                            if ($q_sub_att && mysqli_num_rows($q_sub_att) > 0) {
+                                echo '<hr class="border-success opacity-25 my-3">';
+                                echo '<div class="text-start">';
+                                echo '<h6 class="font-weight-bold small text-uppercase mb-2 text-success"><i class="fas fa-book me-1"></i> Tercatat di Mata Pelajaran:</h6>';
+                                echo '<ul class="list-unstyled mb-0">';
+                                while ($row_sub = mysqli_fetch_assoc($q_sub_att)) {
+                                    echo '<li class="d-flex justify-content-between align-items-center mb-1">';
+                                    echo '<span>' . htmlspecialchars($row_sub['nama_mapel']) . '</span>';
+                                    echo '<span class="badge bg-white text-success border border-success rounded-pill px-2">' . $row_sub['status'] . '</span>';
+                                    echo '</li>';
+                                }
+                                echo '</ul>';
+                                echo '</div>';
+                            }
+                            ?>
                         </div>
                     <?php else: ?>
                         <div class="d-grid gap-2 d-md-block">

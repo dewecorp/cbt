@@ -94,6 +94,11 @@
                         <i class="fas fa-tasks"></i> Tugas
                     </a>
                 </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/elearning/rekap_absensi.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/rekap_absensi.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-calendar-check"></i> Kehadiran Siswa
+                    </a>
+                </li>
                 <?php endif; ?>
 
                 <?php if($level !== 'siswa'): ?>
