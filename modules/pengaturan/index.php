@@ -121,14 +121,31 @@ elseif (isset($_POST['reset_tahun_ajaran'])) {
             }
         }
     }
+    // Delete forum files
+    $forum_dir = '../../assets/uploads/forum/';
+    if (is_dir($forum_dir)) {
+        $files = scandir($forum_dir);
+        foreach ($files as $f) {
+            if ($f === '.' || $f === '..') continue;
+            $path = $forum_dir . $f;
+            if (is_file($path)) {
+                @unlink($path);
+            }
+        }
+    }
     // Clear database records
     mysqli_query($koneksi, "DELETE FROM submissions");
     mysqli_query($koneksi, "DELETE FROM assignments");
+    mysqli_query($koneksi, "DELETE FROM absensi");
+    mysqli_query($koneksi, "DELETE FROM forum_topics");
+    mysqli_query($koneksi, "DELETE FROM forum_replies");
+    mysqli_query($koneksi, "DELETE FROM forum_likes");
+    mysqli_query($koneksi, "DELETE FROM forum_reply_likes");
     echo "<script>
         Swal.fire({
             icon: 'success',
             title: 'Reset Berhasil',
-            text: 'Semua tugas dan pengumpulan telah dihapus untuk memulai tahun ajaran baru.',
+            text: 'Semua data (tugas, absensi, forum) telah dihapus untuk memulai tahun ajaran baru.',
             timer: 2000,
             showConfirmButton: false
         }).then(() => {
@@ -222,15 +239,15 @@ elseif (isset($_POST['reset_tahun_ajaran'])) {
                 </div>
                 <div class="card-body">
                     <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-circle"></i> Fitur ini akan menghapus semua <b>tugas</b> yang dibuat guru dan <b>pengumpulan tugas</b> siswa, termasuk file yang diunggah, untuk memulai tahun ajaran baru.
+                        <i class="fas fa-exclamation-circle"></i> Fitur ini akan menghapus semua <b>tugas, pengumpulan tugas, data absensi, dan data forum</b> untuk memulai tahun ajaran baru.
                     </div>
                     <form method="POST" action="">
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="confirm_reset" required>
                             <label class="form-check-label text-danger fw-bold" for="confirm_reset">Saya memahami konsekuensinya dan ingin melanjutkan reset.</label>
                         </div>
-                        <button type="submit" name="reset_tahun_ajaran" class="btn btn-danger" onclick="return confirm('Hapus semua tugas dan pengumpulan? Tindakan ini tidak dapat dibatalkan.');">
-                            <i class="fas fa-exclamation-triangle"></i> Reset Tahun Ajaran (Hapus Tugas & Pengumpulan)
+                        <button type="submit" name="reset_tahun_ajaran" class="btn btn-danger" onclick="return confirm('Hapus semua data (tugas, absensi, forum)? Tindakan ini tidak dapat dibatalkan.');">
+                            <i class="fas fa-exclamation-triangle"></i> Reset Tahun Ajaran (Hapus Semua Data)
                         </button>
                     </form>
                 </div>
