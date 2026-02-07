@@ -17,14 +17,7 @@ if (isset($_SESSION['login_success'])) {
 }
 
 // Helper Functions (Used by modules)
-function time_ago_str($datetime) {
-    $ts = strtotime($datetime);
-    $diff = time() - $ts;
-    if ($diff < 60) return $diff . " detik lalu";
-    if ($diff < 3600) return floor($diff / 60) . " menit lalu";
-    if ($diff < 86400) return floor($diff / 3600) . " jam lalu";
-    return floor($diff / 86400) . " hari lalu";
-}
+// time_ago_str moved to config/database.php
 
 function get_indo_day($date) {
     $days = [

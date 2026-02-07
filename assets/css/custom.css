@@ -237,3 +237,34 @@ table.dataTable thead th {
 .bottom-nav .nav-item:hover {
     color: var(--kemenag-green-dark);
 }
+
+/* Timeline Custom Styles */
+.timeline {
+    position: relative;
+    padding-left: 1rem;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -20px;
+    top: 25px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #4e73df;
+    border: 3px solid #eaf1fb;
+    z-index: 1;
+}
+
+.border-left-blue {
+    border-left: 4px solid #4e73df !important;
+}
+
+.text-blue {
+    color: #4e73df !important;
+}

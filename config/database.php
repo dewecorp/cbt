@@ -31,6 +31,7 @@ mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS activity_log (
 
 mysqli_query($koneksi, "DELETE FROM activity_log WHERE created_at < (NOW() - INTERVAL 1 DAY)");
 
+if (!function_exists('log_activity')) {
 function log_activity($action, $module, $details = '') {
     global $koneksi;
     $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
@@ -44,5 +45,17 @@ function log_activity($action, $module, $details = '') {
     $dt = mysqli_real_escape_string($koneksi, $details);
     $sql = "INSERT INTO activity_log (user_id, username, level, action, module, details, created_at) VALUES ($uid, $u, $lv, '$ac', '$md', '$dt', NOW())";
     mysqli_query($koneksi, $sql);
+}
+}
+
+if (!function_exists('time_ago_str')) {
+function time_ago_str($datetime) {
+    $ts = strtotime($datetime);
+    $diff = time() - $ts;
+    if ($diff < 60) return $diff . " detik lalu";
+    if ($diff < 3600) return floor($diff / 60) . " menit lalu";
+    if ($diff < 86400) return floor($diff / 3600) . " jam lalu";
+    return floor($diff / 86400) . " hari lalu";
+}
 }
 ?>
