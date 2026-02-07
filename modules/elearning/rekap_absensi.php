@@ -134,7 +134,7 @@ if (!empty($id_kelas)) {
                     <input type="number" name="tahun" class="form-control" value="<?php echo $tahun; ?>" min="2020" max="<?php echo date('Y')+1; ?>">
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-success w-100"><i class="fas fa-search"></i> Tampilkan</button>
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> Tampilkan</button>
                 </div>
             </form>
         </div>

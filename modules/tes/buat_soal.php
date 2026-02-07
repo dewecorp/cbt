@@ -366,7 +366,7 @@ if (isset($_GET['edit_soal'])) {
     <!-- Form Tambah Soal -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" data-bs-toggle="collapse" data-bs-target="#collapseForm" style="cursor: pointer;">
-            <h6 class="m-0 font-weight-bold text-success"><i class="fas fa-plus-circle"></i> Tambah Soal Baru</h6>
+            <h6 class="m-0 font-weight-bold text-success">Form Buat Soal</h6>
             <i class="fas fa-chevron-down"></i>
         </div>
         <div class="collapse show" id="collapseForm">
@@ -518,7 +518,7 @@ if (isset($_GET['edit_soal'])) {
     <!-- List Soal -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Daftar Soal</h6>
+            <h6 class="m-0 font-weight-bold text-success">Daftar Soal</h6>
         </div>
         <div class="card-body">
             <?php
@@ -629,11 +629,11 @@ if (isset($_GET['edit_soal'])) {
             </div>
             <form method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
-                    <div class="card bg-primary bg-opacity-10 border border-primary text-primary p-3 rounded mb-3">
+                    <div class="card bg-success bg-opacity-10 border border-success text-success p-3 rounded mb-3">
                         <small>
                             <i class="fas fa-info-circle"></i> <strong>Format Dokumen Word (.docx):</strong><br>
                             Gunakan template yang telah disediakan agar format sesuai. <br>
-                            <a href="download_template_word.php" class="fw-bold text-decoration-none text-primary"><i class="fas fa-download"></i> Download Template Word</a>
+                            <a href="download_template_word.php" class="fw-bold text-decoration-none text-success"><i class="fas fa-download"></i> Download Template Word</a>
                             <br><br>
                             <em>Fitur deteksi otomatis:</em><br>
                             - Pilihan Ganda (Opsi A-E)<br>

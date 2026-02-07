@@ -134,7 +134,32 @@ if ($level === 'admin') {
     // Reset pointer for other views
     mysqli_data_seek($assignments, 0);
 }
+
+function getAssignmentBadgeClass($type) {
+    switch ($type) {
+        case 'CBT': return 'bg-primary';
+        case 'Merangkum': return 'bg-info text-dark';
+        case 'Observasi': return 'bg-warning text-dark';
+        case 'Praktik': return 'bg-danger';
+        case 'Proyek': return 'bg-secondary';
+        case 'Latihan Soal': return 'bg-dark';
+        default: return 'bg-success';
+    }
+}
 ?>
+<style>
+    /* Custom Green Pills */
+    #pills-tab .nav-link.active, #pills-tab .show > .nav-link {
+        color: #fff;
+        background-color: #198754;
+    }
+    #pills-tab .nav-link {
+        color: #198754;
+    }
+    #pills-tab .nav-link:hover {
+        color: #146c43;
+    }
+</style>
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -193,7 +218,7 @@ if ($level === 'admin') {
                                                             <td><?php echo $no++; ?></td>
                                                             <td><?php echo htmlspecialchars($a['nama_kelas']); ?></td>
                                                             <td><?php echo htmlspecialchars($a['nama_course']); ?></td>
-                                                            <td><span class="badge bg-primary"><?php echo htmlspecialchars($a['jenis_tugas']); ?></span></td>   
+                                                            <td><span class="badge <?php echo getAssignmentBadgeClass($a['jenis_tugas']); ?>"><?php echo htmlspecialchars($a['jenis_tugas']); ?></span></td>   
                                                             <td><?php echo htmlspecialchars($a['judul']); ?></td>
                                                             <td><?php echo date('d/m/Y H:i', strtotime($a['deadline'])); ?></td>
                                                             <td><?php echo htmlspecialchars($a['nama_lengkap']); ?></td>
@@ -235,7 +260,7 @@ if ($level === 'admin') {
                                     <td><?php echo $no++; ?></td>
                                     <td><?php echo htmlspecialchars($a['nama_kelas']); ?></td>
                                     <td><?php echo htmlspecialchars($a['nama_course']); ?></td>
-                                    <td><span class="badge bg-success"><?php echo htmlspecialchars($a['jenis_tugas']); ?></span></td>
+                                    <td><span class="badge <?php echo getAssignmentBadgeClass($a['jenis_tugas']); ?>"><?php echo htmlspecialchars($a['jenis_tugas']); ?></span></td>
                                     <td><?php echo htmlspecialchars($a['judul']); ?></td>
                                     <td><?php echo date('d/m/Y H:i', strtotime($a['deadline'])); ?></td>
                                     <td><?php echo htmlspecialchars($a['nama_lengkap']); ?></td>

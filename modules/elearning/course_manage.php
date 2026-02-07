@@ -615,16 +615,16 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
          <div class="tab-pane fade <?php echo $active_tab == 'tugas' ? 'show active' : ''; ?>">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Daftar Tugas</h6>
+                    <h6 class="m-0 font-weight-bold text-success">Daftar Tugas</h6>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <?php while($asg = mysqli_fetch_assoc($assignments)): ?>
                             <div class="col-md-6 mb-4">
-                                <div class="card h-100 shadow-sm border-left-primary">
+                                <div class="card h-100 shadow-sm border-left-success">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <div class="h5 font-weight-bold text-primary text-uppercase mb-1"><?php echo htmlspecialchars($asg['judul']); ?></div>
+                                            <div class="h5 font-weight-bold text-success text-uppercase mb-1"><?php echo htmlspecialchars($asg['judul']); ?></div>
                                             <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                                                 <i class="fas fa-clock"></i> <?php echo date('d M Y', strtotime($asg['deadline'])); ?>
                                             </div>
@@ -640,7 +640,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                                         <a href="submissions.php?assignment_id=<?php echo $asg['id_assignment']; ?>" class="btn btn-info btn-sm">Lihat Pengumpulan</a>
                                                     <?php endif; ?>
                                                 <?php else: ?>
-                                                    <a href="student_assignments.php?id=<?php echo $asg['id_assignment']; ?>" class="btn btn-success btn-sm">Kerjakan</a>
+                                                    <a href="student_assignments.php?id=<?php echo $asg['id_assignment']; ?>" class="btn btn-primary btn-sm">Kerjakan</a>
                                                 <?php endif; ?>
                                              </div>
                                         </div>
@@ -660,13 +660,13 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
          <div class="tab-pane fade <?php echo $active_tab == 'materi' ? 'show active' : ''; ?>">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Materi Pembelajaran</h6>
+                    <h6 class="m-0 font-weight-bold text-success">Materi Pembelajaran</h6>
                 </div>
                 <div class="card-body">
                     <div class="row">
                          <?php while($mat = mysqli_fetch_assoc($materials)): ?>
                             <div class="col-md-4 mb-4">
-                                <div class="card h-100 shadow-sm border-left-info">
+                                <div class="card h-100 shadow-sm border-left-success">
                                     <div class="card-body text-center">
                                         <div class="mb-3">
                                             <?php 
@@ -682,7 +682,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                         <small class="text-muted d-block mb-3"><?php echo date('d M Y', strtotime($mat['created_at'])); ?></small>
                                         
                                         <div class="d-flex gap-2">
-                                            <button class="btn btn-success btn-sm flex-fill btn-preview" 
+                                            <button class="btn btn-primary btn-sm flex-fill btn-preview" 
                                                 data-id="<?php echo $mat['id_material']; ?>"
                                                 data-tipe="<?php echo $mat['tipe']; ?>"
                                                 data-path="<?php echo ($mat['tipe']=='link') ? $mat['path'] : '../../'.$mat['path']; ?>"
@@ -692,7 +692,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                             <?php if($mat['tipe'] == 'link'): ?>
                                                 <a href="<?php echo $mat['path']; ?>" target="_blank" class="btn btn-primary btn-sm flex-fill"><i class="fas fa-external-link-alt"></i> Buka</a>
                                             <?php else: ?>
-                                                <a href="../../<?php echo $mat['path']; ?>" download class="btn btn-success btn-sm flex-fill"><i class="fas fa-download"></i> Unduh</a>
+                                                <a href="../../<?php echo $mat['path']; ?>" download class="btn btn-primary btn-sm flex-fill"><i class="fas fa-download"></i> Unduh</a>
                                             <?php endif; ?>
                                         </div>
                                     </div>
@@ -713,10 +713,10 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
             <!-- Riwayat Kehadiran -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Riwayat Kehadiran Kelas Ini</h6>
+                    <h6 class="m-0 font-weight-bold text-success">Riwayat Kehadiran Kelas Ini</h6>
                 </div>
                 <div class="card-body">
-                    <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded mb-3">
+                    <div class="card bg-success bg-opacity-10 border border-success text-success p-3 rounded mb-3">
                         <i class="fas fa-info-circle me-1"></i> Absensi dilakukan melalui halaman Dashboard Utama sesuai jadwal pelajaran.
                     </div>
                     <div class="table-responsive">

@@ -287,7 +287,7 @@ $topicsQ = mysqli_query($koneksi, "
                             <i class="fas fa-paperclip fa-lg"></i> <input type="file" name="file" style="display: none;"> File
                         </label>
                     </div>
-                    <button type="submit" name="create_post" value="1" class="btn btn-success btn-sm px-4">Kirim</button>
+                    <button type="submit" name="create_post" value="1" class="btn btn-primary btn-sm px-4">Kirim</button>
                 </div>
             </form>
         </div>

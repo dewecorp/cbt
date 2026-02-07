@@ -163,14 +163,14 @@ if (isset($_GET['edit_id'])) {
 }
 ?>
 <style>
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+#pills-tab .nav-link.active, #pills-tab .show > .nav-link {
     background-color: #198754 !important;
     color: white !important;
 }
-.nav-pills .nav-link {
+#pills-tab .nav-link {
     color: #6c757d;
 }
-.nav-pills .nav-link:hover {
+#pills-tab .nav-link:hover {
     color: #198754;
 }
 </style>

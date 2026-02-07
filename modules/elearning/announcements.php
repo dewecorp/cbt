@@ -212,7 +212,7 @@ $ann = mysqli_query($koneksi, "SELECT a.*, c.nama_course, k.nama_kelas, u.nama_l
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="submit" name="update_announcement" value="1" class="btn btn-success">Simpan Perubahan</button>
+        <button type="submit" name="update_announcement" value="1" class="btn btn-primary">Simpan Perubahan</button>
       </div>
     </form>
   </div>

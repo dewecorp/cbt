@@ -140,6 +140,19 @@ if ($level === 'admin') {
 }
 ?>
 <div class="container-fluid">
+    <style>
+        #pills-tab .nav-link.active, #pills-tab .show > .nav-link {
+            color: #fff !important;
+            background-color: #198754 !important;
+        }
+        #pills-tab .nav-link {
+            color: #198754 !important;
+        }
+        #pills-tab .nav-link:hover {
+            color: #157347 !important;
+            background-color: rgba(25, 135, 84, 0.1) !important;
+        }
+    </style>
     <div class="row">
         <div class="col-12">
             <div class="card shadow mb-4">
@@ -205,7 +218,7 @@ if ($level === 'admin') {
                                                             <td><?php echo htmlspecialchars($mt['nama_lengkap']); ?></td>
                                                             <td><?php echo date('d/m/Y H:i', strtotime($mt['created_at'])); ?></td>
                                                             <td>
-                                                                <button class="btn btn-success btn-sm btn-preview" 
+                                                                <button class="btn btn-primary btn-sm btn-preview" 
                                                                     data-id="<?php echo $mt['id_material']; ?>"
                                                                     data-tipe="<?php echo $mt['tipe']; ?>"
                                                                     data-path="<?php echo ($mt['tipe']=='link') ? $mt['path'] : '../../'.$mt['path']; ?>"
@@ -213,9 +226,9 @@ if ($level === 'admin') {
                                                                     <i class="fas fa-eye"></i> Lihat
                                                                 </button>
                                                                 <?php if($mt['tipe'] == 'link'): ?>
-                                                                    <a href="<?php echo $mt['path']; ?>" target="_blank" class="btn btn-success btn-sm"><i class="fas fa-external-link-alt"></i> Buka</a>
+                                                                    <a href="<?php echo $mt['path']; ?>" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-external-link-alt"></i> Buka</a>
                                                                 <?php else: ?>
-                                                                    <a href="../../<?php echo $mt['path']; ?>" download class="btn btn-success btn-sm"><i class="fas fa-download"></i> Unduh</a>
+                                                                    <a href="../../<?php echo $mt['path']; ?>" download class="btn btn-primary btn-sm"><i class="fas fa-download"></i> Unduh</a>
                                                                 <?php endif; ?>
                                                             </td>
                                                         </tr>
@@ -265,7 +278,7 @@ if ($level === 'admin') {
                                         <td><?php echo htmlspecialchars($mt['nama_lengkap']); ?></td>
                                         <td><?php echo date('d/m/Y H:i', strtotime($mt['created_at'])); ?></td>
                                         <td>
-                                            <button class="btn btn-success btn-sm btn-preview" 
+                                            <button class="btn btn-primary btn-sm btn-preview" 
                                                 data-id="<?php echo $mt['id_material']; ?>"
                                                 data-tipe="<?php echo $mt['tipe']; ?>"
                                                 data-path="<?php echo ($mt['tipe']=='link') ? $mt['path'] : '../../'.$mt['path']; ?>"
@@ -274,9 +287,9 @@ if ($level === 'admin') {
                                             </button>
                                             
                                             <?php if($mt['tipe'] == 'link'): ?>
-                                                <a href="<?php echo $mt['path']; ?>" target="_blank" class="btn btn-success btn-sm"><i class="fas fa-external-link-alt"></i> Buka</a>
+                                                <a href="<?php echo $mt['path']; ?>" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-external-link-alt"></i> Buka</a>
                                             <?php else: ?>
-                                                <a href="../../<?php echo $mt['path']; ?>" download class="btn btn-success btn-sm"><i class="fas fa-download"></i> Unduh</a>
+                                                <a href="../../<?php echo $mt['path']; ?>" download class="btn btn-primary btn-sm"><i class="fas fa-download"></i> Unduh</a>
                                             <?php endif; ?>
 
                                             <?php if($level === 'admin' || ($level === 'guru' && $mt['owner_id'] == $uid)): ?>
@@ -349,7 +362,7 @@ if ($level === 'admin') {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="submit" name="create_material" value="1" class="btn btn-success">Simpan</button>
+        <button type="submit" name="create_material" value="1" class="btn btn-primary">Simpan</button>
       </div>
     </form>
   </div>
@@ -406,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function(){
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="submit" name="edit_material" value="1" class="btn btn-success">Simpan Perubahan</button>
+        <button type="submit" name="edit_material" value="1" class="btn btn-primary">Simpan Perubahan</button>
       </div>
     </form>
   </div>

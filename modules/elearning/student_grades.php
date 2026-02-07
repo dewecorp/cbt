@@ -80,7 +80,7 @@ $grades = mysqli_query($koneksi, $query);
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-center">
-                                    <a href="../../<?php echo $row['submitted_file']; ?>" target="_blank" class="btn btn-sm btn-success text-white" title="Lihat File Saya">
+                                    <a href="../../<?php echo $row['submitted_file']; ?>" target="_blank" class="btn btn-sm btn-primary text-white" title="Lihat File Saya">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>

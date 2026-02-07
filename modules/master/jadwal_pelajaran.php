@@ -226,7 +226,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                         <td><?php echo $row['nama_lengkap']; ?></td>
                                         <td>
                                             <?php foreach($m_names as $mn): ?>
-                                                <span class="badge bg-primary text-white me-1 mb-1"><?php echo $mn; ?></span>
+                                                <span class="badge bg-success text-white me-1 mb-1"><?php echo $mn; ?></span>
                                             <?php endforeach; ?>
                                         </td>
                                         <td>

@@ -427,11 +427,11 @@ if($level === 'siswa') {
         </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2 border-start border-4 border-info">
+            <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Data Kelas</div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Data Kelas</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_kelas; ?></div>
                         </div>
                         <div class="col-auto">
@@ -482,7 +482,7 @@ if($level === 'siswa') {
                         $rs_cnt = mysqli_query($koneksi, "SELECT COUNT(*) AS c FROM activity_log WHERE created_at >= (NOW() - INTERVAL 1 DAY)");
                         if ($rs_cnt) { $row_cnt = mysqli_fetch_assoc($rs_cnt); $log_count_24h = (int)$row_cnt['c']; }
                         ?>
-                        <span class="badge bg-primary rounded-pill"><?php echo $log_count_24h; ?> Aktivitas</span>
+                        <span class="badge bg-success rounded-pill"><?php echo $log_count_24h; ?> Aktivitas</span>
                     </div>
                 </div>
                 <div class="card-body" style="max-height: 420px; overflow-y: auto;">
