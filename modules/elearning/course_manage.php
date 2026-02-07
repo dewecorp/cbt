@@ -158,6 +158,22 @@ if (!function_exists('get_indo_day')) {
 }
 
 // Forum Helper Function
+if (!function_exists('get_avatar_html')) {
+    function get_avatar_html($name, $photo, $role, $size = '40px', $font_size = '16px') {
+        $base_dir = __DIR__ . '/../../'; // Server path
+        $web_path = '../../'; // Browser path
+        
+        $folder = ($role === 'siswa') ? 'assets/img/siswa/' : 'assets/img/guru/';
+        $photo_path = $folder . $photo;
+        
+        if (!empty($photo) && file_exists($base_dir . $photo_path)) {
+            return '<img src="' . $web_path . $photo_path . '" class="rounded-circle" style="width: ' . $size . '; height: ' . $size . '; object-fit: cover;">';
+        } else {
+            return '<div class="avatar-circle" style="width: ' . $size . '; height: ' . $size . '; font-size: ' . $font_size . ';">' . strtoupper(substr($name, 0, 1)) . '</div>';
+        }
+    }
+}
+
 if (!function_exists('render_comments')) {
     function render_comments($comments, $children, $parent_id = 0) {
         $list = ($parent_id == 0) ? $comments : (isset($children[$parent_id]) ? $children[$parent_id] : []);
@@ -169,7 +185,9 @@ if (!function_exists('render_comments')) {
             echo '<div class="d-flex '.$margin.'" id="comment-'.$r_id.'">';
             echo '  <div class="flex-shrink-0">';
             $dn = isset($r['display_name']) ? $r['display_name'] : ($r['nama_lengkap'] ?? '');
-            echo '      <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 14px;">'.strtoupper(substr($dn, 0, 1)).'</div>';
+            $photo = isset($r['user_photo']) ? $r['user_photo'] : '';
+            $role = isset($r['user_role']) ? $r['user_role'] : 'siswa';
+            echo get_avatar_html($dn, $photo, $role, '32px', '14px');
             echo '  </div>';
             echo '  <div class="flex-grow-1 ms-2">';
             echo '      <div class="bg-light p-2 rounded d-inline-block">';
@@ -193,7 +211,13 @@ if (!function_exists('render_comments')) {
             echo '      </div>';
             echo '      <div id="reply-form-'.$r_id.'" class="mt-2" style="display:none;">';
             echo '          <div class="d-flex align-items-center">';
-            echo '              <div class="avatar-circle me-2" style="width: 24px; height: 24px; font-size: 10px;">'.strtoupper(substr($_SESSION['nama'] ?? 'U', 0, 1)).'</div>';
+            
+            // Current User Avatar for Reply
+            $my_name = isset($_SESSION['nama']) ? $_SESSION['nama'] : 'U';
+            $my_photo = isset($_SESSION['foto']) ? $_SESSION['foto'] : '';
+            $my_role = isset($_SESSION['level']) ? $_SESSION['level'] : 'siswa';
+            echo get_avatar_html($my_name, $my_photo, $my_role, '24px', '10px');
+            
             echo '              <input type="text" class="form-control form-control-sm rounded-pill bg-light border-0" placeholder="Tulis balasan..." id="input-reply-'.$r_id.'" onkeypress="handleReply(event, '.$r['topic_id'].', '.$r_id.')">';
             echo '              <button class="btn btn-link text-muted p-0 ms-2" onclick="toggleEmojiPicker(\'input-reply-'.$r_id.'\', '.$r['topic_id'].', '.$r_id.')"><i class="far fa-smile"></i></button>';
             echo '              <button class="btn btn-link text-muted p-0 ms-2" onclick="toggleStickerPicker('.$r['topic_id'].', '.$r_id.')"><i class="far fa-sticky-note"></i></button>';
@@ -239,6 +263,10 @@ $topicsQ = mysqli_query($koneksi, "
         WHEN t.author_role = 'siswa' THEN s.nama_siswa
         ELSE u.nama_lengkap 
     END AS nama_lengkap,
+    CASE 
+        WHEN t.author_role = 'siswa' THEN s.foto
+        ELSE u.foto 
+    END AS author_photo,
     (SELECT COUNT(*) FROM forum_replies r WHERE r.topic_id=t.id_topic) AS comment_count,
     (SELECT COUNT(*) FROM forum_likes l WHERE l.topic_id=t.id_topic) AS like_count,
     (SELECT COUNT(*) FROM forum_likes l2 WHERE l2.topic_id=t.id_topic AND l2.user_id=$uid) AS is_liked
@@ -446,10 +474,12 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                     <form method="post" enctype="multipart/form-data">
                         <input type="hidden" name="create_post" value="1">
                         <div class="d-flex mb-3">
-                            <div class="avatar-circle me-2">
+                            <div class="me-2">
                                 <?php 
                                 $my_name = isset($_SESSION['nama']) ? $_SESSION['nama'] : 'U';
-                                echo strtoupper(substr($my_name, 0, 1)); 
+                                $my_photo = isset($_SESSION['foto']) ? $_SESSION['foto'] : '';
+                                $my_role = isset($_SESSION['level']) ? $_SESSION['level'] : 'siswa';
+                                echo get_avatar_html($my_name, $my_photo, $my_role, '40px', '16px'); 
                                 ?>
                             </div>
                             <textarea name="content" class="form-control bg-light border-0 rounded-3" rows="2" placeholder="Apa yang ingin Anda diskusikan di kelas ini?"></textarea>
@@ -477,8 +507,8 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                 <div class="card post-card">
                     <div class="card-body">
                         <div class="post-header">
-                            <div class="avatar-circle">
-                                <?php echo strtoupper(substr($t['nama_lengkap'] ?? '', 0, 1)); ?>
+                            <div class="me-2">
+                                <?php echo get_avatar_html($t['nama_lengkap'] ?? '', $t['author_photo'] ?? '', $t['author_role'] ?? 'siswa', '40px', '16px'); ?>
                             </div>
                             <div class="post-info">
                                 <a href="#" class="post-author"><?php echo htmlspecialchars($t['nama_lengkap'] ?? ''); ?></a>
@@ -521,7 +551,11 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                     CASE 
                                         WHEN r.user_role = 'siswa' THEN s.nama_siswa
                                         ELSE u.nama_lengkap 
-                                    END AS display_name
+                                    END AS display_name,
+                                    CASE 
+                                        WHEN r.user_role = 'siswa' THEN s.foto
+                                        ELSE u.foto 
+                                    END AS user_photo
                                     FROM forum_replies r 
                                     LEFT JOIN users u ON r.user_id=u.id_user 
                                     LEFT JOIN siswa s ON r.user_id=s.id_siswa
@@ -542,8 +576,13 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                             </div>
                             
                             <div class="d-flex mt-2 align-items-center">
-                                <div class="avatar-circle me-2" style="width: 32px; height: 32px; font-size: 14px;">
-                                    <?php echo strtoupper(substr($my_name, 0, 1)); ?>
+                                <div class="me-2">
+                                    <?php 
+                                    $my_name = isset($_SESSION['nama']) ? $_SESSION['nama'] : 'U';
+                                    $my_photo = isset($_SESSION['foto']) ? $_SESSION['foto'] : '';
+                                    $my_role = isset($_SESSION['level']) ? $_SESSION['level'] : 'siswa';
+                                    echo get_avatar_html($my_name, $my_photo, $my_role, '32px', '14px'); 
+                                    ?>
                                 </div>
                                 <input type="text" class="form-control rounded-pill bg-light border-0" placeholder="Tulis komentar..." id="input-comment-<?php echo $t['id_topic']; ?>" onkeypress="handleComment(event, <?php echo $t['id_topic']; ?>)">
                                 <button class="btn btn-link text-primary p-0 ms-2" onclick="postComment(<?php echo $t['id_topic']; ?>)"><i class="fas fa-paper-plane"></i></button>

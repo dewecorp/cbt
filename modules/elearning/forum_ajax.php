@@ -92,19 +92,30 @@ if ($action === 'post_comment') {
             $last_id = mysqli_insert_id($koneksi);
             
             if ($role === 'siswa') {
-                $uq = mysqli_query($koneksi, "SELECT nama_siswa AS display_name FROM siswa WHERE id_siswa=$uid");
+                $uq = mysqli_query($koneksi, "SELECT nama_siswa AS display_name, foto FROM siswa WHERE id_siswa=$uid");
             } else {
-                $uq = mysqli_query($koneksi, "SELECT nama_lengkap AS display_name FROM users WHERE id_user=$uid");
+                $uq = mysqli_query($koneksi, "SELECT nama_lengkap AS display_name, foto FROM users WHERE id_user=$uid");
             }
             $u = mysqli_fetch_assoc($uq);
             $display_name = $u['display_name'] ?? 'Pengguna';
+            $user_photo = $u['foto'] ?? '';
+            $base_dir = __DIR__ . '/../../';
+            $web_path = '../../';
+            $folder = ($role === 'siswa') ? 'assets/img/siswa/' : 'assets/img/guru/';
+            $photo_path = $folder . $user_photo;
+
+            if (!empty($user_photo) && file_exists($base_dir . $photo_path)) {
+                $avatar_html = '<img src="' . $web_path . $photo_path . '" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">';
+                $avatar_html_small = '<img src="' . $web_path . $photo_path . '" class="rounded-circle me-2" style="width: 24px; height: 24px; object-fit: cover;">';
+            } else {
+                $avatar_html = '<div class="avatar-circle" style="width: 32px; height: 32px; font-size: 14px;">'.strtoupper(substr($display_name, 0, 1)).'</div>';
+                $avatar_html_small = '<div class="avatar-circle me-2" style="width: 24px; height: 24px; font-size: 10px;">'.strtoupper(substr($display_name, 0, 1)).'</div>';
+            }
             
             $html = '
             <div class="d-flex mb-2" id="comment-'.$last_id.'">
                 <div class="flex-shrink-0">
-                    <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 14px;">
-                        '.strtoupper(substr($display_name, 0, 1)).'
-                    </div>
+                    '.$avatar_html.'
                 </div>
                 <div class="flex-grow-1 ms-2">
                     <div class="bg-light p-2 rounded d-inline-block">
@@ -122,9 +133,7 @@ if ($action === 'post_comment') {
                     <!-- Reply Form (Hidden by default) -->
                     <div id="reply-form-'.$last_id.'" class="mt-2" style="display:none;">
                         <div class="d-flex align-items-center">
-                            <div class="avatar-circle me-2" style="width: 24px; height: 24px; font-size: 10px;">
-                                '.strtoupper(substr($display_name, 0, 1)).'
-                            </div>
+                            '.$avatar_html_small.'
                             <input type="text" class="form-control form-control-sm rounded-pill bg-light border-0" placeholder="Tulis balasan..." id="input-reply-'.$last_id.'" onkeypress="handleReply(event, '.$topic_id.', '.$last_id.')">
                             <button class="btn btn-link text-muted p-0 ms-2" onclick="toggleEmojiPicker(\'input-reply-'.$last_id.'\', '.$topic_id.', '.$last_id.')"><i class="far fa-smile"></i></button>
                             <button class="btn btn-link text-muted p-0 ms-2" onclick="toggleStickerPicker('.$topic_id.', '.$last_id.')"><i class="far fa-sticky-note"></i></button>
@@ -174,18 +183,31 @@ if ($action === 'post_sticker') {
     if ($insert) {
         $last_id = mysqli_insert_id($koneksi);
         if ($role === 'siswa') {
-            $uq = mysqli_query($koneksi, "SELECT nama_siswa AS display_name FROM siswa WHERE id_siswa=$uid");
+            $uq = mysqli_query($koneksi, "SELECT nama_siswa AS display_name, foto FROM siswa WHERE id_siswa=$uid");
         } else {
-            $uq = mysqli_query($koneksi, "SELECT nama_lengkap AS display_name FROM users WHERE id_user=$uid");
+            $uq = mysqli_query($koneksi, "SELECT nama_lengkap AS display_name, foto FROM users WHERE id_user=$uid");
         }
         $u = mysqli_fetch_assoc($uq);
         $display_name = $u['display_name'] ?? 'Pengguna';
+
+        $user_photo = $u['foto'] ?? '';
+        $base_dir = __DIR__ . '/../../';
+        $web_path = '../../';
+        $folder = ($role === 'siswa') ? 'assets/img/siswa/' : 'assets/img/guru/';
+        $photo_path = $folder . $user_photo;
+
+        if (!empty($user_photo) && file_exists($base_dir . $photo_path)) {
+            $avatar_html = '<img src="' . $web_path . $photo_path . '" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">';
+            $avatar_html_small = '<img src="' . $web_path . $photo_path . '" class="rounded-circle me-2" style="width: 24px; height: 24px; object-fit: cover;">';
+        } else {
+            $avatar_html = '<div class="avatar-circle" style="width: 32px; height: 32px; font-size: 14px;">'.strtoupper(substr($display_name, 0, 1)).'</div>';
+            $avatar_html_small = '<div class="avatar-circle me-2" style="width: 24px; height: 24px; font-size: 10px;">'.strtoupper(substr($display_name, 0, 1)).'</div>';
+        }
+
         $html = '
         <div class="d-flex mb-2" id="comment-'.$last_id.'">
             <div class="flex-shrink-0">
-                <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 14px;">
-                    '.strtoupper(substr($display_name, 0, 1)).'
-                </div>
+                '.$avatar_html.'
             </div>
             <div class="flex-grow-1 ms-2">
                 <div class="bg-light p-2 rounded d-inline-block">
@@ -201,9 +223,7 @@ if ($action === 'post_sticker') {
                 <div id="replies-'.$last_id.'" class="mt-2 ps-3 border-start"></div>
                 <div id="reply-form-'.$last_id.'" class="mt-2" style="display:none;">
                     <div class="d-flex align-items-center">
-                        <div class="avatar-circle me-2" style="width: 24px; height: 24px; font-size: 10px;">
-                            '.strtoupper(substr($display_name, 0, 1)).'
-                        </div>
+                        '.$avatar_html_small.'
                         <input type="text" class="form-control form-control-sm rounded-pill bg-light border-0" placeholder="Tulis balasan..." id="input-reply-'.$last_id.'" onkeypress="handleReply(event, '.$topic_id.', '.$last_id.')">
                         <button class="btn btn-link text-muted p-0 ms-2" onclick="toggleEmojiPicker(\'input-reply-'.$last_id.'\', '.$topic_id.', '.$last_id.')"><i class="far fa-smile"></i></button>
                         <button class="btn btn-link text-muted p-0 ms-2" onclick="toggleStickerPicker('.$topic_id.', '.$last_id.')"><i class="far fa-sticky-note"></i></button>
