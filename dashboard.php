@@ -68,25 +68,6 @@ if (isset($_SESSION['user_id'])) {
                 $level = 'siswa';
             }
         }
-
-        // Logic Absensi untuk Guru (Rekap Hari Ini)
-        $attendance_summary = [];
-        if (!empty($clean_kelas_ids)) {
-            $ids_str = implode("','", $clean_kelas_ids);
-            $q_att_today = mysqli_query($koneksi, "
-                SELECT a.*, s.nama_siswa, k.nama_kelas 
-                FROM absensi a 
-                JOIN siswa s ON a.id_siswa = s.id_siswa 
-                JOIN kelas k ON a.id_kelas = k.id_kelas 
-                WHERE a.tanggal = CURDATE() AND a.id_kelas IN ('$ids_str')
-                ORDER BY k.nama_kelas ASC, s.nama_siswa ASC
-            ");
-            if($q_att_today) {
-                while($row = mysqli_fetch_assoc($q_att_today)) {
-                    $attendance_summary[] = $row;
-                }
-            }
-        }
     }
 }
 
@@ -196,6 +177,7 @@ if($level === 'guru') {
 
     // Data Siswa per Kelas yang diajar
     $teacher_classes = [];
+    $attendance_summary = [];
     $jml_mapel_guru = 0;
     
     $q_guru = mysqli_query($koneksi, "SELECT mengajar_kelas, mengajar_mapel FROM users WHERE id_user='$id_guru'");
@@ -234,6 +216,29 @@ if($level === 'guru') {
                         'nama_kelas' => $row['nama_kelas'],
                         'jumlah_siswa' => $row['count']
                     ];
+                }
+
+                // Logic Absensi untuk Guru (Rekap Hari Ini)
+                $attendance_summary = [];
+                $ids_str = implode("','", $clean_kelas_ids);
+                $q_att_today = mysqli_query($koneksi, "
+                    SELECT a.*, s.nama_siswa, k.nama_kelas, c.nama_course, m.nama_mapel
+                    FROM absensi a 
+                    JOIN siswa s ON a.id_siswa = s.id_siswa 
+                    JOIN kelas k ON a.id_kelas = k.id_kelas
+                    LEFT JOIN courses c ON a.id_course = c.id_course
+                    LEFT JOIN mapel m ON c.id_mapel = m.id_mapel
+                    WHERE a.tanggal = CURDATE() AND a.id_kelas IN ('$ids_str')
+                    ORDER BY k.nama_kelas ASC, s.nama_siswa ASC
+                ");
+                if($q_att_today) {
+                    while($row = mysqli_fetch_assoc($q_att_today)) {
+                        // Jika ada nama mapel, tambahkan ke keterangan
+                        if (!empty($row['nama_mapel'])) {
+                             $row['keterangan'] = '<strong>' . $row['nama_mapel'] . '</strong> <br>' . $row['keterangan'];
+                        }
+                        $attendance_summary[] = $row;
+                    }
                 }
             }
         }
@@ -719,7 +724,7 @@ if($level === 'siswa') {
                                         ?>
                                         <span class="badge bg-<?php echo $badge; ?>"><?php echo $as['status']; ?></span>
                                     </td>
-                                    <td><?php echo htmlspecialchars($as['keterangan'] ?? '-'); ?></td>
+                                    <td><?php echo $as['keterangan'] ?? '-'; ?></td>
                                     <td><?php echo date('H:i', strtotime($as['waktu_absen'])); ?></td>
                                 </tr>
                                 <?php endforeach; ?>
