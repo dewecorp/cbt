@@ -50,9 +50,12 @@ if (isset($_SESSION['user_id']) && isset($koneksi)) {
         if (mysqli_num_rows($q_check_u) > 0) {
             $d_check_u = mysqli_fetch_assoc($q_check_u);
             // Perbaiki level jika tidak match (misal guru jadi admin atau sebaliknya)
+            // DISABLED SELF-HEALING TO PREVENT ACCIDENTAL ROLE SWITCHING
+            /*
             if ($current_level !== $d_check_u['level']) {
                 $_SESSION['level'] = $d_check_u['level'];
             }
+            */
             if (!isset($_SESSION['nama'])) $_SESSION['nama'] = $d_check_u['nama_lengkap'];
             // Update foto session
             $_SESSION['foto'] = isset($d_check_u['foto']) ? $d_check_u['foto'] : null;
