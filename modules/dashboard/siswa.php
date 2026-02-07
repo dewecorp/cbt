@@ -1,6 +1,65 @@
 <?php
 $id_kelas = $_SESSION['id_kelas'];
 
+// Handle Upload Foto Siswa
+if (isset($_POST['upload_foto_siswa'])) {
+    $target_dir = "assets/img/siswa/";
+    if (!file_exists($target_dir)) {
+        mkdir($target_dir, 0777, true);
+    }
+    
+    $file_extension = pathinfo($_FILES["foto_profil"]["name"], PATHINFO_EXTENSION);
+    $new_name = "siswa_" . $_SESSION['user_id'] . "_" . time() . "." . $file_extension;
+    $target_file = $target_dir . $new_name;
+    
+    $uploadOk = 1;
+    $imageFileType = strtolower($file_extension);
+
+    // Check if image file is a actual image or fake image
+    $check = getimagesize($_FILES["foto_profil"]["tmp_name"]);
+    if($check === false) {
+        echo "<script>Swal.fire('Gagal', 'File bukan gambar.', 'error');</script>";
+        $uploadOk = 0;
+    }
+
+    // Check file size (2MB)
+    if ($_FILES["foto_profil"]["size"] > 2000000) {
+        echo "<script>Swal.fire('Gagal', 'Ukuran file terlalu besar (Maks 2MB).', 'error');</script>";
+        $uploadOk = 0;
+    }
+
+    // Allow certain file formats
+    if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif" ) {
+        echo "<script>Swal.fire('Gagal', 'Hanya format JPG, JPEG, PNG & GIF yang diperbolehkan.', 'error');</script>";
+        $uploadOk = 0;
+    }
+
+    if ($uploadOk == 1) {
+        if (move_uploaded_file($_FILES["foto_profil"]["tmp_name"], $target_file)) {
+            // Update DB
+            $uid = $_SESSION['user_id'];
+            mysqli_query($koneksi, "UPDATE siswa SET foto='$new_name' WHERE id_siswa='$uid'");
+            
+            // Update Session
+            $_SESSION['foto'] = $new_name;
+            
+            echo "<script>
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: 'Foto profil berhasil diperbarui.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = 'dashboard.php';
+                });
+            </script>";
+        } else {
+            echo "<script>Swal.fire('Gagal', 'Gagal mengupload file', 'error');</script>";
+        }
+    }
+}
+
 // Logic Absensi Siswa (Dashboard - General Attendance + Scheduled Courses)
 // SELF-HEALING: Sync General Attendance to Course Attendance automatically
 $today_sync = date('Y-m-d');
@@ -143,12 +202,59 @@ if($q_tugas_active) {
         <div class="card shadow border-left-success py-2 h-100">
             <div class="card-body">
                 <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="position-relative">
+                            <img src="<?php echo !empty($_SESSION['foto']) && file_exists('assets/img/siswa/'.$_SESSION['foto']) ? 'assets/img/siswa/'.$_SESSION['foto'] : 'https://ui-avatars.com/api/?name='.urlencode($_SESSION['nama']).'&size=100&background=random'; ?>" 
+                                 class="img-profile rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
+                            <button class="btn btn-sm btn-light position-absolute bottom-0 end-0 rounded-circle border shadow-sm p-1" 
+                                    style="width: 30px; height: 30px;"
+                                    data-bs-toggle="modal" data-bs-target="#modalEditFotoSiswa">
+                                <i class="fas fa-camera text-secondary small"></i>
+                            </button>
+                        </div>
+<!-- Modal Edit Foto Siswa -->
+<div class="modal fade" id="modalEditFotoSiswa" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Perbarui Foto Profil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <img id="previewFotoSiswa" src="<?php echo !empty($_SESSION['foto']) && file_exists('assets/img/siswa/'.$_SESSION['foto']) ? 'assets/img/siswa/'.$_SESSION['foto'] : 'https://ui-avatars.com/api/?name='.urlencode($_SESSION['nama']).'&size=150&background=random'; ?>" 
+                                class="img-thumbnail rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                        <p class="text-muted small">Format: JPG, PNG, GIF. Maks: 2MB.</p>
+                    </div>
+                    <div class="mb-3">
+                        <input class="form-control" type="file" name="foto_profil" accept="image/*" onchange="previewImageSiswa(this)">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" name="upload_foto_siswa" class="btn btn-primary">Simpan Foto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function previewImageSiswa(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewFotoSiswa').src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+                    </div>
                     <div class="col mr-2">
                         <div class="h5 font-weight-bold text-success text-uppercase mb-1">Selamat Datang, <?php echo $_SESSION['nama']; ?></div>
                         <p class="mb-0">Silahkan cek daftar ujian yang tersedia di bawah ini.</p>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-smile fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>

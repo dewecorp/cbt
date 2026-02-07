@@ -297,6 +297,7 @@ $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                     <thead class="bg-light">
                         <tr>
                             <th width="5%">No</th>
+                            <th width="5%">Foto</th>
                             <th>NISN</th>
                             <th>Nama Siswa</th>
                             <th>L/P</th>
@@ -314,6 +315,10 @@ $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                         ?>
                             <tr>
                                 <td><?php echo $no++; ?></td>
+                                <td>
+                                    <img src="<?php echo !empty($row['foto']) && file_exists('../../assets/img/siswa/'.$row['foto']) ? '../../assets/img/siswa/'.$row['foto'] : 'https://ui-avatars.com/api/?name='.urlencode($row['nama_siswa']).'&size=40&background=random'; ?>" 
+                                         class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                </td>
                                 <td><?php echo $row['nisn']; ?></td>
                                 <td><?php echo $row['nama_siswa']; ?></td>
                                 <td><?php echo $row['jk']; ?></td>

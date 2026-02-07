@@ -53,6 +53,7 @@ if (isset($_POST['login'])) {
                  $_SESSION['user_id'] = $data['id_siswa'];
                  $_SESSION['username'] = $data['nisn'];
                  $_SESSION['nama'] = $data['nama_siswa'];
+                 $_SESSION['foto'] = isset($data['foto']) ? $data['foto'] : null;
                  $_SESSION['level'] = 'siswa';
                  $_SESSION['id_kelas'] = $data['id_kelas'];
                  // $_SESSION['login_success'] = 1; // Removed to prevent alert on dashboard
