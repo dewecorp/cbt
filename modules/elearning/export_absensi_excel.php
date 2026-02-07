@@ -15,10 +15,14 @@ if (empty($id_kelas)) {
     die("Pilih Kelas Terlebih Dahulu");
 }
 
-// Get Class Name
+// Get Class Name & Wali Kelas
 $nama_kelas = '';
-$q_k = mysqli_query($koneksi, "SELECT nama_kelas FROM kelas WHERE id_kelas='$id_kelas'");
-if ($r = mysqli_fetch_assoc($q_k)) $nama_kelas = $r['nama_kelas'];
+$wali_kelas = '';
+$q_k = mysqli_query($koneksi, "SELECT kelas.nama_kelas, users.nama_lengkap AS nama_wali FROM kelas LEFT JOIN users ON kelas.wali_kelas = users.id_user WHERE kelas.id_kelas='$id_kelas'");
+if ($r = mysqli_fetch_assoc($q_k)) {
+    $nama_kelas = $r['nama_kelas'];
+    $wali_kelas = $r['nama_wali'];
+}
 
 // Month Names
 $month_names = [
@@ -66,6 +70,7 @@ $data = [];
 // Title Rows
 $data[] = ["REKAP ABSENSI SISWA"];
 $data[] = ["Kelas: $nama_kelas"];
+$data[] = ["Wali Kelas: $wali_kelas"];
 $data[] = ["Bulan: $nama_bulan $tahun"];
 $data[] = [""]; // Empty row
 

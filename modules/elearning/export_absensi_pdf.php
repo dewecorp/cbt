@@ -15,8 +15,10 @@ if (empty($id_kelas)) {
 }
 
 // Get Info
-$q_k = mysqli_query($koneksi, "SELECT nama_kelas FROM kelas WHERE id_kelas='$id_kelas'");
-$nama_kelas = ($r = mysqli_fetch_assoc($q_k)) ? $r['nama_kelas'] : '-';
+$q_k = mysqli_query($koneksi, "SELECT kelas.nama_kelas, users.nama_lengkap AS nama_wali FROM kelas LEFT JOIN users ON kelas.wali_kelas = users.id_user WHERE kelas.id_kelas='$id_kelas'");
+$kelas_info = mysqli_fetch_assoc($q_k);
+$nama_kelas = $kelas_info ? $kelas_info['nama_kelas'] : '-';
+$wali_kelas = ($kelas_info && $kelas_info['nama_wali']) ? $kelas_info['nama_wali'] : '______________________';
 
 // Month Names
 $month_names = [
@@ -141,10 +143,17 @@ while($row = mysqli_fetch_assoc($q_att)) {
         </tbody>
     </table>
 
-    <div style="margin-top: 30px; text-align: right;">
-        <p>Guru Wali Kelas,</p>
-        <br><br><br>
-        <p>______________________</p>
+    <div style="margin-top: 30px; text-align: right; page-break-inside: avoid;">
+        <table style="width: 100%; border: none;">
+            <tr>
+                <td style="border: none; width: 70%;"></td>
+                <td style="border: none; text-align: center;">
+                    <p>Guru Wali Kelas,</p>
+                    <br><br><br>
+                    <p style="font-weight: bold;"><?php echo $wali_kelas; ?></p>
+                </td>
+            </tr>
+        </table>
     </div>
 </body>
 </html>
