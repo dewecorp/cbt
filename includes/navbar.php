@@ -80,9 +80,9 @@ if (isset($koneksi)) {
                              echo '<img src="'.$base_url.$foto_path_web.'" alt="User" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">';
                          } else {
                              $initial = strtoupper(substr($u_nama, 0, 1));
-                             echo '<div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center me-2 fw-bold" style="width: 32px; height: 32px;">'.$initial.'</div>';
-                         }
-                         ?>
+                            echo '<div class="rounded-circle bg-light text-success d-flex align-items-center justify-content-center me-2 fw-bold" style="width: 32px; height: 32px;">'.$initial.'</div>';
+                        }
+                        ?>
                         <span class="d-none d-lg-inline"><?php echo $u_nama; ?></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
                icon: 'warning',
                showCancelButton: true,
                confirmButtonColor: '#d33',
-               cancelButtonColor: '#3085d6',
+               cancelButtonColor: '#198754',
                confirmButtonText: 'Ya, Logout',
                cancelButtonText: 'Batal'
            }).then((result) => {
@@ -183,7 +183,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
            icon: 'warning',
            showCancelButton: true,
            confirmButtonColor: '#d33',
-           cancelButtonColor: '#3085d6',
+           cancelButtonColor: '#198754',
            confirmButtonText: 'Ya, Logout',
            cancelButtonText: 'Batal'
        }).then((result) => {

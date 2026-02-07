@@ -366,7 +366,7 @@ if (isset($_GET['edit_soal'])) {
     <!-- Form Tambah Soal -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" data-bs-toggle="collapse" data-bs-target="#collapseForm" style="cursor: pointer;">
-            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-plus-circle"></i> Tambah Soal Baru</h6>
+            <h6 class="m-0 font-weight-bold text-success"><i class="fas fa-plus-circle"></i> Tambah Soal Baru</h6>
             <i class="fas fa-chevron-down"></i>
         </div>
         <div class="collapse show" id="collapseForm">
@@ -507,7 +507,7 @@ if (isset($_GET['edit_soal'])) {
                             <button type="submit" name="update_soal" class="btn btn-warning text-white"><i class="fas fa-save"></i> Update Soal</button>
                             <a href="buat_soal.php?id=<?php echo $id_bank; ?>" class="btn btn-secondary ms-2"><i class="fas fa-times"></i> Batal</a>
                         <?php else: ?>
-                            <button type="submit" name="simpan_soal" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Soal</button>
+                            <button type="submit" name="simpan_soal" class="btn btn-success"><i class="fas fa-save"></i> Simpan Soal</button>
                         <?php endif; ?>
                     </div>
                 </form>
@@ -649,7 +649,7 @@ if (isset($_GET['edit_soal'])) {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" name="import_soal_word" class="btn btn-primary">Import</button>
+                    <button type="submit" name="import_soal_word" class="btn btn-success">Import</button>
                 </div>
             </form>
         </div>

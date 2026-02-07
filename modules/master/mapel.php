@@ -90,7 +90,7 @@ if (isset($_GET['delete'])) {
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Mata Pelajaran</h1>
         <div>
-            <button type="button" class="btn btn-info text-white me-2" data-bs-toggle="modal" data-bs-target="#bulkKktpModal">
+            <button type="button" class="btn btn-success text-white me-2" data-bs-toggle="modal" data-bs-target="#bulkKktpModal">
                 <i class="fas fa-tasks"></i> Set Semua KKTP
             </button>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
@@ -170,7 +170,7 @@ if (isset($_GET['delete'])) {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" name="add" class="btn btn-primary">Simpan</button>
+                    <button type="submit" name="add" class="btn btn-success">Simpan</button>
                 </div>
             </form>
         </div>
@@ -195,7 +195,7 @@ if (isset($_GET['delete'])) {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" name="set_bulk_kktp" class="btn btn-info text-white">Update Semua</button>
+                    <button type="submit" name="set_bulk_kktp" class="btn btn-primary text-white">Update Semua</button>
                 </div>
             </form>
         </div>

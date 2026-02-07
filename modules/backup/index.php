@@ -58,7 +58,7 @@ if (is_dir($backupDir)) {
         <div class="col-md-6">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Backup Database</h6>
+                    <h6 class="m-0 font-weight-bold text-success">Backup Database</h6>
                 </div>
                 <div class="card-body">
                     <p>Klik tombol di bawah ini untuk membuat backup database baru.</p>
@@ -184,7 +184,7 @@ function confirmDelete(filename) {
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
+        cancelButtonColor: '#198754',
         confirmButtonText: 'Ya, Hapus!',
         cancelButtonText: 'Batal'
     }).then((result) => {
@@ -233,7 +233,7 @@ document.getElementById('formRestore').addEventListener('submit', function(e) {
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
+        cancelButtonColor: '#198754',
         confirmButtonText: 'Ya, Restore!',
         cancelButtonText: 'Batal'
     }).then((result) => {

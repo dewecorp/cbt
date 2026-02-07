@@ -194,7 +194,7 @@ if (isset($_GET['edit_id'])) {
                                             aria-selected="<?php echo ($index === 0) ? 'true' : 'false'; ?>">
                                             <i class="fas fa-chalkboard-teacher"></i>
                                             <?php echo htmlspecialchars($k['nama_kelas']); ?>
-                                            <span class="badge bg-white text-primary rounded-pill ms-2"><?php echo $count; ?></span>
+                                            <span class="badge bg-white text-success rounded-pill ms-2"><?php echo $count; ?></span>
                                         </button>
                                     </li>
                                 <?php endforeach; ?>
@@ -206,10 +206,10 @@ if (isset($_GET['edit_id'])) {
                                             <?php if(isset($admin_courses[$k['id_kelas']]) && count($admin_courses[$k['id_kelas']]) > 0): ?>
                                                 <?php foreach($admin_courses[$k['id_kelas']] as $c): ?>
                                                     <div class="col-xl-4 col-md-6 mb-4">
-                                                        <div class="card shadow h-100 border-start border-4 border-primary hover-shadow transition-300">
+                                                        <div class="card shadow h-100 border-start border-4 border-success hover-shadow transition-300">
                                                             <div class="card-body">
                                                                 <div class="d-flex justify-content-between align-items-start mb-2">
-                                                                    <span class="badge bg-primary"><?php echo htmlspecialchars($c['nama_kelas']); ?></span>
+                                                                    <span class="badge bg-success"><?php echo htmlspecialchars($c['nama_kelas']); ?></span>
                                                                     <small class="text-muted fw-bold"><?php echo htmlspecialchars($c['kode_course']); ?></small>
                                                                 </div>
                                                                 <h5 class="card-title font-weight-bold text-dark mb-2 text-truncate" title="<?php echo htmlspecialchars($c['nama_course']); ?>">
@@ -222,7 +222,7 @@ if (isset($_GET['edit_id'])) {
                                                                 <div class="row text-center mb-3 g-2">
                                                                     <div class="col-6">
                                                                         <div class="bg-light p-2 rounded border">
-                                                                            <div class="h5 mb-0 font-weight-bold text-primary"><?php echo (int)$c['jml_materi']; ?></div>
+                                                                            <div class="h5 mb-0 font-weight-bold text-success"><?php echo (int)$c['jml_materi']; ?></div>
                                                                             <div class="small text-muted" style="font-size: 0.75rem;">Materi</div>
                                                                         </div>
                                                                     </div>
@@ -262,10 +262,10 @@ if (isset($_GET['edit_id'])) {
                         <div class="row">
                             <?php while($c = mysqli_fetch_assoc($courses)): ?>
                             <div class="col-xl-4 col-md-6 mb-4">
-                                <div class="card shadow h-100 border-start border-4 border-primary hover-shadow transition-300">
+                                <div class="card shadow h-100 border-start border-4 border-success hover-shadow transition-300">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <span class="badge bg-primary"><?php echo htmlspecialchars($c['nama_kelas']); ?></span>
+                                            <span class="badge bg-success"><?php echo htmlspecialchars($c['nama_kelas']); ?></span>
                                             <small class="text-muted fw-bold"><?php echo htmlspecialchars($c['kode_course']); ?></small>
                                         </div>
                                         <h5 class="card-title font-weight-bold text-dark mb-2 text-truncate" title="<?php echo htmlspecialchars($c['nama_course']); ?>">
@@ -278,7 +278,7 @@ if (isset($_GET['edit_id'])) {
                                         <div class="row text-center mb-3 g-2">
                                             <div class="col-6">
                                                 <div class="bg-light p-2 rounded border">
-                                                    <div class="h5 mb-0 font-weight-bold text-primary"><?php echo (int)$c['jml_materi']; ?></div>
+                                                    <div class="h5 mb-0 font-weight-bold text-success"><?php echo (int)$c['jml_materi']; ?></div>
                                                     <div class="small text-muted" style="font-size: 0.75rem;">Materi</div>
                                                 </div>
                                             </div>

@@ -113,7 +113,7 @@ while($sub = mysqli_fetch_assoc($q_subs)) {
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Daftar Pengumpulan Siswa</h6>
+            <h6 class="m-0 font-weight-bold text-success">Daftar Pengumpulan Siswa</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -159,8 +159,8 @@ while($sub = mysqli_fetch_assoc($q_subs)) {
                                     $is_url = (isset($sub['file_provider']) && $sub['file_provider'] == 'gdrive') || filter_var($sub['file_path'], FILTER_VALIDATE_URL);
                                     $link = $is_url ? $sub['file_path'] : "../../" . $sub['file_path'];
                                 ?>
-                                    <a href="<?php echo $link; ?>" target="_blank" class="btn btn-sm btn-info">
-                                        <i class="fas fa-download"></i> Unduh
+                                    <a href="<?php echo $link; ?>" target="_blank" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-download"></i> Unduh   
                                     </a>
                                 <?php else: ?>
                                     -
@@ -168,7 +168,7 @@ while($sub = mysqli_fetch_assoc($q_subs)) {
                             </td>
                             <td>
                                 <?php if($sub): ?>
-                                    <span class="fw-bold text-primary"><?php echo $sub['nilai'] > 0 ? $sub['nilai'] : '-'; ?></span>
+                                    <span class="fw-bold text-success"><?php echo $sub['nilai'] > 0 ? $sub['nilai'] : '-'; ?></span>
                                 <?php else: ?>
                                     -
                                 <?php endif; ?>

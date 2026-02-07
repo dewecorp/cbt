@@ -164,7 +164,7 @@ $assignments = mysqli_query($koneksi, $query);
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card shadow h-100 border-start border-4 border-<?php echo $status_class; ?>">
                     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold text-primary"><?php echo htmlspecialchars($a['nama_mapel']); ?> - <?php echo htmlspecialchars($a['nama_course']); ?></h6>
+                        <h6 class="m-0 font-weight-bold text-success"><?php echo htmlspecialchars($a['nama_mapel']); ?> - <?php echo htmlspecialchars($a['nama_course']); ?></h6>
                         <span class="badge bg-<?php echo $status_class; ?>"><?php echo $status_text; ?></span>
                     </div>
                     <div class="card-body">
@@ -187,13 +187,13 @@ $assignments = mysqli_query($koneksi, $query);
                                             Tugas telah dikirim pada <?php echo date('d M Y H:i', strtotime($a['submitted_at'])); ?>
                                         </div>
                                         <div class="mt-2">
-                                            <a href="../../<?php echo $a['submitted_file']; ?>" target="_blank" class="btn btn-sm btn-light border text-primary"><i class="fas fa-paperclip"></i> Lihat File Saya</a>
+                                            <a href="../../<?php echo $a['submitted_file']; ?>" target="_blank" class="btn btn-sm btn-light border text-success"><i class="fas fa-paperclip"></i> Lihat File Saya</a>
                                         </div>
                                 
                                         <?php if(isset($a['nilai']) && $a['nilai'] !== null && $a['nilai'] != ''): ?>
                                             <div class="mt-3 p-3 bg-white border rounded shadow-sm">
                                                 <div class="d-flex align-items-center mb-2">
-                                                    <div class="h2 fw-bold text-primary me-3"><?php echo floatval($a['nilai']); ?></div>
+                                                    <div class="h2 fw-bold text-success me-3"><?php echo floatval($a['nilai']); ?></div>
                                                     <div>
                                                         <div class="small text-uppercase text-muted fw-bold">Nilai Tugas</div>
                                                         <div class="small text-muted">Dinilai oleh <?php echo htmlspecialchars($a['nama_guru']); ?></div>

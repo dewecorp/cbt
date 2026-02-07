@@ -83,7 +83,7 @@ $ann = mysqli_query($koneksi, "SELECT a.*, c.nama_course, k.nama_kelas, u.nama_l
         <div class="col-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Pengumuman</h6>
+                    <h6 class="m-0 font-weight-bold text-success">Pengumuman</h6>
                     <div>
                         <?php if($level === 'admin' || $level === 'guru'): ?>
                         <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAnnouncement"><i class="fas fa-bullhorn"></i> Buat Pengumuman</button>
@@ -212,7 +212,7 @@ $ann = mysqli_query($koneksi, "SELECT a.*, c.nama_course, k.nama_kelas, u.nama_l
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="submit" name="update_announcement" value="1" class="btn btn-primary">Simpan Perubahan</button>
+        <button type="submit" name="update_announcement" value="1" class="btn btn-success">Simpan Perubahan</button>
       </div>
     </form>
   </div>
@@ -243,7 +243,7 @@ function confirmDeleteAnnouncement(e, form) {
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
+        cancelButtonColor: '#198754',
         confirmButtonText: 'Ya, Hapus!',
         cancelButtonText: 'Batal'
     }).then((result) => {

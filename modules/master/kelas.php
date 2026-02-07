@@ -113,7 +113,7 @@ if (isset($_GET['delete'])) {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" name="add" class="btn btn-primary">Simpan</button>
+                    <button type="submit" name="add" class="btn btn-success">Simpan</button>
                 </div>
             </form>
         </div>

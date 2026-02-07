@@ -257,7 +257,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
     .avatar-circle {
         width: 40px;
         height: 40px;
-        background-color: #0d6efd;
+        background-color: #198754;
         color: white;
         border-radius: 50%;
         display: flex;
@@ -332,12 +332,26 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
         background-color: #f0f2f5;
     }
     .action-btn.liked {
-        color: #0d6efd;
+        color: #198754;
     }
     .create-post-card {
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         margin-bottom: 20px;
+    }
+    /* Custom Green Tabs */
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    .nav-tabs .nav-link:hover {
+        color: #198754;
+        border-color: #e9ecef #e9ecef #dee2e6;
+    }
+    .nav-tabs .nav-link.active {
+        color: #198754 !important;
+        border-color: #dee2e6 #dee2e6 #fff !important;
+        border-top: 3px solid #198754 !important;
     }
 </style>
 
@@ -373,7 +387,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
         <div class="tab-pane fade <?php echo $active_tab == 'info' ? 'show active' : ''; ?>">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Informasi Kelas</h6>
+                    <h6 class="m-0 font-weight-bold text-success">Informasi Kelas</h6>
                 </div>
                 <div class="card-body">
                     <div class="row align-items-center">
@@ -403,7 +417,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                     <tr>
                                         <td class="fw-bold text-secondary">Jumlah Siswa</td>
                                         <td>:</td>
-                                        <td class="text-dark"><span class="badge bg-info rounded-pill"><?php echo $student_count; ?> Siswa</span></td>
+                                        <td class="text-dark"><span class="badge bg-success rounded-pill"><?php echo $student_count; ?> Siswa</span></td>
                                     </tr>
                                     <tr>
                                         <td class="fw-bold text-secondary">Tanggal Dibuat</td>
@@ -423,7 +437,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
             <!-- FORUM SECTION -->
             <hr class="my-5">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="mb-0 text-gray-800"><i class="fas fa-comments text-primary"></i> Forum Diskusi Kelas</h4>
+                <h4 class="mb-0 text-gray-800"><i class="fas fa-comments text-success"></i> Forum Diskusi Kelas</h4>
             </div>
             
             <!-- Create Post -->
@@ -662,13 +676,13 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                             elseif($mat['tipe'] == 'video') $icon = 'fa-video';
                                             elseif($mat['tipe'] == 'link') $icon = 'fa-link';
                                             ?>
-                                            <i class="fas <?php echo $icon; ?> fa-3x text-primary"></i>
+                                            <i class="fas <?php echo $icon; ?> fa-3x text-success"></i>
                                         </div>
                                         <h5 class="card-title font-weight-bold text-dark mb-1"><?php echo htmlspecialchars($mat['judul']); ?></h5>
                                         <small class="text-muted d-block mb-3"><?php echo date('d M Y', strtotime($mat['created_at'])); ?></small>
                                         
                                         <div class="d-flex gap-2">
-                                            <button class="btn btn-info btn-sm flex-fill btn-preview" 
+                                            <button class="btn btn-success btn-sm flex-fill btn-preview" 
                                                 data-id="<?php echo $mat['id_material']; ?>"
                                                 data-tipe="<?php echo $mat['tipe']; ?>"
                                                 data-path="<?php echo ($mat['tipe']=='link') ? $mat['path'] : '../../'.$mat['path']; ?>"

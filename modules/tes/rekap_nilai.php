@@ -136,7 +136,7 @@ if ($id_ujian && $id_kelas) {
     <?php if ($id_kelas && empty($id_ujian)): ?>
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Daftar Asesmen di Kelas Ini</h6>
+            <h6 class="m-0 font-weight-bold text-success">Daftar Asesmen di Kelas Ini</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -183,7 +183,7 @@ if ($id_ujian && $id_kelas) {
     <?php if ($id_ujian && $id_kelas): ?>
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Data Nilai Siswa</h6>
+            <h6 class="m-0 font-weight-bold text-success">Data Nilai Siswa</h6>
             <div>
                 <a href="export_excel.php?id_ujian=<?php echo $id_ujian; ?>&id_kelas=<?php echo $id_kelas; ?>" target="_blank" class="btn btn-success btn-sm">
                     <i class="fas fa-file-excel"></i> Export Excel

@@ -239,37 +239,36 @@ if (isset($_GET['delete'])) {
 <style>
     /* Custom Select2 Styling for Multiselect */
     .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__rendered .select2-selection__choice {
-        background-color: #4e73df; /* Primary Color */
-        border-color: #4e73df;
+        background-color: #0d6efd; /* Primary Color */
+        border-color: #0d6efd;
         color: #fff;
         border-radius: 0.35rem;
         padding: 2px 8px;
         font-size: 0.85rem;
     }
-    
-    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__rendered .select2-selection__choice .select2-selection__choice__remove {
+
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__rendered .select2-selection__choice .select2-selection__choice__remove {   
         color: #fff;
         margin-right: 5px;
         border-right: 1px solid rgba(255, 255, 255, 0.3);
     }
-    
+
     .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__rendered .select2-selection__choice .select2-selection__choice__remove:hover {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: transparent;
         color: #fff;
     }
 
     /* Fix Focus Border */
-    .select2-container--bootstrap-5.select2-container--focus .select2-selection, 
-    .select2-container--bootstrap-5.select2-container--open .select2-selection {
-        border-color: #bac8f3;
-        box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+    .select2-container--bootstrap-5.select2-container--focus .select2-selection,
+    .select2-container--bootstrap-5.select2-container--open .select2-selection {        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
     }
 </style>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Data Guru</h1>
     <div>
-        <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">
+        <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#importModal">
             <i class="fas fa-file-excel"></i> Import Excel
         </button>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
@@ -492,7 +491,7 @@ if (isset($_GET['delete'])) {
             </div>
             <form method="POST" enctype="multipart/form-data" id="importForm">
                 <div class="modal-body">
-                    <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded mb-3 text-center">
+                    <div class="card bg-success bg-opacity-10 border border-success text-success p-3 rounded mb-3 text-center">
                         <i class="fas fa-info-circle me-1"></i> Gunakan format file Excel (.xlsx) dengan urutan kolom:
                         <strong>NUPTK, Nama Lengkap, Password</strong>.
                     </div>

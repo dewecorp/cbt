@@ -147,7 +147,7 @@ $topicsQ = mysqli_query($koneksi, "
     .avatar-circle {
         width: 40px;
         height: 40px;
-        background-color: #0d6efd;
+        background-color: #198754;
         color: white;
         border-radius: 50%;
         display: flex;
@@ -222,7 +222,7 @@ $topicsQ = mysqli_query($koneksi, "
         background-color: #f0f2f5;
     }
     .action-btn.liked {
-        color: #0d6efd;
+        color: #198754;
     }
     .comments-section {
         margin-top: 10px;
@@ -260,7 +260,7 @@ $topicsQ = mysqli_query($koneksi, "
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
-        <h4 class="mb-0 text-gray-800"><i class="fas fa-comments text-primary"></i> Forum Guru & Admin</h4>
+        <h4 class="mb-0 text-gray-800"><i class="fas fa-comments text-success"></i> Forum Guru & Admin</h4>
     </div>
 
     <!-- Create Post -->
@@ -287,7 +287,7 @@ $topicsQ = mysqli_query($koneksi, "
                             <i class="fas fa-paperclip fa-lg"></i> <input type="file" name="file" style="display: none;"> File
                         </label>
                     </div>
-                    <button type="submit" name="create_post" value="1" class="btn btn-primary btn-sm px-4">Kirim</button>
+                    <button type="submit" name="create_post" value="1" class="btn btn-success btn-sm px-4">Kirim</button>
                 </div>
             </form>
         </div>
@@ -321,7 +321,7 @@ $topicsQ = mysqli_query($koneksi, "
 
             <?php if(!empty($t['file'])): ?>
                 <div class="post-file">
-                    <i class="fas fa-file-alt fa-2x text-primary me-3"></i>
+                    <i class="fas fa-file-alt fa-2x text-success me-3"></i>
                     <div>
                         <div class="fw-bold"><?php echo $t['file']; ?></div>
                         <a href="../../assets/uploads/forum/<?php echo $t['file']; ?>" target="_blank" class="text-decoration-none small">Download File</a>
@@ -331,7 +331,7 @@ $topicsQ = mysqli_query($koneksi, "
 
             <div class="d-flex justify-content-between text-muted small mt-3 px-2">
                 <span id="like-count-<?php echo $t['id_topic']; ?>">
-                    <?php if($t['like_count'] > 0) echo '<i class="fas fa-thumbs-up text-primary"></i> ' . $t['like_count']; ?>
+                    <?php if($t['like_count'] > 0) echo '<i class="fas fa-thumbs-up text-success"></i> ' . $t['like_count']; ?>
                 </span>
                 <span><?php echo $t['comment_count']; ?> Komentar</span>
             </div>
@@ -376,7 +376,7 @@ $topicsQ = mysqli_query($koneksi, "
                         <?php echo strtoupper(substr($my_name, 0, 1)); ?>
                     </div>
                     <input type="text" class="form-control rounded-pill bg-light border-0" placeholder="Tulis komentar..." id="input-comment-<?php echo $t['id_topic']; ?>" onkeypress="handleComment(event, <?php echo $t['id_topic']; ?>)">
-                    <button class="btn btn-link text-primary p-0 ms-2" onclick="postComment(<?php echo $t['id_topic']; ?>)"><i class="fas fa-paper-plane"></i></button>
+                    <button class="btn btn-link text-success p-0 ms-2" onclick="postComment(<?php echo $t['id_topic']; ?>)"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
@@ -400,7 +400,7 @@ function toggleLike(topicId) {
             
             const countSpan = $('#like-count-' + topicId);
             if (res.count > 0) {
-                countSpan.html('<i class="fas fa-thumbs-up text-primary"></i> ' + res.count);
+                countSpan.html('<i class="fas fa-thumbs-up text-success"></i> ' + res.count);
             } else {
                 countSpan.html('');
             }

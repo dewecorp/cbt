@@ -103,7 +103,7 @@ if (!empty($id_kelas)) {
     <!-- Filter Card -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Filter Data</h6>
+            <h6 class="m-0 font-weight-bold text-success">Filter Data</h6>
         </div>
         <div class="card-body">
             <form method="get" class="row g-3 align-items-end">
@@ -134,7 +134,7 @@ if (!empty($id_kelas)) {
                     <input type="number" name="tahun" class="form-control" value="<?php echo $tahun; ?>" min="2020" max="<?php echo date('Y')+1; ?>">
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> Tampilkan</button>
+                    <button type="submit" class="btn btn-success w-100"><i class="fas fa-search"></i> Tampilkan</button>
                 </div>
             </form>
         </div>
@@ -143,7 +143,7 @@ if (!empty($id_kelas)) {
     <?php if ($id_kelas && !empty($students)): ?>
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">
+            <h6 class="m-0 font-weight-bold text-success">
                 Rekap Absensi: <?php echo $month_names[$bulan] . ' ' . $tahun; ?>
             </h6>
             <div>
@@ -154,8 +154,8 @@ if (!empty($id_kelas)) {
                     <i class="fas fa-file-pdf"></i> PDF
                 </a>
                 <span class="badge bg-success me-1">H: Hadir</span>
-                <span class="badge bg-warning me-1">S: Sakit</span>
                 <span class="badge bg-info me-1">I: Izin</span>
+                <span class="badge bg-warning me-1">S: Sakit</span>
                 <span class="badge bg-danger">A: Alpha</span>
             </div>
         </div>
@@ -190,7 +190,7 @@ if (!empty($id_kelas)) {
                                 $bg = '';
                                 if ($status == 'H') { $bg = 'bg-success text-white'; $total_hadir++; }
                                 elseif ($status == 'S') $bg = 'bg-warning text-dark';
-                                elseif ($status == 'I') $bg = 'bg-info text-white';
+                                elseif ($status == 'I') $bg = 'bg-success text-white';
                                 elseif ($status == 'A') $bg = 'bg-danger text-white';
                             ?>
                                 <td class="text-center <?php echo $bg; ?>" style="padding: 2px;"><?php echo $status; ?></td>
@@ -208,11 +208,11 @@ if (!empty($id_kelas)) {
         </div>
     </div>
     <?php elseif ($id_kelas): ?>
-        <div class="alert alert-info text-center">
+        <div class="alert alert-success text-center">
             Tidak ada siswa ditemukan di kelas ini.
         </div>
     <?php else: ?>
-        <div class="alert alert-info text-center">
+        <div class="alert alert-success text-center">
             Silakan pilih kelas terlebih dahulu untuk melihat rekap kehadiran.
         </div>
     <?php endif; ?>

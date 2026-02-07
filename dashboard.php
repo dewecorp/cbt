@@ -395,11 +395,11 @@ if($level === 'siswa') {
     <div class="row">
         <!-- Data Guru Widget -->
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2 border-start border-4 border-primary">
+            <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Data Guru</div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Data Guru</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_guru; ?></div>
                         </div>
                         <div class="col-auto">
@@ -463,7 +463,7 @@ if($level === 'siswa') {
         <div class="col-lg-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Selamat Datang di E-Learning MI Sultan Fattah Sukosono</h6>
+                    <h6 class="m-0 font-weight-bold text-success">Selamat Datang di E-Learning MI Sultan Fattah Sukosono</h6>
                 </div>
                 <div class="card-body">
                     <div><?php echo $admin_welcome_text; ?></div>
@@ -475,7 +475,7 @@ if($level === 'siswa') {
         <div class="col-lg-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Aktivitas Pengguna (24 Jam)</h6>
+                    <h6 class="m-0 font-weight-bold text-success">Aktivitas Pengguna (24 Jam)</h6>
                     <div>
                         <?php
                         $log_count_24h = 0;
@@ -568,7 +568,7 @@ if($level === 'siswa') {
     <?php if($level === 'guru'): ?>
     <div class="row">
         <div class="col-12 mb-4">
-            <div class="card shadow border-left-primary py-2">
+            <div class="card shadow border-left-success py-2">
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-auto pr-3">
@@ -577,7 +577,7 @@ if($level === 'siswa') {
                                 $foto_path = 'assets/img/guru/' . ($_SESSION['foto'] ?? 'default.png');
                                 if (empty($_SESSION['foto']) || !file_exists($foto_path)) {
                                     // Fallback UI if no photo
-                                    echo '<div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white font-weight-bold" style="width: 80px; height: 80px; font-size: 32px;">' . strtoupper(substr($_SESSION['nama'], 0, 1)) . '</div>';
+                                    echo '<div class="rounded-circle bg-success d-flex align-items-center justify-content-center text-white font-weight-bold" style="width: 80px; height: 80px; font-size: 32px;">' . strtoupper(substr($_SESSION['nama'], 0, 1)) . '</div>';
                                 } else {
                                     echo '<img src="' . $foto_path . '?' . time() . '" class="rounded-circle border border-white shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">';
                                 }
@@ -585,12 +585,12 @@ if($level === 'siswa') {
                                 <button type="button" class="btn btn-sm btn-light rounded-circle shadow-sm position-absolute" 
                                         style="bottom: 0; right: 0; width: 30px; height: 30px; padding: 0; border: 1px solid #e3e6f0;"
                                         data-bs-toggle="modal" data-bs-target="#modalEditFotoGuru">
-                                    <i class="fas fa-camera text-primary"></i>
+                                    <i class="fas fa-camera text-success"></i>
                                 </button>
                             </div>
                         </div>
                         <div class="col">
-                            <div class="h5 font-weight-bold text-primary text-uppercase mb-1">Selamat Datang, <?php echo $_SESSION['nama']; ?></div>
+                            <div class="h5 font-weight-bold text-success text-uppercase mb-1">Selamat Datang, <?php echo $_SESSION['nama']; ?></div>
                             <p class="mb-0">Selamat datang di halaman Dashboard Guru. Anda dapat mengelola Bank Soal dan Jadwal Asesmen.</p>
                         </div>
                         <div class="col-auto">
@@ -650,11 +650,11 @@ if($level === 'siswa') {
         </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2 border-start border-4 border-primary">
+            <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Mapel Diampu</div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Mapel Diampu</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_mapel_guru; ?></div>
                         </div>
                         <div class="col-auto">
@@ -689,7 +689,7 @@ if($level === 'siswa') {
         <div class="col-12 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-calendar-check me-2"></i>Rekap Absensi Siswa Hari Ini (<?php echo date('d/m/Y'); ?>)</h6>
+                    <h6 class="m-0 font-weight-bold text-success"><i class="fas fa-calendar-check me-2"></i>Rekap Absensi Siswa Hari Ini (<?php echo date('d/m/Y'); ?>)</h6>
                 </div>
                 <div class="card-body">
                     <?php if(!empty($attendance_summary)): ?>
@@ -788,11 +788,11 @@ if($level === 'siswa') {
     <?php if($level === 'siswa'): ?>
     <div class="row">
         <div class="col-xl-8 col-lg-7 mb-4">
-            <div class="card shadow border-left-primary py-2 h-100">
+            <div class="card shadow border-left-success py-2 h-100">
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col mr-2">
-                            <div class="h5 font-weight-bold text-primary text-uppercase mb-1">Selamat Datang, <?php echo $_SESSION['nama']; ?></div>
+                            <div class="h5 font-weight-bold text-success text-uppercase mb-1">Selamat Datang, <?php echo $_SESSION['nama']; ?></div>
                             <p class="mb-0">Silahkan cek daftar ujian yang tersedia di bawah ini.</p>
                         </div>
                         <div class="col-auto">
@@ -852,7 +852,7 @@ if($level === 'siswa') {
         <div class="col-12 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Absensi Hari Ini</h6>
+                    <h6 class="m-0 font-weight-bold text-success">Absensi Hari Ini</h6>
                 </div>
                 <div class="card-body text-center">
                     <p class="mb-4"><?php echo get_indo_day($today) . ', ' . date('d F Y'); ?></p>
@@ -992,7 +992,7 @@ if($level === 'siswa') {
         <div class="col-12 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-bullhorn me-2"></i>Pengumuman Terbaru</h6>
+                    <h6 class="m-0 font-weight-bold text-success"><i class="fas fa-bullhorn me-2"></i>Pengumuman Terbaru</h6>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -1066,7 +1066,7 @@ if($level === 'siswa') {
         <div class="col-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Daftar Asesmen Aktif</h6>
+                    <h6 class="m-0 font-weight-bold text-success">Daftar Asesmen Aktif</h6>
                 </div>
                 <div class="card-body">
                     <?php if(mysqli_num_rows($ujian_aktif) > 0): ?>

@@ -165,7 +165,7 @@ if ($level === 'admin') {
                                             aria-selected="<?php echo ($index === 0) ? 'true' : 'false'; ?>">
                                             <i class="fas fa-chalkboard-teacher"></i>
                                             <?php echo htmlspecialchars($k['nama_kelas']); ?>
-                                            <span class="badge bg-white text-primary rounded-pill ms-2"><?php echo $count; ?></span>
+                                            <span class="badge bg-white text-success rounded-pill ms-2"><?php echo $count; ?></span>
                                         </button>
                                     </li>
                                 <?php endforeach; ?>
@@ -193,7 +193,7 @@ if ($level === 'admin') {
                                                             <td><?php echo $no++; ?></td>
                                                             <td><?php echo htmlspecialchars($a['nama_kelas']); ?></td>
                                                             <td><?php echo htmlspecialchars($a['nama_course']); ?></td>
-                                                            <td><span class="badge bg-info"><?php echo htmlspecialchars($a['jenis_tugas']); ?></span></td>
+                                                            <td><span class="badge bg-primary"><?php echo htmlspecialchars($a['jenis_tugas']); ?></span></td>   
                                                             <td><?php echo htmlspecialchars($a['judul']); ?></td>
                                                             <td><?php echo date('d/m/Y H:i', strtotime($a['deadline'])); ?></td>
                                                             <td><?php echo htmlspecialchars($a['nama_lengkap']); ?></td>
@@ -235,7 +235,7 @@ if ($level === 'admin') {
                                     <td><?php echo $no++; ?></td>
                                     <td><?php echo htmlspecialchars($a['nama_kelas']); ?></td>
                                     <td><?php echo htmlspecialchars($a['nama_course']); ?></td>
-                                    <td><span class="badge bg-info"><?php echo htmlspecialchars($a['jenis_tugas']); ?></span></td>
+                                    <td><span class="badge bg-success"><?php echo htmlspecialchars($a['jenis_tugas']); ?></span></td>
                                     <td><?php echo htmlspecialchars($a['judul']); ?></td>
                                     <td><?php echo date('d/m/Y H:i', strtotime($a['deadline'])); ?></td>
                                     <td><?php echo htmlspecialchars($a['nama_lengkap']); ?></td>
@@ -244,7 +244,7 @@ if ($level === 'admin') {
                                         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalSubmit<?php echo $a['id_assignment']; ?>"><i class="fas fa-upload"></i> Unggah</button>
                                         <?php endif; ?>
                                         <?php if($level === 'guru' && $a['created_by'] == $uid): ?>
-                                        <button class="btn btn-info btn-sm" onclick="editAssignment(<?php echo htmlspecialchars(json_encode($a)); ?>)"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-warning btn-sm" onclick="editAssignment(<?php echo htmlspecialchars(json_encode($a)); ?>)"><i class="fas fa-edit"></i></button>
                                         <a href="#" class="btn btn-danger btn-sm" onclick="confirmDeleteAssignment('assignments.php?delete=<?php echo $a['id_assignment']; ?>'); return false;"><i class="fas fa-trash"></i></a>
                                         <?php endif; ?>
                                     </td>

@@ -203,10 +203,10 @@ if ($_SESSION['level'] == 'guru') {
                                 </td>
                                 <?php if($_SESSION['level'] == 'guru'): ?>
                                 <td>
-                                    <a href="monitoring_ujian.php?id=<?php echo $row['id_ujian']; ?>" class="btn btn-info btn-sm text-white" title="Monitoring Asesmen">
+                                    <a href="monitoring_ujian.php?id=<?php echo $row['id_ujian']; ?>" class="btn btn-success btn-sm text-white" title="Monitoring Asesmen">
                                         <i class="fas fa-desktop"></i>
                                     </a>
-                                    <button type="button" class="btn btn-warning btn-sm text-white" 
+                                    <button type="button" class="btn btn-warning btn-sm text-white"  
                                         data-bs-toggle="modal" 
                                         data-bs-target="#editModal"
                                         data-id="<?php echo $row['id_ujian']; ?>"

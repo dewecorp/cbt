@@ -148,7 +148,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 <div class="container-fluid">
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Jadwal Pelajaran</h6>
+            <h6 class="m-0 font-weight-bold text-success">Jadwal Pelajaran</h6>
         </div>
         <div class="card-body">
             <?php if(!empty($kelas_data)): 
@@ -172,7 +172,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                             aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>">
                             <i class="fas fa-chalkboard-teacher"></i>
                             <?php echo $k['nama_kelas']; ?>
-                            <span class="badge bg-white text-primary rounded-pill ms-2"><?php echo $count; ?></span>
+                            <span class="badge bg-white text-success rounded-pill ms-2"><?php echo $count; ?></span>
                         </button>
                     </li>
                     <?php endforeach; ?>
@@ -226,7 +226,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                         <td><?php echo $row['nama_lengkap']; ?></td>
                                         <td>
                                             <?php foreach($m_names as $mn): ?>
-                                                <span class="badge bg-info text-dark me-1 mb-1"><?php echo $mn; ?></span>
+                                                <span class="badge bg-primary text-white me-1 mb-1"><?php echo $mn; ?></span>
                                             <?php endforeach; ?>
                                         </td>
                                         <td>
@@ -307,7 +307,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
-                <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded text-center">
+                <div class="card bg-success bg-opacity-10 border border-success text-success p-3 rounded text-center">
                     <i class="fas fa-info-circle me-1"></i> Belum ada data kelas. Silakan tambahkan data kelas di menu Master Data.
                 </div>
             <?php endif; ?>
@@ -319,7 +319,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-success text-white">
                 <h5 class="modal-title" id="addModalTitle">Tambah Jadwal</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>

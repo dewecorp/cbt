@@ -81,7 +81,7 @@ $q_siswa = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_kelas='$id_kelas
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">
+            <h6 class="m-0 font-weight-bold text-success">
                 <?php echo $ujian['nama_ujian']; ?> 
                 <span class="badge bg-info ms-2"><?php echo $ujian['kode_bank']; ?></span>
             </h6>
@@ -210,7 +210,7 @@ $q_siswa = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_kelas='$id_kelas
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" name="tambah_waktu_submit" class="btn btn-primary">Simpan</button>
+                    <button type="submit" name="tambah_waktu_submit" class="btn btn-success">Simpan</button>
                 </div>
             </form>
         </div>

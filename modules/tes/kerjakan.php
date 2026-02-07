@@ -254,7 +254,7 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
                 <div class="card-footer small">
                     <span class="badge bg-success me-1">&nbsp;</span> Dijawab
                     <span class="badge bg-warning text-dark me-1">&nbsp;</span> Ragu
-                    <span class="badge border border-primary text-dark">&nbsp;</span> Aktif
+                    <span class="badge border border-success text-dark">&nbsp;</span> Aktif
                 </div>
             </div>
         </div>

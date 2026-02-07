@@ -19,7 +19,7 @@ if (mysqli_num_rows($check_col) == 0) {
     .avatar-initial {
         width: 40px;
         height: 40px;
-        background-color: #0d6efd;
+        background-color: #198754;
         color: white;
         border-radius: 50%;
         display: flex;
@@ -183,7 +183,7 @@ if (isset($_GET['hapus'])) {
                             <td><?php echo $row['nama_lengkap']; ?></td>
                             <td><?php echo $row['username']; ?></td>
                             <td>
-                                <span class="badge bg-<?php echo ($row['level'] == 'admin') ? 'danger' : 'info'; ?>">
+                                <span class="badge bg-<?php echo ($row['level'] == 'admin') ? 'danger' : 'success'; ?>">
                                     <?php echo ucfirst($row['level']); ?>
                                 </span>
                             </td>
@@ -317,8 +317,8 @@ if (isset($_GET['hapus'])) {
                 text: "Data user akan dihapus!",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#198754',
                 confirmButtonText: 'Ya, Hapus!'
             }).then((result) => {
                 if (result.isConfirmed) {

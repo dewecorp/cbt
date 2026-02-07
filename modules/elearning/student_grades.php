@@ -38,7 +38,7 @@ $grades = mysqli_query($koneksi, $query);
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Rekap Nilai Tugas Saya</h6>
+            <h6 class="m-0 font-weight-bold text-success">Rekap Nilai Tugas Saya</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -80,7 +80,7 @@ $grades = mysqli_query($koneksi, $query);
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-center">
-                                    <a href="../../<?php echo $row['submitted_file']; ?>" target="_blank" class="btn btn-sm btn-info text-white" title="Lihat File Saya">
+                                    <a href="../../<?php echo $row['submitted_file']; ?>" target="_blank" class="btn btn-sm btn-success text-white" title="Lihat File Saya">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>

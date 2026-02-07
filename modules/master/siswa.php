@@ -259,7 +259,7 @@ $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
     <!-- Filter Kelas -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Filter Kelas</h6>
+            <h6 class="m-0 font-weight-bold text-success">Filter Kelas</h6>
         </div>
         <div class="card-body">
             <form method="GET" action="">
@@ -278,7 +278,7 @@ $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
     <?php if ($selected_kelas): ?>
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-            <h6 class="m-0 font-weight-bold text-primary">Daftar Siswa</h6>
+            <h6 class="m-0 font-weight-bold text-success">Daftar Siswa</h6>
             <div>
                 <button type="button" class="btn btn-danger btn-sm me-2" onclick="confirmResetAllPassword('<?php echo $selected_kelas; ?>')">
                     <i class="fas fa-key"></i> Reset Semua Password
@@ -286,7 +286,7 @@ $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                 <button type="button" class="btn btn-success btn-sm me-2" data-bs-toggle="modal" data-bs-target="#importModal">
                     <i class="fas fa-file-excel"></i> Import Excel
                 </button>
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
+                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
                     <i class="fas fa-plus"></i> Tambah Siswa
                 </button>
             </div>
@@ -356,7 +356,7 @@ $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
         </div>
     </div>
     <?php else: ?>
-        <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded text-center">
+        <div class="card bg-success bg-opacity-10 border border-success text-success p-3 rounded text-center">
             <i class="fas fa-info-circle me-1"></i> Silakan pilih kelas terlebih dahulu untuk menampilkan data siswa.
         </div>
     <?php endif; ?>
@@ -480,7 +480,7 @@ $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" name="edit" class="btn btn-primary">Update</button>
+                    <button type="submit" name="edit" class="btn btn-success">Update</button>
                 </div>
             </form>
         </div>
@@ -549,7 +549,7 @@ $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
             text: "Password akan diubah menjadi kode acak baru!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
+            confirmButtonColor: '#198754',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Ya, Reset!',
             cancelButtonText: 'Batal'
@@ -591,7 +591,7 @@ $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
+            cancelButtonColor: '#198754',
             confirmButtonText: 'Ya, Reset Semua!',
             cancelButtonText: 'Batal'
         }).then((result) => {

@@ -133,7 +133,7 @@ include '../../includes/header.php';
                     </script>
                     <?php endif; ?>
 
-                    <h4 class="text-center mb-4 text-primary fw-bold"><?php echo $hasil['nama_ujian']; ?></h4>
+                    <h4 class="text-center mb-4 text-success fw-bold"><?php echo $hasil['nama_ujian']; ?></h4>
 
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped">

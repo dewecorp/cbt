@@ -235,7 +235,7 @@ if ($_SESSION['level'] == 'guru') {
                                 <td><?php echo $row['nama_lengkap']; ?></td>
                                 <td><?php echo date('d-m-Y', strtotime($row['created_at'])); ?></td>
                                 <td>
-                                    <span class="badge bg-info"><?php echo $row['jml_soal']; ?> Soal</span>
+                                    <span class="badge bg-success"><?php echo $row['jml_soal']; ?> Soal</span>
                                 </td>
                                 <td>
                                     <?php 
@@ -260,10 +260,10 @@ if ($_SESSION['level'] == 'guru') {
                                     }
                                     ?>
                                 </td>
-                                <?php if($_SESSION['level'] == 'guru'): ?>
+                                <?php if($_SESSION['level'] == 'guru'): ?>      
                                 <td>
-                                    <a href="buat_soal.php?id=<?php echo $row['id_bank_soal']; ?>" class="btn btn-info btn-sm text-white">
-                                        <i class="fas fa-list"></i> Kelola Soal
+                                    <a href="buat_soal.php?id=<?php echo $row['id_bank_soal']; ?>" class="btn btn-primary btn-sm text-white">
+                                        <i class="fas fa-list"></i> Kelola Soal 
                                     </a>
                                     <button type="button" class="btn btn-warning btn-sm text-white" 
                                         data-bs-toggle="modal" 

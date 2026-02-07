@@ -150,11 +150,10 @@ if ($level == 'admin' || $level == 'guru') {
                                 <?php endif; ?>
                             </td>
                             <td><?php echo $row['waktu_selesai']; ?></td>
-                            <?php if ($level == 'guru' || $level == 'admin'): ?>
-                            <td class="text-center">
-                                <?php if($row['status'] == 'selesai'): ?>
-                                <a href="lihat_jawaban.php?id=<?php echo $row['id_ujian_siswa']; ?>" class="btn btn-primary btn-sm" title="Lihat Jawaban">
-                                    <i class="fas fa-eye"></i> Lihat Jawaban
+                            <?php if ($level == 'guru' || $level == 'admin'): ?>                            <td class="text-center">
+                                <?php if($row['status'] == 'selesai'): ?>       
+                                <a href="lihat_jawaban.php?id=<?php echo $row['id_ujian_siswa']; ?>" class="btn btn-primary btn-sm" title="Lihat Jawaban">      
+                                    <i class="fas fa-eye"></i> Lihat Jawaban    
                                 </a>
                                 <?php endif; ?>
                             </td>
