@@ -50,7 +50,7 @@ try {
 
         // Setup file writing
         $filename = "backup_".$db."_".date('Y-m-d_H-i-s').".sql";
-        $backupDir = "../../backups/";
+        $backupDir = __DIR__ . "/../../backups/";
         
         // Ensure directory exists
         if (!is_dir($backupDir)) {
@@ -116,6 +116,11 @@ try {
         fwrite($handle, "\nCOMMIT;");
         fclose($handle);
 
+        // Log aktivitas
+        if (function_exists('log_activity')) {
+            log_activity('create', 'backup', 'Membuat backup database: ' . $filename);
+        }
+
         echo json_encode(['status' => 'success', 'message' => 'Backup berhasil dibuat', 'file' => $filename]);
 
     } elseif ($action == 'restore') {
@@ -141,6 +146,11 @@ try {
                         }
                     } while ($mysqli->more_results() && $mysqli->next_result());
                     
+                    // Log aktivitas
+                    if (function_exists('log_activity')) {
+                        log_activity('restore', 'backup', 'Restore database dari file: ' . $_FILES['file_restore']['name']);
+                    }
+
                     echo json_encode(['status' => 'success', 'message' => 'Restore database berhasil']);
                 } else {
                     throw new Exception('Gagal restore: ' . $mysqli->error);
@@ -156,10 +166,20 @@ try {
         $filename = isset($_POST['filename']) ? $_POST['filename'] : '';
         if (empty($filename)) throw new Exception('Filename kosong');
 
-        $path = "../../backups/" . basename($filename); // basename for security
+        $path = __DIR__ . "/../../backups/" . basename($filename); // basename for security
 
         if (file_exists($path) && is_file($path)) {
             if (unlink($path)) {
+                // Log aktivitas
+                if (function_exists('log_activity')) {
+                    // Gunakan try catch khusus untuk log agar tidak mengganggu proses utama
+                    try {
+                        log_activity('delete', 'backup', 'Menghapus file backup: ' . $filename);
+                    } catch (Throwable $t) {
+                        // Ignore log error
+                    }
+                }
+
                 echo json_encode(['status' => 'success', 'message' => 'File backup berhasil dihapus']);
             } else {
                 throw new Exception('Gagal menghapus file');

@@ -28,7 +28,7 @@ function formatSizeUnits($bytes) {
 }
 
 // Get list of backups
-$backupDir = "../../backups/";
+$backupDir = __DIR__ . "/../../backups/";
 $backupFiles = [];
 if (is_dir($backupDir)) {
     $files = scandir($backupDir);
@@ -50,7 +50,7 @@ if (is_dir($backupDir)) {
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Backup & Restore Database</h1>
+        <h1 class="h2">Backup & Restore Database <small class="text-muted" style="font-size: 0.5em;">v1.2</small></h1>
     </div>
 
     <div class="row">
@@ -124,12 +124,12 @@ if (is_dir($backupDir)) {
                                         <td><?php echo formatSizeUnits($file['size']); ?></td>
                                         <td><?php echo date('d-m-Y H:i:s', $file['time']); ?></td>
                                         <td>
-                                            <a href="../../backups/<?php echo $file['name']; ?>" class="btn btn-success btn-sm" download title="Unduh">
+                                            <a href="javascript:void(0);" class="btn btn-success btn-sm" onclick="startDownload('<?php echo $file['name']; ?>')" title="Unduh">
                                                 <i class="fas fa-download"></i>
                                             </a>
-                                            <button class="btn btn-danger btn-sm" onclick="confirmDelete('<?php echo $file['name']; ?>')" title="Hapus">
+                                            <a href="javascript:void(0);" class="btn btn-danger btn-sm" onclick="confirmBackupDelete('<?php echo $file['name']; ?>', event)" title="Hapus">
                                                 <i class="fas fa-trash"></i>
-                                            </button>
+                                            </a>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -144,6 +144,31 @@ if (is_dir($backupDir)) {
 </div>
 
 <script>
+function startDownload(filename) {
+    Swal.fire({
+        title: 'Menyiapkan Unduhan',
+        html: 'Mohon tunggu, sedang memproses file...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    setTimeout(() => {
+        // Trigger download
+        window.location.href = 'download.php?file=' + filename;
+        
+        // Show success alert
+        Swal.fire({
+            icon: 'success',
+            title: 'Download Dimulai',
+            text: 'File backup sedang diunduh ke perangkat Anda.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }, 2000); // 2 seconds delay
+}
+
 function doBackup() {
     Swal.fire({
         title: 'Memproses Backup',
@@ -154,9 +179,11 @@ function doBackup() {
         }
     });
 
-    fetch('action.php?action=backup')
-    .then(response => response.json())
-    .then(data => {
+    const minDelay = new Promise(resolve => setTimeout(resolve, 2000));
+    const request = fetch('action.php?action=backup').then(response => response.json());
+
+    Promise.all([minDelay, request])
+    .then(([_, data]) => {
         if (data.status === 'success') {
             Swal.fire({
                 icon: 'success',
@@ -172,12 +199,14 @@ function doBackup() {
         }
     })
     .catch(error => {
-        Swal.fire('Error', 'Terjadi kesalahan pada server', 'error');
+        Swal.fire('Error', 'Terjadi kesalahan pada server: ' + error, 'error');
         console.error(error);
     });
 }
 
-function confirmDelete(filename) {
+function confirmBackupDelete(filename, event) {
+    if(event) event.preventDefault();
+    
     Swal.fire({
         title: 'Hapus Backup?',
         text: "File backup " + filename + " akan dihapus permanen!",
@@ -189,21 +218,43 @@ function confirmDelete(filename) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            deleteBackup(filename);
+            processDeleteBackup(filename);
         }
     });
 }
 
-function deleteBackup(filename) {
+function processDeleteBackup(filename) {
+    Swal.fire({
+        title: 'Menghapus Backup',
+        html: 'Mohon tunggu sebentar...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
     let formData = new FormData();
     formData.append('filename', filename);
 
-    fetch('action.php?action=delete', {
+    const minDelay = new Promise(resolve => setTimeout(resolve, 2000));
+    const request = fetch('action.php?action=delete', {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
+    .then(response => {
+        // Cek jika response bukan JSON valid
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            return response.json();
+        } else {
+            return response.text().then(text => {
+                throw new Error("Server returned non-JSON response: " + text.substring(0, 100));
+            });
+        }
+    });
+
+    Promise.all([minDelay, request])
+    .then(([_, data]) => {
         if (data.status === 'success') {
             Swal.fire({
                 icon: 'success',
@@ -219,7 +270,7 @@ function deleteBackup(filename) {
         }
     })
     .catch(error => {
-        Swal.fire('Error', 'Terjadi kesalahan pada server', 'error');
+        Swal.fire('Error', 'Terjadi kesalahan: ' + error.message, 'error');
         console.error(error);
     });
 }

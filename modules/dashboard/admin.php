@@ -145,6 +145,17 @@ if ($d_setting_dash && isset($d_setting_dash['admin_welcome_text']) && !empty($d
                         $text_class = 'text-danger';
                         $border_class = 'border-left-danger';
                         $marker_color = '#e74a3b';
+                    } elseif($lg['action'] == 'import') {
+                        $ico = 'fa-file-excel';
+                        $text_class = 'text-success';
+                        $border_class = 'border-left-success';
+                        $marker_color = '#1cc88a';
+                    } else {
+                         // Default fallback for unknown actions
+                        $ico = 'fa-circle';
+                        $text_class = 'text-secondary';
+                        $border_class = 'border-left-secondary';
+                        $marker_color = '#858796';
                     }
                     
                     // Get user name if not in details

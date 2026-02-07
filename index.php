@@ -32,10 +32,9 @@ if (isset($_POST['login'])) {
             $_SESSION['nama'] = $data['nama_lengkap'];
             $_SESSION['foto'] = isset($data['foto']) ? $data['foto'] : null;
             $_SESSION['level'] = $data['level'];
-            $_SESSION['login_success'] = 1;
-            log_activity('login', 'auth', 'login admin/guru');
-            header("Location: dashboard.php");
-            exit;
+            // $_SESSION['login_success'] = 1; // Removed to prevent alert on dashboard
+            log_activity('login', 'auth', 'login ' . $data['level']);
+            $login_success = true; // Flag for alert
         } else {
             $error = "Password salah!";
         }
@@ -55,10 +54,9 @@ if (isset($_POST['login'])) {
                  $_SESSION['nama'] = $data['nama_siswa'];
                  $_SESSION['level'] = 'siswa';
                  $_SESSION['id_kelas'] = $data['id_kelas'];
-                 $_SESSION['login_success'] = 1;
+                 // $_SESSION['login_success'] = 1; // Removed to prevent alert on dashboard
                  log_activity('login', 'auth', 'login siswa');
-                 header("Location: dashboard.php");
-                 exit;
+                 $login_success = true; // Flag for alert
             } else {
                 $error = "Password salah!";
             }
@@ -107,6 +105,22 @@ if (isset($_POST['login'])) {
             <p class="text-center text-muted mb-4">Silahkan login untuk melanjutkan</p>
             <?php endif; ?>
             
+            <?php if(isset($login_success) && $login_success): ?>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Proses Authentication Berhasil',
+                        text: 'Akun anda berhasil diverifikasi',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        window.location.href = 'dashboard.php';
+                    });
+                });
+            </script>
+            <?php endif; ?>
+
             <?php if($error): ?>
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
@@ -120,6 +134,13 @@ if (isset($_POST['login'])) {
             </script>
             <?php endif; ?>
 
+            <?php if(isset($login_success) && $login_success): ?>
+                <!-- Login Sukses - Form disembunyikan -->
+                <div class="text-center my-5">
+                    <i class="fas fa-circle-notch fa-spin fa-3x text-kemenag"></i>
+                    <p class="mt-3 text-muted">Login berhasil, mengalihkan ke dashboard...</p>
+                </div>
+            <?php else: ?>
             <form method="POST" action="">
                 <div class="mb-3">
                     <label for="username" class="form-label">Username / NISN</label>
@@ -139,6 +160,7 @@ if (isset($_POST['login'])) {
                     <button type="submit" name="login" class="btn btn-kemenag btn-lg">LOGIN</button>
                 </div>
             </form>
+            <?php endif; ?>
             <div class="text-center mt-3">
                 <small class="text-muted">&copy; 2026 MI Sultan Fattah Sukosono</small>
             </div>
