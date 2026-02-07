@@ -14,17 +14,8 @@ echo Pesan commit: "%commitMsg%"
 set /p confirm=Lanjutkan? (Y/N):
 if /I not "%confirm%"=="Y" goto end
 git add -A
-git diff --cached --quiet
-if errorlevel 1 (
-  git commit -m "%commitMsg%"
-) else (
-  echo Tidak ada perubahan untuk commit.
-)
-for /f "delims=" %%i in ('git rev-parse --abbrev-ref HEAD') do set BRANCH=%%i
-if "%BRANCH%"=="" set BRANCH=main
-git rev-parse --verify "%BRANCH%" >nul 2>&1
-if errorlevel 1 git checkout -b "%BRANCH%"
-git push -u origin "%BRANCH%"
+git commit -m "%commitMsg%"
+git push origin main
 set BACKUP_DIR=%REPO_DIR%\backups
 if not exist "%BACKUP_DIR%" mkdir "%BACKUP_DIR%"
 set ZIP_PATH=%BACKUP_DIR%\cbt-backup.zip
