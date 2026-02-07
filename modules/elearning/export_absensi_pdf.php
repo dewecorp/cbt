@@ -102,7 +102,10 @@ while($row = mysqli_fetch_assoc($q_att)) {
                 <th rowspan="2" width="30">No</th>
                 <th rowspan="2" width="200">Nama Siswa</th>
                 <th colspan="<?php echo $days_in_month; ?>">Tanggal</th>
-                <th rowspan="2" width="40">Total</th>
+                <th rowspan="2" width="25" style="background-color: #d4edda;">H</th>
+                <th rowspan="2" width="25" style="background-color: #fff3cd;">S</th>
+                <th rowspan="2" width="25" style="background-color: #d1ecf1;">I</th>
+                <th rowspan="2" width="25" style="background-color: #f8d7da;">A</th>
             </tr>
             <tr>
                 <?php for($d=1; $d<=$days_in_month; $d++): ?>
@@ -115,18 +118,24 @@ while($row = mysqli_fetch_assoc($q_att)) {
             $no = 1;
             foreach($students as $s): 
                 $sid = $s['id_siswa'];
-                $total_hadir = 0;
+                $t_h = 0; $t_s = 0; $t_i = 0; $t_a = 0;
             ?>
             <tr>
                 <td><?php echo $no++; ?></td>
                 <td class="text-left"><?php echo htmlspecialchars($s['nama_siswa']); ?></td>
                 <?php for($d=1; $d<=$days_in_month; $d++): 
                     $status = isset($attendance_data[$sid][$d]) ? $attendance_data[$sid][$d] : '';
-                    if ($status == 'H') $total_hadir++;
+                    if ($status == 'H') $t_h++;
+                    if ($status == 'S') $t_s++;
+                    if ($status == 'I') $t_i++;
+                    if ($status == 'A') $t_a++;
                 ?>
                     <td><?php echo $status; ?></td>
                 <?php endfor; ?>
-                <td><strong><?php echo $total_hadir; ?></strong></td>
+                <td><strong><?php echo $t_h; ?></strong></td>
+                <td><strong><?php echo $t_s; ?></strong></td>
+                <td><strong><?php echo $t_i; ?></strong></td>
+                <td><strong><?php echo $t_a; ?></strong></td>
             </tr>
             <?php endforeach; ?>
         </tbody>

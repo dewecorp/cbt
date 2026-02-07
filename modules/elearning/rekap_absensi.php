@@ -167,7 +167,10 @@ if (!empty($id_kelas)) {
                             <th rowspan="2" class="align-middle" style="width: 40px;">No</th>
                             <th rowspan="2" class="align-middle" style="min-width: 200px; text-align: left; padding-left: 10px;">Nama Siswa</th>
                             <th colspan="<?php echo $days_in_month; ?>"><?php echo $month_names[$bulan]; ?></th>
-                            <th rowspan="2" class="align-middle" style="width: 60px;">Total</th>
+                            <th rowspan="2" class="align-middle bg-success text-white" style="width: 30px;" title="Hadir">H</th>
+                            <th rowspan="2" class="align-middle bg-warning text-dark" style="width: 30px;" title="Sakit">S</th>
+                            <th rowspan="2" class="align-middle bg-info text-white" style="width: 30px;" title="Izin">I</th>
+                            <th rowspan="2" class="align-middle bg-danger text-white" style="width: 30px;" title="Alpha">A</th>
                         </tr>
                         <tr>
                             <?php for($d=1; $d<=$days_in_month; $d++): ?>
@@ -180,7 +183,7 @@ if (!empty($id_kelas)) {
                         $no = 1;
                         foreach($students as $s): 
                             $sid = $s['id_siswa'];
-                            $total_hadir = 0;
+                            $t_h = 0; $t_s = 0; $t_i = 0; $t_a = 0;
                         ?>
                         <tr>
                             <td class="text-center"><?php echo $no++; ?></td>
@@ -188,14 +191,17 @@ if (!empty($id_kelas)) {
                             <?php for($d=1; $d<=$days_in_month; $d++): 
                                 $status = isset($attendance_data[$sid][$d]) ? $attendance_data[$sid][$d] : '';
                                 $bg = '';
-                                if ($status == 'H') { $bg = 'bg-success text-white'; $total_hadir++; }
-                                elseif ($status == 'S') $bg = 'bg-warning text-dark';
-                                elseif ($status == 'I') $bg = 'bg-success text-white';
-                                elseif ($status == 'A') $bg = 'bg-danger text-white';
+                                if ($status == 'H') { $bg = 'bg-success text-white'; $t_h++; }
+                                elseif ($status == 'S') { $bg = 'bg-warning text-dark'; $t_s++; }
+                                elseif ($status == 'I') { $bg = 'bg-info text-white'; $t_i++; }
+                                elseif ($status == 'A') { $bg = 'bg-danger text-white'; $t_a++; }
                             ?>
                                 <td class="text-center <?php echo $bg; ?>" style="padding: 2px;"><?php echo $status; ?></td>
                             <?php endfor; ?>
-                            <td class="text-center fw-bold"><?php echo $total_hadir; ?></td>
+                            <td class="text-center fw-bold bg-success text-white"><?php echo $t_h; ?></td>
+                            <td class="text-center fw-bold bg-warning text-dark"><?php echo $t_s; ?></td>
+                            <td class="text-center fw-bold bg-info text-white"><?php echo $t_i; ?></td>
+                            <td class="text-center fw-bold bg-danger text-white"><?php echo $t_a; ?></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>

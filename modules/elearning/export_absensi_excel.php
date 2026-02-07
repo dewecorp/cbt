@@ -74,7 +74,10 @@ $header = ['No', 'Nama Siswa'];
 for($d=1; $d<=$days_in_month; $d++) {
     $header[] = $d;
 }
-$header[] = 'Total';
+$header[] = 'H';
+$header[] = 'S';
+$header[] = 'I';
+$header[] = 'A';
 $data[] = $header;
 
 // Data Rows
@@ -82,14 +85,20 @@ $no = 1;
 foreach($students as $s) {
     $sid = $s['id_siswa'];
     $row = [$no++, $s['nama_siswa']];
-    $total_hadir = 0;
+    $t_h = 0; $t_s = 0; $t_i = 0; $t_a = 0;
     
     for($d=1; $d<=$days_in_month; $d++) {
         $status = isset($attendance_data[$sid][$d]) ? $attendance_data[$sid][$d] : '';
-        if ($status == 'H') $total_hadir++;
+        if ($status == 'H') $t_h++;
+        if ($status == 'S') $t_s++;
+        if ($status == 'I') $t_i++;
+        if ($status == 'A') $t_a++;
         $row[] = $status;
     }
-    $row[] = $total_hadir;
+    $row[] = $t_h;
+    $row[] = $t_s;
+    $row[] = $t_i;
+    $row[] = $t_a;
     $data[] = $row;
 }
 
