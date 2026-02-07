@@ -233,10 +233,6 @@ if($level === 'guru') {
                 ");
                 if($q_att_today) {
                     while($row = mysqli_fetch_assoc($q_att_today)) {
-                        // Jika ada nama mapel, tambahkan ke keterangan
-                        if (!empty($row['nama_mapel'])) {
-                             $row['keterangan'] = '<strong>' . $row['nama_mapel'] . '</strong> <br>' . $row['keterangan'];
-                        }
                         $attendance_summary[] = $row;
                     }
                 }
@@ -703,7 +699,7 @@ if($level === 'siswa') {
                                 <tr>
                                     <th>No</th>
                                     <th>Nama Siswa</th>
-                                    <th>Kelas</th>
+                                    <th>Mata Pelajaran</th>
                                     <th>Status</th>
                                     <th>Keterangan</th>
                                     <th>Waktu</th>
@@ -714,7 +710,15 @@ if($level === 'siswa') {
                                 <tr>
                                     <td><?php echo $no++; ?></td>
                                     <td><?php echo htmlspecialchars($as['nama_siswa']); ?></td>
-                                    <td><?php echo htmlspecialchars($as['nama_kelas']); ?></td>
+                                    <td>
+                                        <?php 
+                                            if (!empty($as['nama_mapel'])) {
+                                                echo htmlspecialchars($as['nama_mapel']);
+                                            } else {
+                                                echo '<span class="text-muted fst-italic">Absensi Harian</span>';
+                                            }
+                                        ?>
+                                    </td>
                                     <td>
                                         <?php 
                                         $badge = 'secondary';
