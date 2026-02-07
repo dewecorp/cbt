@@ -162,12 +162,24 @@ if (isset($_GET['edit_id'])) {
     }
 }
 ?>
+<style>
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+    background-color: #198754 !important;
+    color: white !important;
+}
+.nav-pills .nav-link {
+    color: #6c757d;
+}
+.nav-pills .nav-link:hover {
+    color: #198754;
+}
+</style>
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Kelas Online</h6>
+                    <h6 class="m-0 font-weight-bold text-success">Kelas Online</h6>
                     <div>
                         <?php if($level === 'guru'): ?>
                         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalCourse"><i class="fas fa-plus"></i> Buat Kelas Online</button>

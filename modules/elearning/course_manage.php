@@ -456,7 +456,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                         </div>
                         <div class="d-flex justify-content-between align-items-center border-top pt-3">
                             <div class="d-flex">
-                                <label class="btn btn-light btn-sm rounded-pill me-2 text-primary">
+                                <label class="btn btn-light btn-sm rounded-pill me-2 text-success">
                                     <i class="fas fa-image"></i> Foto
                                     <input type="file" name="image" class="d-none" accept="image/*">
                                 </label>
@@ -567,12 +567,12 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
         <div class="tab-pane fade <?php echo $active_tab == 'siswa' ? 'show active' : ''; ?>">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Daftar Siswa</h6>
+                    <h6 class="m-0 font-weight-bold text-success">Daftar Siswa</h6>
                     <?php if($level === 'guru'): ?>
                         <div>
                             <form method="post" class="d-inline" onsubmit="return confirmAddAll(this);">
                                 <input type="hidden" name="add_all" value="1">
-                                <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-users"></i> Tambah Semua</button>
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-users"></i> Tambah Semua</button>
                             </form>
                             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addStudentModal"><i class="fas fa-plus"></i> Tambah Siswa</button>
                         </div>

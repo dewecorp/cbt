@@ -140,7 +140,7 @@ if ($level === 'admin') {
         <div class="col-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Tugas Pembelajaran</h6>
+                    <h6 class="m-0 font-weight-bold text-success">Tugas Pembelajaran</h6>
                     <div>
                         <?php if($level === 'guru'): ?>
                         <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalAssignment"><i class="fas fa-plus-circle"></i> Buat Tugas</button>

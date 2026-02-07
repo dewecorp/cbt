@@ -353,7 +353,7 @@ if (isset($_GET['edit_soal'])) {
             <p class="mb-0 text-muted">Bank Soal: <strong><?php echo $bank['kode_bank']; ?></strong> | Mapel: <?php echo $bank['nama_mapel']; ?></p>
         </div>
         <div>
-            <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importModal">
+            <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#importModal">
                 <i class="fas fa-file-excel"></i> Import Excel
             </button>
             <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#importWordModal">

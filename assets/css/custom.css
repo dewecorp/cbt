@@ -113,6 +113,8 @@ body {
     color: var(--kemenag-green-dark);
 }
 
+/* btn-primary override removed to restore blue color */
+/*
 .btn-primary {
     background: linear-gradient(180deg, #2e7d32 0%, #1b5e20 100%);
     border: none;
@@ -121,6 +123,7 @@ body {
 .btn-primary:hover {
     background: linear-gradient(180deg, #1b5e20 0%, #0e3b18 100%);
 }
+*/
 
 .text-kemenag {
     color: var(--kemenag-green) !important;

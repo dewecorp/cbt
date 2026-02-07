@@ -283,10 +283,10 @@ $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                 <button type="button" class="btn btn-danger btn-sm me-2" onclick="confirmResetAllPassword('<?php echo $selected_kelas; ?>')">
                     <i class="fas fa-key"></i> Reset Semua Password
                 </button>
-                <button type="button" class="btn btn-success btn-sm me-2" data-bs-toggle="modal" data-bs-target="#importModal">
+                <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#importModal">
                     <i class="fas fa-file-excel"></i> Import Excel
                 </button>
-                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
                     <i class="fas fa-plus"></i> Tambah Siswa
                 </button>
             </div>
