@@ -16,23 +16,27 @@ $id_ujian_siswa = $us['id_ujian_siswa'];
 // Hitung Nilai (Sederhana - hanya untuk PG dan Isian Singkat yang exact match)
 // Essay dan Kompleks butuh logika lebih rumit, disini kita skip dulu atau hitung simple
 $q_jawab = mysqli_query($koneksi, "
-    SELECT js.jawaban as jawab_siswa, s.kunci_jawaban, s.jenis 
+    SELECT js.jawaban as jawab_siswa, s.kunci_jawaban, s.jenis, s.bobot 
     FROM jawaban_siswa js 
     JOIN soal s ON js.id_soal = s.id_soal 
     WHERE js.id_ujian_siswa='$id_ujian_siswa'
 ");
 
 $total_skor = 0;
-$total_soal = mysqli_num_rows($q_jawab);
+$total_bobot = 0;
 
 while($r = mysqli_fetch_assoc($q_jawab)) {
     $skor_soal = 0;
+    // Tentukan bobot soal (default 1 jika 0/null)
+    $bobot = ($r['bobot'] > 0) ? $r['bobot'] : 1;
+    $total_bobot += $bobot;
+
     $j = strtoupper(trim($r['jawab_siswa']));
     $k = strtoupper(trim($r['kunci_jawaban']));
 
     if($r['jenis'] == 'pilihan_ganda') {
         if($j == $k) {
-            $skor_soal = 1;
+            $skor_soal = $bobot;
         }
     } elseif($r['jenis'] == 'isian_singkat' || $r['jenis'] == 'essay') {
         // Normalisasi teks untuk perbandingan yang lebih fair
@@ -45,14 +49,14 @@ while($r = mysqli_fetch_assoc($q_jawab)) {
         $clean_k = preg_replace('/\s+/', ' ', $clean_k);
 
         if($j != '' && $clean_j == $clean_k) {
-            $skor_soal = 1;
+            $skor_soal = $bobot;
         } elseif ($j != '') {
             // Cek kemiripan untuk nilai separuh
             $percent = 0;
             // Bandingkan teks yang sudah dibersihkan
             similar_text($clean_j, $clean_k, $percent);
             if($percent >= 50) {
-                $skor_soal = 0.5;
+                $skor_soal = $bobot * 0.5;
             }
         }
     } elseif($r['jenis'] == 'pilihan_ganda_kompleks') {
@@ -62,19 +66,19 @@ while($r = mysqli_fetch_assoc($q_jawab)) {
         sort($kunci_arr);
         sort($jawab_arr);
         if($kunci_arr == $jawab_arr) {
-            $skor_soal = 1;
+            $skor_soal = $bobot;
         }
     } elseif($r['jenis'] == 'menjodohkan') {
         // Logika: exact match string pairs
         if($j == $k) {
-            $skor_soal = 1;
+            $skor_soal = $bobot;
         }
     }
     
     $total_skor += $skor_soal;
 }
 
-$nilai = ($total_soal > 0) ? ($total_skor / $total_soal) * 100 : 0;
+$nilai = ($total_bobot > 0) ? ($total_skor / $total_bobot) * 100 : 0;
 
 mysqli_query($koneksi, "UPDATE ujian_siswa SET status='selesai', waktu_selesai=NOW(), nilai='$nilai' WHERE id_ujian_siswa='$id_ujian_siswa'");
 

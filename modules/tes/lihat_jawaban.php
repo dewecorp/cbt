@@ -108,17 +108,19 @@ $q_soal = mysqli_query($koneksi, $query_soal);
                 
                 // Logic Check Answer & Scoring
                 $skor_soal = 0;
+                $bobot = ($s['bobot'] > 0) ? $s['bobot'] : 1;
+                
                 $j = strtoupper(trim($jawaban));
                 $k = strtoupper(trim($kunci));
 
                 if ($s['jenis'] == 'pilihan_ganda') {
-                    if($j == $k) $skor_soal = 1;
+                    if($j == $k) $skor_soal = $bobot;
                 } elseif ($s['jenis'] == 'pilihan_ganda_kompleks') {
                     $k_arr = explode(',', $k);
                     $j_arr = explode(',', $j);
                     sort($k_arr);
                     sort($j_arr);
-                    if($k_arr == $j_arr) $skor_soal = 1;
+                    if($k_arr == $j_arr) $skor_soal = $bobot;
                 } elseif ($s['jenis'] == 'isian_singkat' || $s['jenis'] == 'essay') {
                     // Normalisasi teks
                     $clean_j = strtolower(trim($j));
@@ -130,14 +132,14 @@ $q_soal = mysqli_query($koneksi, $query_soal);
                     $clean_k = preg_replace('/\s+/', ' ', $clean_k);
 
                     if($j != '' && $clean_j == $clean_k) {
-                        $skor_soal = 1;
+                        $skor_soal = $bobot;
                     } elseif ($j != '') {
                          $percent = 0;
                          similar_text($clean_j, $clean_k, $percent);
-                         if($percent >= 50) $skor_soal = 0.5;
+                         if($percent >= 50) $skor_soal = $bobot * 0.5;
                     }
                 } elseif ($s['jenis'] == 'menjodohkan') {
-                    if($j == $k) $skor_soal = 1;
+                    if($j == $k) $skor_soal = $bobot;
                 }
                 
                 $bg_class = '';
@@ -146,10 +148,10 @@ $q_soal = mysqli_query($koneksi, $query_soal);
                 if ($jawaban == '') {
                     $bg_class = 'border-warning border-3 border-start'; 
                     $icon_status = '<span class="badge bg-warning text-dark">Tidak Dijawab</span>';
-                } elseif ($skor_soal == 1) {
+                } elseif ($skor_soal == $bobot) {
                     $bg_class = 'border-success border-3 border-start';
                     $icon_status = '<span class="badge bg-success"><i class="fas fa-check"></i> Benar</span>';
-                } elseif ($skor_soal == 0.5) {
+                } elseif ($skor_soal > 0) {
                     $bg_class = 'border-warning border-3 border-start';
                     $icon_status = '<span class="badge bg-warning text-dark"><i class="fas fa-check-circle"></i> Setengah Benar</span>';
                 } else {
@@ -160,7 +162,13 @@ $q_soal = mysqli_query($koneksi, $query_soal);
             <div class="card mb-3 <?php echo $bg_class; ?>">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <h6 class="font-weight-bold text-secondary">Soal No. <?php echo $no++; ?> (<?php echo ucwords(str_replace('_', ' ', $s['jenis'])); ?>)</h6>
+                        <h6 class="font-weight-bold text-secondary">
+                            Soal No. <?php echo $no++; ?> (<?php echo ucwords(str_replace('_', ' ', $s['jenis'])); ?>)
+                            <span class="badge bg-secondary ms-2">Bobot: <?php echo $bobot; ?></span>
+                            <?php if($skor_soal > 0 && $skor_soal < $bobot): ?>
+                                <span class="badge bg-warning text-dark ms-1">Skor: <?php echo floatval($skor_soal); ?></span>
+                            <?php endif; ?>
+                        </h6>
                         <?php echo $icon_status; ?>
                     </div>
                     
@@ -172,7 +180,7 @@ $q_soal = mysqli_query($koneksi, $query_soal);
                         <div class="col-md-6">
                             <div class="p-3 bg-light rounded h-100">
                                 <small class="text-muted d-block mb-1">Jawaban Siswa:</small>
-                                <div class="fw-bold <?php echo ($skor_soal == 1) ? 'text-success' : (($skor_soal == 0.5) ? 'text-warning' : 'text-danger'); ?>">
+                                <div class="fw-bold <?php echo ($skor_soal == $bobot) ? 'text-success' : (($skor_soal > 0) ? 'text-warning' : 'text-danger'); ?>">
                                     <?php 
                                     if($jawaban == '') {
                                         echo '<span class="text-muted fst-italic">- Tidak menjawab -</span>';

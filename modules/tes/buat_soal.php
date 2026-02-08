@@ -139,9 +139,11 @@ if (isset($_POST['import_soal_word'])) {
 if (isset($_POST['simpan_soal'])) {
     $jenis = $_POST['jenis'];
     $pertanyaan = mysqli_real_escape_string($koneksi, $_POST['pertanyaan']);
+    $bobot = isset($_POST['bobot']) && $_POST['bobot'] !== '' ? $_POST['bobot'] : 0;
     
     $opsi_a = $opsi_b = $opsi_c = $opsi_d = $opsi_e = "";
     $kunci = "";
+    $bobot = isset($_POST['bobot']) && $_POST['bobot'] !== '' ? $_POST['bobot'] : 0;
 
     if ($jenis == 'pilihan_ganda') {
         $opsi_a = mysqli_real_escape_string($koneksi, $_POST['pg_a']);
@@ -194,8 +196,8 @@ if (isset($_POST['simpan_soal'])) {
         $kunci = mysqli_real_escape_string($koneksi, $_POST['essay_kunci']);
     }
 
-    $query = "INSERT INTO soal (id_bank_soal, jenis, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, opsi_e, kunci_jawaban) 
-              VALUES ('$id_bank', '$jenis', '$pertanyaan', '$opsi_a', '$opsi_b', '$opsi_c', '$opsi_d', '$opsi_e', '$kunci')";
+    $query = "INSERT INTO soal (id_bank_soal, jenis, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, opsi_e, kunci_jawaban, bobot) 
+              VALUES ('$id_bank', '$jenis', '$pertanyaan', '$opsi_a', '$opsi_b', '$opsi_c', '$opsi_d', '$opsi_e', '$kunci', '$bobot')";
     
     if(mysqli_query($koneksi, $query)) {
         echo "<script>
@@ -219,6 +221,7 @@ if (isset($_POST['update_soal'])) {
     $id_soal = $_POST['id_soal'];
     $jenis = $_POST['jenis'];
     $pertanyaan = mysqli_real_escape_string($koneksi, $_POST['pertanyaan']);
+    $bobot = isset($_POST['bobot']) && $_POST['bobot'] !== '' ? $_POST['bobot'] : 0;
     
     $opsi_a = $opsi_b = $opsi_c = $opsi_d = $opsi_e = "";
     $kunci = "";
@@ -277,7 +280,8 @@ if (isset($_POST['update_soal'])) {
               opsi_c='$opsi_c', 
               opsi_d='$opsi_d', 
               opsi_e='$opsi_e', 
-              kunci_jawaban='$kunci' 
+              kunci_jawaban='$kunci',
+              bobot='$bobot' 
               WHERE id_soal='$id_soal' AND id_bank_soal='$id_bank'";
     
     if(mysqli_query($koneksi, $query)) {
@@ -319,6 +323,7 @@ $e_opsi_c = '';
 $e_opsi_d = '';
 $e_opsi_e = '';
 $e_kunci = '';
+$e_bobot = '';
 $e_kiri = [];
 $e_kanan = [];
 
@@ -337,6 +342,7 @@ if (isset($_GET['edit_soal'])) {
         $e_opsi_d = $d_edit['opsi_d'];
         $e_opsi_e = $d_edit['opsi_e'];
         $e_kunci = $d_edit['kunci_jawaban'];
+        $e_bobot = isset($d_edit['bobot']) ? $d_edit['bobot'] : '';
         
         if($e_jenis == 'menjodohkan') {
             $e_kiri = json_decode($e_opsi_a, true);
@@ -385,6 +391,11 @@ if (isset($_GET['edit_soal'])) {
                             <option value="isian_singkat" <?php echo ($e_jenis=='isian_singkat')?'selected':''; ?>>Isian Singkat</option>
                             <option value="essay" <?php echo ($e_jenis=='essay')?'selected':''; ?>>Uraian / Essay</option>
                         </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Bobot Soal / Score</label>
+                        <input type="number" step="0.01" name="bobot" class="form-control" value="<?php echo $e_bobot; ?>" placeholder="Kosongkan untuk otomatis (Default 1)">
                     </div>
 
                     <div class="mb-3">
@@ -529,7 +540,11 @@ if (isset($_GET['edit_soal'])) {
             ?>
             <div class="border-bottom pb-3 mb-3">
                 <div class="d-flex justify-content-between">
-                    <h5 class="fw-bold">Soal No. <?php echo $no++; ?> <span class="badge bg-secondary small"><?php echo str_replace('_', ' ', strtoupper($s['jenis'])); ?></span></h5>
+                    <h5 class="fw-bold">
+                        Soal No. <?php echo $no++; ?> 
+                        <span class="badge bg-secondary small"><?php echo str_replace('_', ' ', strtoupper($s['jenis'])); ?></span>
+                        <span class="badge bg-info text-dark small ms-2">Bobot: <?php echo isset($s['bobot']) ? $s['bobot'] : '1.00'; ?></span>
+                    </h5>
                     <div>
                         <a href="buat_soal.php?id=<?php echo $id_bank; ?>&edit_soal=<?php echo $s['id_soal']; ?>" class="btn btn-warning btn-sm text-white me-1"><i class="fas fa-edit"></i></a>
                         <a href="buat_soal.php?id=<?php echo $id_bank; ?>&delete_soal=<?php echo $s['id_soal']; ?>" class="btn btn-danger btn-sm" onclick="confirmDeleteSoal(event, this.href); return false;"><i class="fas fa-trash"></i></a>
