@@ -161,19 +161,33 @@ if ($d_setting_dash && isset($d_setting_dash['admin_welcome_text']) && !empty($d
                     // Get user name if not in details
                     $display_name = '';
                     $level = $lg['level'] ?? '';
+                    
                     if($lg['user_id'] > 0) {
-                        $qu = mysqli_query($koneksi, "SELECT nama_lengkap, level FROM users WHERE id_user='".$lg['user_id']."'");
-                        if(mysqli_num_rows($qu) > 0) {
-                            $du = mysqli_fetch_assoc($qu);
-                            $display_name = $du['nama_lengkap'];
-                            $level = $du['level'];
-                        } else {
-                            // Try siswa
+                        // Check level from log to decide which table to query
+                        if ($level == 'siswa') {
                             $qs = mysqli_query($koneksi, "SELECT nama_siswa FROM siswa WHERE id_siswa='".$lg['user_id']."'");
-                            if(mysqli_num_rows($qs) > 0) {
+                            if($qs && mysqli_num_rows($qs) > 0) {
                                 $ds = mysqli_fetch_assoc($qs);
                                 $display_name = $ds['nama_siswa'];
-                                $level = 'siswa';
+                            }
+                        } else {
+                            // Default to users table (admin/guru)
+                            $qu = mysqli_query($koneksi, "SELECT nama_lengkap, level FROM users WHERE id_user='".$lg['user_id']."'");
+                            if($qu && mysqli_num_rows($qu) > 0) {
+                                $du = mysqli_fetch_assoc($qu);
+                                $display_name = $du['nama_lengkap'];
+                                // Only set level if it was missing in log
+                                if(empty($level)) $level = $du['level'];
+                            } else {
+                                // Fallback: if not found in users and level is unknown, try siswa
+                                if (empty($level)) {
+                                    $qs = mysqli_query($koneksi, "SELECT nama_siswa FROM siswa WHERE id_siswa='".$lg['user_id']."'");
+                                    if($qs && mysqli_num_rows($qs) > 0) {
+                                        $ds = mysqli_fetch_assoc($qs);
+                                        $display_name = $ds['nama_siswa'];
+                                        $level = 'siswa';
+                                    }
+                                }
                             }
                         }
                     }

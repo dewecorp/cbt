@@ -21,55 +21,12 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Robust Session Self-Healing
-// Memastikan level dan data session selalu sinkron dengan database
-if (isset($_SESSION['user_id']) && isset($koneksi)) {
-    $uid_check = $_SESSION['user_id'];
-    $current_level = isset($_SESSION['level']) ? $_SESSION['level'] : '';
-
-    if ($current_level === 'siswa') {
-        // Jika session bilang siswa, cek tabel siswa DULU
-        $q_check_s = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_siswa='$uid_check'");
-        if (mysqli_num_rows($q_check_s) > 0) {
-            // Valid siswa
-            $s = mysqli_fetch_assoc($q_check_s);
-            if (!isset($_SESSION['nama'])) $_SESSION['nama'] = $s['nama_siswa'];
-            if (!isset($_SESSION['id_kelas'])) $_SESSION['id_kelas'] = $s['id_kelas'];
-        } else {
-            // Tidak ketemu di siswa? Cek users
-            $q_check_u = mysqli_query($koneksi, "SELECT * FROM users WHERE id_user='$uid_check'");
-            if (mysqli_num_rows($q_check_u) > 0) {
-                $d_check_u = mysqli_fetch_assoc($q_check_u);
-                $_SESSION['level'] = $d_check_u['level'];
-                if (!isset($_SESSION['nama'])) $_SESSION['nama'] = $d_check_u['nama_lengkap'];
-            }
-        }
-    } else {
-        // Jika session bilang admin/guru, atau kosong, cek users DULU
-        $q_check_u = mysqli_query($koneksi, "SELECT * FROM users WHERE id_user='$uid_check'");
-        if (mysqli_num_rows($q_check_u) > 0) {
-            $d_check_u = mysqli_fetch_assoc($q_check_u);
-            // Perbaiki level jika tidak match (misal guru jadi admin atau sebaliknya)
-            // DISABLED SELF-HEALING TO PREVENT ACCIDENTAL ROLE SWITCHING
-            /*
-            if ($current_level !== $d_check_u['level']) {
-                $_SESSION['level'] = $d_check_u['level'];
-            }
-            */
-            if (!isset($_SESSION['nama'])) $_SESSION['nama'] = $d_check_u['nama_lengkap'];
-            // Update foto session
-            $_SESSION['foto'] = isset($d_check_u['foto']) ? $d_check_u['foto'] : null;
-        } else {
-            // Tidak ketemu di users? Cek siswa
-            $q_check_s = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_siswa='$uid_check'");
-            if (mysqli_num_rows($q_check_s) > 0) {
-                $s = mysqli_fetch_assoc($q_check_s);
-                $_SESSION['level'] = 'siswa';
-                if (!isset($_SESSION['nama'])) $_SESSION['nama'] = $s['nama_siswa'];
-                if (!isset($_SESSION['id_kelas'])) $_SESSION['id_kelas'] = $s['id_kelas'];
-            }
-        }
-    }
+// Ensure level is set (Session Validation)
+if (isset($_SESSION['user_id']) && !isset($_SESSION['level'])) {
+    // If level is missing, session is corrupt. Destroy and redirect.
+    session_destroy();
+    echo "<script>window.location='index.php';</script>";
+    exit;
 }
 ?>
 <!DOCTYPE html>

@@ -35,46 +35,11 @@ function get_indo_day($date) {
 // Safe session level
 $level = isset($_SESSION['level']) ? $_SESSION['level'] : '';
 
-// Self-healing session level mismatch (Fix for Khoiruddin & Adiba case)
-if (isset($_SESSION['user_id'])) {
-    $uid_check = $_SESSION['user_id'];
-    $current_level = isset($_SESSION['level']) ? $_SESSION['level'] : '';
-
-    if ($current_level === 'siswa') {
-        // Jika session bilang siswa, cek tabel siswa DULU
-        $q_check_s = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_siswa='$uid_check'");
-        if (mysqli_num_rows($q_check_s) > 0) {
-            // Valid siswa, jangan ubah apa-apa
-        } else {
-            // Tidak ketemu di siswa? Mungkin salah label, baru cek users
-            $q_check_u = mysqli_query($koneksi, "SELECT level FROM users WHERE id_user='$uid_check'");
-            if (mysqli_num_rows($q_check_u) > 0) {
-                $d_check_u = mysqli_fetch_assoc($q_check_u);
-                $_SESSION['level'] = $d_check_u['level'];
-                $level = $d_check_u['level'];
-            }
-        }
-    } else {
-        // Jika session bilang admin/guru, atau kosong, cek users DULU
-        $q_check_u = mysqli_query($koneksi, "SELECT level FROM users WHERE id_user='$uid_check'");
-        if (mysqli_num_rows($q_check_u) > 0) {
-            $d_check_u = mysqli_fetch_assoc($q_check_u);
-            // Disabled to fix Guru-to-Admin role switching
-            /*
-            if ($current_level !== $d_check_u['level']) {
-                $_SESSION['level'] = $d_check_u['level'];
-                $level = $d_check_u['level'];
-            }
-            */
-        } else {
-            // Tidak ketemu di users? Cek siswa
-            $q_check_s = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_siswa='$uid_check'");
-            if (mysqli_num_rows($q_check_s) > 0) {
-                $_SESSION['level'] = 'siswa';
-                $level = 'siswa';
-            }
-        }
-    }
+// Validation: If user_id exists but level is missing, force logout to prevent errors
+if (isset($_SESSION['user_id']) && empty($level)) {
+    session_destroy();
+    echo "<script>window.location='index.php';</script>";
+    exit;
 }
 ?>
 

@@ -50,6 +50,7 @@ if (isset($_POST['login'])) {
             
             // Implementasi sederhana: cek password
             if ($password == $data['password'] || password_verify($password, $data['password'])) {
+                 session_regenerate_id(true); // Prevent session fixation
                  $_SESSION['user_id'] = $data['id_siswa'];
                  $_SESSION['username'] = $data['nisn'];
                  $_SESSION['nama'] = $data['nama_siswa'];
@@ -74,7 +75,7 @@ if (isset($_POST['login'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - CBT MI Sultan Fattah</title>
+    <title>Login | E-Learning</title>
     <!-- Google Fonts: Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
