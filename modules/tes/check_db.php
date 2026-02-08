@@ -1,7 +1,8 @@
 <?php
 include __DIR__ . '/../../config/database.php';
-$res = mysqli_query($koneksi, "DESCRIBE soal");
+echo "--- SISWA ---\n";
+$res = mysqli_query($koneksi, "DESCRIBE siswa");
 while($row = mysqli_fetch_assoc($res)) {
-    print_r($row);
+    echo $row['Field'] . "\n";
 }
 ?>

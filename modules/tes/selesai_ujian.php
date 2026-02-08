@@ -82,6 +82,34 @@ $nilai = ($total_bobot > 0) ? ($total_skor / $total_bobot) * 100 : 0;
 
 mysqli_query($koneksi, "UPDATE ujian_siswa SET status='selesai', waktu_selesai=NOW(), nilai='$nilai' WHERE id_ujian_siswa='$id_ujian_siswa'");
 
+// Send Notification to Teacher
+$q_notif = mysqli_query($koneksi, "
+    SELECT b.id_guru, u.nama_ujian, m.nama_mapel
+    FROM ujian u
+    JOIN bank_soal b ON u.id_bank_soal = b.id_bank_soal
+    JOIN mapel m ON b.id_mapel = m.id_mapel
+    WHERE u.id_ujian = '$id_ujian'
+");
+if($notif_data = mysqli_fetch_assoc($q_notif)) {
+    $guru_id = $notif_data['id_guru'];
+    $nama_ujian = $notif_data['nama_ujian'];
+    $nama_mapel = $notif_data['nama_mapel'];
+    
+    // Get Student Name
+    $siswa_q = mysqli_query($koneksi, "SELECT nama_siswa FROM siswa WHERE id_siswa='$id_siswa'");
+    $siswa_r = mysqli_fetch_assoc($siswa_q);
+    $siswa_nama = $siswa_r ? $siswa_r['nama_siswa'] : 'Siswa';
+    
+    $bulan_indo = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    $tgl_indo = date('d') . ' ' . $bulan_indo[(int)date('m')] . ' ' . date('Y');
+    
+    $message = "<b>" . mysqli_real_escape_string($koneksi, $siswa_nama) . "</b> telah menyelesaikan ujian <b>" . mysqli_real_escape_string($koneksi, $nama_ujian) . "</b> (<b>" . mysqli_real_escape_string($koneksi, $nama_mapel) . "</b>) pada tanggal " . $tgl_indo . " pukul " . date('H:i');
+    
+    $link = "modules/tes/hasil_ujian.php?ujian_id=" . $id_ujian; // Link to exam results
+    
+    mysqli_query($koneksi, "INSERT INTO notifications (user_id, sender_id, sender_role, type, item_id, message, link) VALUES ('$guru_id', '$id_siswa', 'siswa', 'exam_completion', '$id_ujian', '$message', '$link')");
+}
+
 // Ambil Detail Hasil untuk Ditampilkan
 $q_hasil = mysqli_query($koneksi, "
     SELECT u.nama_ujian, u.waktu as durasi_ujian, m.nama_mapel, m.kktp,
@@ -151,7 +179,13 @@ include '../../includes/header.php';
                             </tr>
                             <tr>
                                 <th class="bg-light">Tanggal Pengerjaan</th>
-                                <td><?php echo date('d F Y', strtotime($hasil['waktu_selesai'])); ?></td>
+                                <td>
+                                    <?php 
+                                    $bulan_indo_res = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                                    $ts_res = strtotime($hasil['waktu_selesai']);
+                                    echo date('d', $ts_res) . ' ' . $bulan_indo_res[(int)date('m', $ts_res)] . ' ' . date('Y', $ts_res); 
+                                    ?>
+                                </td>
                             </tr>
                             <tr>
                                 <th class="bg-light">Waktu Mulai</th>

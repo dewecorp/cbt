@@ -80,6 +80,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_assignment']))
                             mysqli_query($koneksi, "INSERT INTO submissions ($cols) VALUES ($vals)");
                         }
                         
+                        // Send Notification to Teacher
+                        $notif_q = mysqli_query($koneksi, "
+                            SELECT a.created_by, a.judul, m.nama_mapel 
+                            FROM assignments a
+                            JOIN courses c ON a.course_id = c.id_course
+                            JOIN mapel m ON c.id_mapel = m.id_mapel
+                            WHERE a.id_assignment = '$assignment_id'
+                        ");
+                        if($notif_data = mysqli_fetch_assoc($notif_q)) {
+                            $guru_id = $notif_data['created_by'];
+                            $judul_tugas = $notif_data['judul'];
+                            $nama_mapel = $notif_data['nama_mapel'];
+                            
+                            // Get Student Name
+                            $siswa_q = mysqli_query($koneksi, "SELECT nama_siswa FROM siswa WHERE id_siswa='$id_siswa'");
+                            $siswa_r = mysqli_fetch_assoc($siswa_q);
+                            $siswa_nama = $siswa_r ? $siswa_r['nama_siswa'] : 'Siswa';
+                            
+                            $bulan_indo = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                            $tgl_indo = date('d') . ' ' . $bulan_indo[(int)date('m')] . ' ' . date('Y');
+                            
+                            $message = "<b>" . mysqli_real_escape_string($koneksi, $siswa_nama) . "</b> telah mengirimkan tugas <b>" . mysqli_real_escape_string($koneksi, $judul_tugas) . "</b> (<b>" . mysqli_real_escape_string($koneksi, $nama_mapel) . "</b>) pada tanggal " . $tgl_indo . " pukul " . date('H:i');
+                            
+                            $link = "modules/elearning/submissions.php?assignment_id=" . $assignment_id;
+                            
+                            mysqli_query($koneksi, "INSERT INTO notifications (user_id, sender_id, sender_role, type, item_id, message, link) VALUES ('$guru_id', '$id_siswa', 'siswa', 'assignment_submission', '$assignment_id', '$message', '$link')");
+                        }
+
                         $_SESSION['success'] = "Tugas berhasil dikirim!";
                     }
                 } else {

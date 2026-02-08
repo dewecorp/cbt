@@ -57,6 +57,57 @@ if (isset($koneksi)) {
             </div>
 
             <ul class="navbar-nav mb-2 mb-lg-0">
+                <?php if (isset($_SESSION['level']) && $_SESSION['level'] == 'guru'): 
+                    $my_id = $_SESSION['user_id'];
+                    $q_unread = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM notifications WHERE user_id='$my_id' AND is_read=0");
+                    $r_unread = mysqli_fetch_assoc($q_unread);
+                    $unread_count = $r_unread['count'];
+                    
+                    $q_notifs = mysqli_query($koneksi, "SELECT * FROM notifications WHERE user_id='$my_id' ORDER BY created_at DESC LIMIT 10");
+                ?>
+                <li class="nav-item dropdown me-3">
+                    <a class="nav-link dropdown-toggle position-relative" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell fa-lg"></i>
+                        <?php if($unread_count > 0): ?>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                                <?php echo $unread_count; ?>
+                                <span class="visually-hidden">unread messages</span>
+                            </span>
+                        <?php endif; ?>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="notifDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                        <li><h6 class="dropdown-header bg-success text-white">Notifikasi</h6></li>
+                        <?php if(mysqli_num_rows($q_notifs) > 0): ?>
+                            <?php 
+                            $bulan_indo_notif = [1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
+                            while($n = mysqli_fetch_assoc($q_notifs)): 
+                                $ts = strtotime($n['created_at']);
+                                $tgl_notif = date('d', $ts) . ' ' . $bulan_indo_notif[(int)date('m', $ts)] . ' ' . date('Y, H:i', $ts);
+                            ?>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-start py-2" href="<?php echo $base_url; ?>modules/notifikasi/read_notif.php?id=<?php echo $n['id']; ?>">
+                                        <div class="me-3 mt-1">
+                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                                                <i class="fas fa-envelope"></i>
+                                            </div>
+                                        </div>
+                                        <div class="w-100">
+                                            <div class="small text-muted mb-1"><?php echo $tgl_notif; ?></div>
+                                            <div class="<?php echo ($n['is_read'] == 0) ? 'fw-bold' : ''; ?>" style="white-space: normal; font-size: 0.9rem;">
+                                                <?php echo $n['message']; ?> <!-- Output raw HTML for bold names -->
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider my-0"></li>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <li><div class="dropdown-item text-center small text-muted py-3">Tidak ada notifikasi baru</div></li>
+                        <?php endif; ?>
+                    </ul>
+                </li>
+                <?php endif; ?>
+
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <?php 
