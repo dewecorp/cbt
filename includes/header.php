@@ -1,6 +1,11 @@
 <?php
 if (session_status() == PHP_SESSION_NONE) {
-    session_start();
+    // Use init_session to handle multi-tab/role detection
+    if (file_exists(__DIR__ . '/init_session.php')) {
+        include __DIR__ . '/init_session.php';
+    } else {
+        session_start();
+    }
 }
 
 // Ensure database and base_url available
@@ -28,6 +33,32 @@ if (isset($_SESSION['user_id']) && !isset($_SESSION['level'])) {
     echo "<script>window.location='index.php';</script>";
     exit;
 }
+
+// Handle Flash Messages & Close Session to prevent locking
+$flash_script = '';
+if (isset($_SESSION['success'])) {
+    $flash_script .= "Swal.fire({icon: 'success', title: 'Berhasil', text: '" . addslashes($_SESSION['success']) . "', timer: 3000, showConfirmButton: false});";
+    unset($_SESSION['success']);
+}
+if (isset($_SESSION['error'])) {
+    $flash_script .= "Swal.fire({icon: 'error', title: 'Gagal', text: '" . addslashes($_SESSION['error']) . "'});";
+    unset($_SESSION['error']);
+}
+if (isset($_SESSION['warning'])) {
+    $flash_script .= "Swal.fire({icon: 'warning', title: 'Peringatan', text: '" . addslashes($_SESSION['warning']) . "'});";
+    unset($_SESSION['warning']);
+}
+if (isset($_SESSION['info'])) {
+    $flash_script .= "Swal.fire({icon: 'info', title: 'Info', text: '" . addslashes($_SESSION['info']) . "'});";
+    unset($_SESSION['info']);
+}
+if (isset($_SESSION['login_success'])) {
+    $flash_script .= "Swal.fire({icon: 'success', title: 'Login Berhasil', text: 'Selamat datang di E-Learning', timer: 1500, showConfirmButton: false});";
+    unset($_SESSION['login_success']);
+}
+
+// Close session writing to prevent lock
+session_write_close();
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -59,6 +90,13 @@ if (isset($_SESSION['user_id']) && !isset($_SESSION['level'])) {
     <!-- SweetAlert2 -->
     <link href="<?php echo $base_url; ?>assets/vendor/sweetalert2/sweetalert2.min.css" rel="stylesheet">
     <script src="<?php echo $base_url; ?>assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+    <?php if ($flash_script): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            <?php echo $flash_script; ?>
+        });
+    </script>
+    <?php endif; ?>
 </head>
 <body>
     <div id="overlay"></div>

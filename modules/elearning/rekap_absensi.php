@@ -1,5 +1,5 @@
 <?php
-session_start();
+include '../../includes/init_session.php';
 include '../../config/database.php';
 $page_title = 'Rekap Kehadiran Siswa';
 
@@ -107,6 +107,7 @@ if (!empty($id_kelas)) {
         </div>
         <div class="card-body">
             <form method="get" class="row g-3 align-items-end">
+                <input type="hidden" name="role" value="<?php echo $level; ?>">
                 <div class="col-md-4">
                     <label class="form-label">Pilih Kelas</label>
                     <select name="id_kelas" class="form-select" onchange="this.form.submit()" required>
@@ -147,10 +148,10 @@ if (!empty($id_kelas)) {
                 Rekap Absensi: <?php echo $month_names[$bulan] . ' ' . $tahun; ?>
             </h6>
             <div>
-                <a href="export_absensi_excel.php?id_kelas=<?php echo $id_kelas; ?>&bulan=<?php echo $bulan; ?>&tahun=<?php echo $tahun; ?>" target="_blank" class="btn btn-sm btn-success me-1">
+                <a href="export_absensi_excel.php?id_kelas=<?php echo $id_kelas; ?>&bulan=<?php echo $bulan; ?>&tahun=<?php echo $tahun; ?>&role=<?php echo $level; ?>" target="_blank" class="btn btn-sm btn-success me-1">
                     <i class="fas fa-file-excel"></i> Excel
                 </a>
-                <a href="export_absensi_pdf.php?id_kelas=<?php echo $id_kelas; ?>&bulan=<?php echo $bulan; ?>&tahun=<?php echo $tahun; ?>" target="_blank" class="btn btn-sm btn-danger me-2">
+                <a href="export_absensi_pdf.php?id_kelas=<?php echo $id_kelas; ?>&bulan=<?php echo $bulan; ?>&tahun=<?php echo $tahun; ?>&role=<?php echo $level; ?>" target="_blank" class="btn btn-sm btn-danger me-2">
                     <i class="fas fa-file-pdf"></i> PDF
                 </a>
                 <span class="badge bg-success me-1">H: Hadir</span>

@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SESSION['level'] == 'guru') {
                 timer: 1500,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = 'jadwal_ujian.php';
+                window.location.href = 'jadwal_ujian.php?role=" . $_SESSION['level'] . "';
             });
         </script>";
     }
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SESSION['level'] == 'guru') {
                 timer: 1500,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = 'jadwal_ujian.php';
+                window.location.href = 'jadwal_ujian.php?role=" . $_SESSION['level'] . "';
             });
         </script>";
     }
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SESSION['level'] == 'guru') {
 if (isset($_GET['delete']) && $_SESSION['level'] == 'guru') {
     $id = $_GET['delete'];
     mysqli_query($koneksi, "DELETE FROM ujian WHERE id_ujian='$id'");
-    echo "<script>window.location.href = 'jadwal_ujian.php';</script>";
+    echo "<script>window.location.href = 'jadwal_ujian.php?role=".$_SESSION['level']."';</script>";
 }
 
 // Get Bank Soal Options
@@ -217,7 +217,7 @@ if ($_SESSION['level'] == 'guru') {
                                     >
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('jadwal_ujian.php?delete=<?php echo $row['id_ujian']; ?>')">
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('jadwal_ujian.php?delete=<?php echo $row['id_ujian']; ?>&role=<?php echo $_SESSION['level']; ?>')">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>

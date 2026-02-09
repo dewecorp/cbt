@@ -1,5 +1,5 @@
 <?php
-session_start();
+include '../../includes/init_session.php';
 
 // Cek Level Admin
 if (!isset($_SESSION['level']) || $_SESSION['level'] != 'admin') {

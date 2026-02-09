@@ -1,5 +1,5 @@
 <?php
-session_start();
+include '../../includes/init_session.php';
 include '../../config/database.php';
 
 if (!isset($_SESSION['user_id'])) {
@@ -20,6 +20,16 @@ if (isset($_GET['id'])) {
         
         // Mark as read
         mysqli_query($koneksi, "UPDATE notifications SET is_read=1 WHERE id='$id'");
+        
+        // Append role parameter to maintain session
+        $role = isset($_SESSION['level']) ? $_SESSION['level'] : '';
+        if ($role) {
+            if (strpos($link, '?') !== false) {
+                $link .= '&role=' . $role;
+            } else {
+                $link .= '?role=' . $role;
+            }
+        }
         
         // Redirect
         header("Location: " . $base_url . $link);

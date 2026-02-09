@@ -2,6 +2,7 @@
 include '../../config/database.php';
 
 // Cek Session
+session_name('CBT_SISWA');
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }

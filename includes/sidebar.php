@@ -10,8 +10,18 @@
             if (!empty($st['nama_sekolah'])) $school_name = $st['nama_sekolah'];
             if (!empty($st['logo'])) $school_logo = $st['logo'];
         }
+        
+        // Determine Dashboard URL based on level
+        $dashboard_url = 'dashboard.php';
+        $level = isset($_SESSION['level']) ? $_SESSION['level'] : '';
+        $role_param = $level ? '?role=' . $level : ''; // Generate role param
+        
+        if ($level === 'admin') $dashboard_url = 'admin.php' . $role_param;
+        elseif ($level === 'guru') $dashboard_url = 'teacher.php' . $role_param;
+        elseif ($level === 'siswa') $dashboard_url = 'student.php' . $role_param;
+        else $dashboard_url = 'dashboard.php' . $role_param;
         ?>
-        <a href="<?php echo $base_url; ?>dashboard.php" class="d-flex align-items-center text-white text-decoration-none">
+        <a href="<?php echo $base_url . $dashboard_url; ?>" class="d-flex align-items-center text-white text-decoration-none">
             <?php if($school_logo): ?>
                 <img src="<?php echo $base_url; ?>assets/img/<?php echo $school_logo; ?>" alt="Logo" class="me-2 sidebar-school-logo">
             <?php endif; ?>
@@ -24,7 +34,7 @@
     <hr class="mt-0">
     <ul class="nav nav-pills flex-column mb-auto">
                 <li class="nav-item">
-                    <a href="<?php echo $base_url; ?>dashboard.php" class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'dashboard.php') ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url . $dashboard_url; ?>" class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == $dashboard_url || basename($_SERVER['PHP_SELF']) == 'dashboard.php') ? 'active' : ''; ?>">
                         <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
                 </li>
@@ -35,27 +45,27 @@
                     <span class="text-uppercase small text-white-50 ms-3">Master Data</span>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/master/guru.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'guru.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/master/guru.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'guru.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-chalkboard-teacher"></i> Data Guru
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/master/siswa.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'siswa.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/master/siswa.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'siswa.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-user-graduate"></i> Data Siswa
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/master/kelas.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'kelas.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/master/kelas.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'kelas.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-school"></i> Data Kelas
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/master/mapel.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'mapel.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/master/mapel.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'mapel.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-book"></i> Mata Pelajaran
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/master/jadwal_pelajaran.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'jadwal_pelajaran.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/master/jadwal_pelajaran.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'jadwal_pelajaran.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-calendar-alt"></i> Jadwal Pelajaran
                     </a>
                 </li>
@@ -65,13 +75,13 @@
                     <span class="text-uppercase small text-white-50 ms-3">E-Learning</span>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/elearning/courses.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/courses.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/elearning/courses.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/courses.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-layer-group"></i> Kelas Online
                     </a>
                 </li>
                 <?php if($level !== 'siswa'): ?>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/elearning/materials.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/materials.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/elearning/materials.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/materials.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-book-open"></i> Materi
                     </a>
                 </li>
@@ -79,23 +89,23 @@
 
                 <?php if($level === 'siswa'): ?>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/elearning/student_assignments.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'student_assignments.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/elearning/student_assignments.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'student_assignments.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-paper-plane"></i> Kirim Tugas
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/elearning/student_grades.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'student_grades.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/elearning/student_grades.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'student_grades.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-star"></i> Nilai Tugas
                     </a>
                 </li>
                 <?php else: ?>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/elearning/assignments.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/assignments.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/elearning/assignments.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/assignments.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-tasks"></i> Tugas
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/elearning/rekap_absensi.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/rekap_absensi.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/elearning/rekap_absensi.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/rekap_absensi.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-calendar-check"></i> Kehadiran Siswa
                     </a>
                 </li>
@@ -103,7 +113,7 @@
 
                 <?php if($level !== 'siswa'): ?>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/elearning/forum.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/forum.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/elearning/forum.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/forum.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-comments"></i> Forum
                     </a>
                 </li>
@@ -111,7 +121,7 @@
 
                 <?php if($level === 'guru'): ?>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/elearning/announcements.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/announcements.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/elearning/announcements.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'elearning/announcements.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-bullhorn"></i> Pengumuman
                     </a>
                 </li>
@@ -123,27 +133,27 @@
                 
                 <?php if($level === 'admin' || $level === 'guru'): ?>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/tes/bank_soal.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'bank_soal.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/tes/bank_soal.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'bank_soal.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-database"></i> Bank Soal
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/tes/jadwal_ujian.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'jadwal_ujian.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/tes/jadwal_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'jadwal_ujian.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-calendar-alt"></i> Jadwal Asesmen
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/tes/hasil_ujian.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'hasil_ujian.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/tes/hasil_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'hasil_ujian.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-poll"></i> Hasil Asesmen
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/tes/rekap_nilai.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'rekap_nilai.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/tes/rekap_nilai.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'rekap_nilai.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-file-alt"></i> Rekap Nilai
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/cetak/kartu_ujian.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'kartu_ujian.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/cetak/kartu_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'kartu_ujian.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-print"></i> Cetak Kartu
                     </a>
                 </li>
@@ -151,12 +161,12 @@
 
                 <?php if($level === 'siswa'): ?>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/tes/hasil_ujian.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'hasil_ujian.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/tes/hasil_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'hasil_ujian.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-poll"></i> Hasil Asesmen
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/cetak/kartu_ujian.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'kartu_ujian.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/cetak/kartu_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'kartu_ujian.php') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-print"></i> Cetak Kartu
                     </a>
                 </li>
@@ -168,24 +178,24 @@
                     <span class="text-uppercase small text-white ms-3">System</span>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/pengaturan/index.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'pengaturan') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/pengaturan/index.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'pengaturan') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-cogs"></i> Pengaturan
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/users/index.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'users') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/users/index.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'users') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-users-cog"></i> Pengguna
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/backup/index.php" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'backup') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/backup/index.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'backup') !== false) ? 'active' : ''; ?>">
                         <i class="fas fa-hdd"></i> Backup Restore
                     </a>
                 </li>
                 <?php endif; ?>
                 
                 <li class="nav-item mt-4 mb-5">
-                    <a href="<?php echo $base_url; ?>logout.php" class="nav-link bg-danger text-white">
+                    <a href="<?php echo $base_url; ?>logout.php?role=<?php echo $level; ?>" class="nav-link bg-danger text-white">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </li>

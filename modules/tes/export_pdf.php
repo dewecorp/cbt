@@ -1,6 +1,6 @@
 <?php
 include '../../config/database.php';
-session_start();
+include '../../includes/init_session.php';
 
 if (!isset($_SESSION['user_id']) || ($_SESSION['level'] != 'admin' && $_SESSION['level'] != 'guru')) {
     exit;

@@ -4,7 +4,7 @@ include '../../vendor/shuchkin/simplexlsxgen/src/SimpleXLSXGen.php';
 
 use Shuchkin\SimpleXLSXGen;
 
-session_start();
+include '../../includes/init_session.php';
 
 if (!isset($_SESSION['level']) || ($_SESSION['level'] !== 'guru' && $_SESSION['level'] !== 'admin')) {
     exit;

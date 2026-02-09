@@ -64,7 +64,7 @@ if (isset($_POST['import_soal'])) {
                     timer: 2000,
                     showConfirmButton: false
                 }).then(() => {
-                    window.location.href = 'buat_soal.php?id=$id_bank';
+                    window.location.href = 'buat_soal.php?id=$id_bank&role=" . $_SESSION['level'] . "';
                 });
             </script>";
         } else {
@@ -124,7 +124,7 @@ if (isset($_POST['import_soal_word'])) {
                     timer: 2000,
                     showConfirmButton: false
                 }).then(() => {
-                    window.location.href = 'buat_soal.php?id=$id_bank';
+                    window.location.href = 'buat_soal.php?id=$id_bank&role=" . $_SESSION['level'] . "';
                 });
             </script>";
         } else {
@@ -208,7 +208,7 @@ if (isset($_POST['simpan_soal'])) {
                 timer: 1000,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = 'buat_soal.php?id=$id_bank';
+                window.location.href = 'buat_soal.php?id=$id_bank&role=" . $_SESSION['level'] . "';
             });
         </script>";
     } else {
@@ -293,7 +293,7 @@ if (isset($_POST['update_soal'])) {
                 timer: 1000,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = 'buat_soal.php?id=$id_bank';
+                window.location.href = 'buat_soal.php?id=$id_bank&role=" . $_SESSION['level'] . "';
             });
         </script>";
     } else {
@@ -365,7 +365,7 @@ if (isset($_GET['edit_soal'])) {
             <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#importWordModal">
                 <i class="fas fa-file-word"></i> Import Word
             </button>
-            <a href="bank_soal.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
+            <a href="bank_soal.php?role=<?php echo $_SESSION['level']; ?>" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
         </div>
     </div>
 

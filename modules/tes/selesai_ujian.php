@@ -1,5 +1,6 @@
 <?php
 include '../../config/database.php';
+session_name('CBT_SISWA');
 session_start();
 
 if (!isset($_SESSION['user_id'])) {

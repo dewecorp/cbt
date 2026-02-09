@@ -92,6 +92,7 @@ if ($id_ujian && $id_kelas) {
     <div class="card mb-4">
         <div class="card-body">
             <form method="GET" action="" class="row g-3">
+                <input type="hidden" name="role" value="<?php echo $level; ?>">
                 <div class="col-md-4">
                     <label class="form-label">Pilih Kelas</label>
                     <select name="id_kelas" class="form-select" onchange="this.form.submit()" <?php echo ($single_class_id) ? 'disabled' : ''; ?> required>
@@ -161,13 +162,13 @@ if ($id_ujian && $id_kelas) {
                             <td><?php echo $u['nama_ujian']; ?></td>
                             <td><?php echo isset($u['tgl_mulai']) ? date('d-m-Y', strtotime($u['tgl_mulai'])) : '-'; ?></td>
                             <td class="text-center">
-                                <a href="?id_kelas=<?php echo $id_kelas; ?>&id_ujian=<?php echo $u['id_ujian']; ?>" class="btn btn-sm btn-primary">
+                                <a href="?id_kelas=<?php echo $id_kelas; ?>&id_ujian=<?php echo $u['id_ujian']; ?>&role=<?php echo $level; ?>" class="btn btn-sm btn-primary">
                                     Lihat Rekap
                                 </a>
-                                <a href="export_excel.php?id_ujian=<?php echo $u['id_ujian']; ?>&id_kelas=<?php echo $id_kelas; ?>" target="_blank" class="btn btn-sm btn-success">
+                                <a href="export_excel.php?id_ujian=<?php echo $u['id_ujian']; ?>&id_kelas=<?php echo $id_kelas; ?>&role=<?php echo $level; ?>" target="_blank" class="btn btn-sm btn-success">
                                     Export Excel
                                 </a>
-                                <a href="export_pdf.php?id_ujian=<?php echo $u['id_ujian']; ?>&id_kelas=<?php echo $id_kelas; ?>" target="_blank" class="btn btn-sm btn-danger">
+                                <a href="export_pdf.php?id_ujian=<?php echo $u['id_ujian']; ?>&id_kelas=<?php echo $id_kelas; ?>&role=<?php echo $level; ?>" target="_blank" class="btn btn-sm btn-danger">
                                     Export PDF
                                 </a>
                             </td>
@@ -185,10 +186,10 @@ if ($id_ujian && $id_kelas) {
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-success">Data Nilai Siswa</h6>
             <div>
-                <a href="export_excel.php?id_ujian=<?php echo $id_ujian; ?>&id_kelas=<?php echo $id_kelas; ?>" target="_blank" class="btn btn-success btn-sm">
+                <a href="export_excel.php?id_ujian=<?php echo $id_ujian; ?>&id_kelas=<?php echo $id_kelas; ?>&role=<?php echo $level; ?>" target="_blank" class="btn btn-success btn-sm">
                     <i class="fas fa-file-excel"></i> Export Excel
                 </a>
-                <a href="export_pdf.php?id_ujian=<?php echo $id_ujian; ?>&id_kelas=<?php echo $id_kelas; ?>" target="_blank" class="btn btn-danger btn-sm">
+                <a href="export_pdf.php?id_ujian=<?php echo $id_ujian; ?>&id_kelas=<?php echo $id_kelas; ?>&role=<?php echo $level; ?>" target="_blank" class="btn btn-danger btn-sm">
                     <i class="fas fa-file-pdf"></i> Export PDF
                 </a>
             </div>

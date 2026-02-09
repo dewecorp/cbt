@@ -1,5 +1,5 @@
 <?php
-session_start();
+include '../../includes/init_session.php';
 include '../../config/database.php';
 $page_title = 'Forum Diskusi Guru & Admin';
 
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
         // Title is optional now, set default or empty
         $title = substr($content, 0, 50) . '...'; 
         mysqli_query($koneksi, "INSERT INTO forum_topics(class_id, course_id, title, content, image, file, created_by, author_role) VALUES(0, 0, '$title', '$content', '$image_path', '$file_path', $uid, '$role')");
-        header("Location: forum.php");
+        header("Location: forum.php?role=".$level);
         exit;
     }
 }

@@ -1,11 +1,30 @@
 <?php
-session_start();
+include 'includes/init_session.php';
+// Fallback if init_session didn't start a session (shouldn't happen if role is passed, but safe to keep)
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
 include 'config/database.php';
 
 // Jika belum login, kembalikan ke index
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit;
+}
+
+// Determine Redirect URL based on Level
+$level = $_SESSION['level'] ?? '';
+$redirect_url = 'dashboard.php'; // Default fallback
+
+if ($level === 'admin') {
+    $redirect_url = 'admin.php?role=admin';
+} elseif ($level === 'guru') {
+    $redirect_url = 'teacher.php?role=guru';
+} elseif ($level === 'siswa') {
+    $redirect_url = 'student.php?role=siswa';
+} else {
+    $redirect_url = 'dashboard.php?role=' . $level;
 }
 ?>
 <!DOCTYPE html>
@@ -45,9 +64,10 @@ if (!isset($_SESSION['user_id'])) {
                     Swal.showLoading();
                 }
             }).then(() => {
-                window.location.href = 'dashboard.php';
+                window.location.href = '<?php echo $redirect_url; ?>';
             });
         });
     </script>
+    <?php session_write_close(); ?>
 </body>
 </html>

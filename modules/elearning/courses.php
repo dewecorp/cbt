@@ -1,5 +1,5 @@
 <?php
-session_start();
+include '../../includes/init_session.php';
 include '../../config/database.php';
 $page_title = 'Kelas Online';
 if (!isset($_SESSION['level'])) { $_SESSION['level'] = 'admin'; }
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_course'])) {
     $pengampu = $uid;
     if (!empty($kode) && !empty($nama) && $id_kelas > 0 && $id_mapel > 0) {
         mysqli_query($koneksi, "INSERT INTO courses(kode_course,nama_course,id_kelas,id_mapel,pengampu) VALUES('$kode','$nama',$id_kelas,$id_mapel,$pengampu)");
-        header("Location: courses.php");
+        header("Location: courses.php?role=$level");
         exit;
     }
 }
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_course'])) {
     }
     if ($ok && $id_course>0 && !empty($kode) && !empty($nama) && $id_kelas>0 && $id_mapel>0) {
         mysqli_query($koneksi, "UPDATE courses SET kode_course='$kode', nama_course='$nama', id_kelas=$id_kelas, id_mapel=$id_mapel WHERE id_course=$id_course");
-        header("Location: courses.php");
+        header("Location: courses.php?role=$level");
         exit;
     }
 }
@@ -70,7 +70,7 @@ if (isset($_GET['delete_id'])) {
             mysqli_query($koneksi, "DELETE FROM course_students WHERE course_id=$del_id");
         }
         mysqli_query($koneksi, "DELETE FROM courses WHERE id_course=$del_id");
-        header("Location: courses.php");
+        header("Location: courses.php?role=$level");
         exit;
     }
 }
@@ -303,15 +303,15 @@ if (isset($_GET['edit_id'])) {
                                         </div>
 
                                         <div class="d-grid gap-2">
-                                            <a href="course_manage.php?course_id=<?php echo $c['id_course']; ?>" class="btn btn-primary">
+                                            <a href="course_manage.php?course_id=<?php echo $c['id_course']; ?>&role=<?php echo $level; ?>" class="btn btn-primary">
                                                 <i class="fas fa-door-open me-1"></i> Masuk Kelas
                                             </a>
                                             <?php if($level === 'admin' || (int)$c['pengampu'] === $uid): ?>
                                             <div class="btn-group">
-                                                <a href="courses.php?edit_id=<?php echo $c['id_course']; ?>" class="btn btn-outline-warning btn-sm">
+                                                <a href="courses.php?edit_id=<?php echo $c['id_course']; ?>&role=<?php echo $level; ?>" class="btn btn-outline-warning btn-sm">
                                                     <i class="fas fa-edit"></i> Edit
                                                 </a>
-                                                <a href="#" onclick="confirmDelete('courses.php?delete_id=<?php echo $c['id_course']; ?>'); return false;" class="btn btn-outline-danger btn-sm">
+                                                <a href="#" onclick="confirmDelete('courses.php?delete_id=<?php echo $c['id_course']; ?>&role=<?php echo $level; ?>'); return false;" class="btn btn-outline-danger btn-sm">
                                                     <i class="fas fa-trash"></i> Hapus
                                                 </a>
                                             </div>

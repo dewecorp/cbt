@@ -1,4 +1,5 @@
 <?php
+include '../../includes/init_session.php';
 include '../../config/database.php';
 $page_title = 'Kelola Kelas Online';
 if (!isset($_SESSION['level'])) { $_SESSION['level'] = 'admin'; }
@@ -69,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_student'])) {
         }
     }
     // Redirect to prevent resubmission
-    header("Location: course_manage.php?course_id=".$course_id."&tab=siswa&status=added");
+    header("Location: course_manage.php?course_id=".$course_id."&tab=siswa&status=added&role=".$level);
     exit;
 }
 
@@ -86,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_all'])) {
         )
     ";
     mysqli_query($koneksi, $sql);
-    header("Location: course_manage.php?course_id=".$course_id."&tab=siswa&status=added");
+    header("Location: course_manage.php?course_id=".$course_id."&tab=siswa&status=added&role=".$level);
     exit;
 }
 
@@ -95,7 +96,7 @@ if (isset($_GET['remove_id'])) {
     $rid = (int)$_GET['remove_id'];
     if ($rid > 0) {
         mysqli_query($koneksi, "DELETE FROM course_students WHERE id=".$rid." AND course_id=".$course_id);
-        header("Location: course_manage.php?course_id=".$course_id."&tab=siswa&status=removed");
+        header("Location: course_manage.php?course_id=".$course_id."&tab=siswa&status=removed&role=".$level);
         exit;
     }
 }
@@ -135,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_post'])) {
         $title = substr($content, 0, 50) . '...'; 
         $class_id = $course['id_kelas'];
         mysqli_query($koneksi, "INSERT INTO forum_topics(class_id, course_id, title, content, image, file, created_by, author_role) VALUES($class_id, $course_id, '$title', '$content', '$image_path', '$file_path', $uid, '$role')");
-        header("Location: course_manage.php?course_id=".$course_id."&tab=info&status=posted");
+        header("Location: course_manage.php?course_id=".$course_id."&tab=info&status=posted&role=".$level);
         exit;
     }
 }
@@ -386,25 +387,25 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4 mt-3">
         <h1 class="h3 mb-0 text-gray-800"><?php echo htmlspecialchars($course['nama_mapel']); ?> - <?php echo htmlspecialchars($course['nama_kelas']); ?></h1>
-        <a href="courses.php" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Kembali</a>
+        <a href="courses.php?role=<?php echo $level; ?>" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Kembali</a>
     </div>
 
     <!-- Tabs -->
     <ul class="nav nav-tabs mb-4">
         <li class="nav-item">
-            <a class="nav-link <?php echo $active_tab == 'info' ? 'active' : ''; ?>" href="?course_id=<?php echo $course_id; ?>&tab=info">Info Kelas</a>
+            <a class="nav-link <?php echo $active_tab == 'info' ? 'active' : ''; ?>" href="?course_id=<?php echo $course_id; ?>&tab=info&role=<?php echo $level; ?>">Info Kelas</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?php echo $active_tab == 'siswa' ? 'active' : ''; ?>" href="?course_id=<?php echo $course_id; ?>&tab=siswa">Siswa (<?php echo $student_count; ?>)</a>
+            <a class="nav-link <?php echo $active_tab == 'siswa' ? 'active' : ''; ?>" href="?course_id=<?php echo $course_id; ?>&tab=siswa&role=<?php echo $level; ?>">Siswa (<?php echo $student_count; ?>)</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?php echo $active_tab == 'tugas' ? 'active' : ''; ?>" href="?course_id=<?php echo $course_id; ?>&tab=tugas">Tugas</a>
+            <a class="nav-link <?php echo $active_tab == 'tugas' ? 'active' : ''; ?>" href="?course_id=<?php echo $course_id; ?>&tab=tugas&role=<?php echo $level; ?>">Tugas</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?php echo $active_tab == 'materi' ? 'active' : ''; ?>" href="?course_id=<?php echo $course_id; ?>&tab=materi">Materi</a>
+            <a class="nav-link <?php echo $active_tab == 'materi' ? 'active' : ''; ?>" href="?course_id=<?php echo $course_id; ?>&tab=materi&role=<?php echo $level; ?>">Materi</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?php echo $active_tab == 'kehadiran' ? 'active' : ''; ?>" href="?course_id=<?php echo $course_id; ?>&tab=kehadiran">Kehadiran</a>
+            <a class="nav-link <?php echo $active_tab == 'kehadiran' ? 'active' : ''; ?>" href="?course_id=<?php echo $course_id; ?>&tab=kehadiran&role=<?php echo $level; ?>">Kehadiran</a>
         </li>
     </ul>
 
@@ -473,6 +474,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                 <div class="card-body">
                     <form method="post" enctype="multipart/form-data">
                         <input type="hidden" name="create_post" value="1">
+                        <input type="hidden" name="role" value="<?php echo $level; ?>">
                         <div class="d-flex mb-3">
                             <div class="me-2">
                                 <?php 
@@ -674,12 +676,12 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                              <div>
                                                 <?php if($level === 'guru'): ?>
                                                     <?php if($asg['jenis_tugas'] == 'CBT'): ?>
-                                                        <a href="../tes/hasil_ujian.php?id_kelas=<?php echo $course['id_kelas']; ?>" class="btn btn-info btn-sm">Lihat Hasil Asesmen</a>
+                                                        <a href="../tes/hasil_ujian.php?id_kelas=<?php echo $course['id_kelas']; ?>&role=<?php echo $level; ?>" class="btn btn-info btn-sm">Lihat Hasil Asesmen</a>
                                                     <?php else: ?>
-                                                        <a href="submissions.php?assignment_id=<?php echo $asg['id_assignment']; ?>" class="btn btn-info btn-sm">Lihat Pengumpulan</a>
+                                                        <a href="submissions.php?assignment_id=<?php echo $asg['id_assignment']; ?>&role=<?php echo $level; ?>" class="btn btn-info btn-sm">Lihat Pengumpulan</a>
                                                     <?php endif; ?>
                                                 <?php else: ?>
-                                                    <a href="student_assignments.php?id=<?php echo $asg['id_assignment']; ?>" class="btn btn-primary btn-sm">Kerjakan</a>
+                                                    <a href="student_assignments.php?id=<?php echo $asg['id_assignment']; ?>&role=<?php echo $level; ?>" class="btn btn-primary btn-sm">Kerjakan</a>
                                                 <?php endif; ?>
                                              </div>
                                         </div>
@@ -751,8 +753,13 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
             
             <!-- Riwayat Kehadiran -->
             <div class="card shadow mb-4">
-                <div class="card-header py-3">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-success">Riwayat Kehadiran Kelas Ini</h6>
+                    <?php if($level == 'guru'): ?>
+                    <a href="rekap_absensi.php?id_kelas=<?php echo $course['id_kelas']; ?>&role=guru" class="btn btn-sm btn-success">
+                        <i class="fas fa-file-alt me-1"></i> Kehadiran Kelas
+                    </a>
+                    <?php endif; ?>
                 </div>
                 <div class="card-body">
                     <div class="card bg-success bg-opacity-10 border border-success text-success p-3 rounded mb-3">
@@ -1003,7 +1010,8 @@ document.addEventListener('DOMContentLoaded', function() {
             showConfirmButton: false
         });
         // Clean URL
-        window.history.replaceState(null, null, window.location.pathname + "?course_id=" + urlParams.get('course_id') + "&tab=siswa");
+        const role = urlParams.get('role') ? "&role=" + urlParams.get('role') : "";
+        window.history.replaceState(null, null, window.location.pathname + "?course_id=" + urlParams.get('course_id') + "&tab=siswa" + role);
     } else if (status === 'added') {
         Swal.fire({
             title: 'Ditambahkan!',
@@ -1013,7 +1021,8 @@ document.addEventListener('DOMContentLoaded', function() {
             showConfirmButton: false
         });
         // Clean URL
-        window.history.replaceState(null, null, window.location.pathname + "?course_id=" + urlParams.get('course_id') + "&tab=siswa");
+        const role = urlParams.get('role') ? "&role=" + urlParams.get('role') : "";
+        window.history.replaceState(null, null, window.location.pathname + "?course_id=" + urlParams.get('course_id') + "&tab=siswa" + role);
     } else if (status === 'posted') {
         Swal.fire({
             title: 'Terposting!',
@@ -1023,7 +1032,8 @@ document.addEventListener('DOMContentLoaded', function() {
             showConfirmButton: false
         });
         // Clean URL
-        window.history.replaceState(null, null, window.location.pathname + "?course_id=" + urlParams.get('course_id') + "&tab=info");
+        const role = urlParams.get('role') ? "&role=" + urlParams.get('role') : "";
+        window.history.replaceState(null, null, window.location.pathname + "?course_id=" + urlParams.get('course_id') + "&tab=info" + role);
     } else if (status === 'saved') {
         Swal.fire({
             title: 'Berhasil!',
@@ -1033,7 +1043,8 @@ document.addEventListener('DOMContentLoaded', function() {
             showConfirmButton: false
         });
         // Clean URL
-        window.history.replaceState(null, null, window.location.pathname + "?course_id=" + urlParams.get('course_id') + "&tab=kehadiran");
+        const role = urlParams.get('role') ? "&role=" + urlParams.get('role') : "";
+        window.history.replaceState(null, null, window.location.pathname + "?course_id=" + urlParams.get('course_id') + "&tab=kehadiran" + role);
     }
 });
 </script>

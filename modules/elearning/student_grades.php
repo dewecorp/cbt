@@ -1,5 +1,5 @@
 <?php
-session_start();
+include '../../includes/init_session.php';
 include '../../config/database.php';
 
 if (!isset($_SESSION['level']) || $_SESSION['level'] !== 'siswa') {

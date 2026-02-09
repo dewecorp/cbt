@@ -2,7 +2,7 @@
 include '../../config/database.php';
 include '../../vendor/shuchkin/simplexlsxgen/src/SimpleXLSXGen.php'; // Adjust path if necessary
 
-session_start();
+include '../../includes/init_session.php';
 
 if (!isset($_SESSION['user_id']) || ($_SESSION['level'] != 'admin' && $_SESSION['level'] != 'guru')) {
     exit;

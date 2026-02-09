@@ -1,5 +1,5 @@
 <?php
-session_start();
+include '../../includes/init_session.php';
 include '../../config/database.php';
 
 if (!isset($_SESSION['level']) || ($_SESSION['level'] !== 'guru' && $_SESSION['level'] !== 'admin')) {
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_grade'])) {
     
     mysqli_query($koneksi, "UPDATE submissions SET nilai='$nilai', catatan='$catatan' WHERE id_submission='$sub_id'");
     $_SESSION['success'] = "Nilai berhasil disimpan.";
-    header("Location: submissions.php?assignment_id=$assignment_id");
+    header("Location: submissions.php?assignment_id=$assignment_id&role=".$level);
     exit;
 }
 
@@ -92,7 +92,7 @@ while($sub = mysqli_fetch_assoc($q_subs)) {
         <div>
             <a href="export_submissions_excel.php?assignment_id=<?php echo $assignment_id; ?>" target="_blank" class="btn btn-success btn-sm me-2"><i class="fas fa-file-excel"></i> Export Excel</a>
             <a href="export_submissions_pdf.php?assignment_id=<?php echo $assignment_id; ?>" target="_blank" class="btn btn-danger btn-sm me-2"><i class="fas fa-file-pdf"></i> Export PDF</a>
-            <a href="course_manage.php?course_id=<?php echo $assignment['course_id']; ?>&tab=tugas" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Kembali</a>
+            <a href="course_manage.php?course_id=<?php echo $assignment['course_id']; ?>&tab=tugas&role=<?php echo $level; ?>" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Kembali</a>
         </div>
     </div>
 

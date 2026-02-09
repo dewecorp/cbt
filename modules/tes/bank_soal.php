@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SESSION['level'] == 'guru') {
                 timer: 1500,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = 'bank_soal.php';
+                window.location.href = 'bank_soal.php?role=" . $_SESSION['level'] . "';
             });
         </script>";
     }
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SESSION['level'] == 'guru') {
                 timer: 1500,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = 'bank_soal.php';
+                window.location.href = 'bank_soal.php?role=" . $_SESSION['level'] . "';
             });
         </script>";
     }
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SESSION['level'] == 'guru') {
 if (isset($_GET['delete']) && $_SESSION['level'] == 'guru') {
     $id = $_GET['delete'];
     mysqli_query($koneksi, "DELETE FROM bank_soal WHERE id_bank_soal='$id'");
-    echo "<script>window.location.href = 'bank_soal.php';</script>";
+    echo "<script>window.location.href = 'bank_soal.php?role=".$_SESSION['level']."';</script>";
 }
 
 // Get Mapel Options
@@ -262,7 +262,7 @@ if ($_SESSION['level'] == 'guru') {
                                 </td>
                                 <?php if($_SESSION['level'] == 'guru'): ?>      
                                 <td>
-                                    <a href="buat_soal.php?id=<?php echo $row['id_bank_soal']; ?>" class="btn btn-primary btn-sm text-white">
+                                    <a href="buat_soal.php?id=<?php echo $row['id_bank_soal']; ?>&role=<?php echo $_SESSION['level']; ?>" class="btn btn-primary btn-sm text-white">
                                         <i class="fas fa-list"></i> Kelola Soal 
                                     </a>
                                     <button type="button" class="btn btn-warning btn-sm text-white" 
@@ -275,7 +275,7 @@ if ($_SESSION['level'] == 'guru') {
                                     >
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('bank_soal.php?delete=<?php echo $row['id_bank_soal']; ?>')">
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('bank_soal.php?delete=<?php echo $row['id_bank_soal']; ?>&role=<?php echo $_SESSION['level']; ?>')">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>

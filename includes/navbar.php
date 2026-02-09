@@ -59,6 +59,8 @@ if (isset($koneksi)) {
             <ul class="navbar-nav mb-2 mb-lg-0">
                 <?php if (isset($_SESSION['level']) && $_SESSION['level'] == 'guru'): 
                     $my_id = $_SESSION['user_id'];
+                    $role_param = isset($_SESSION['level']) ? '?role=' . $_SESSION['level'] : '';
+                    
                     $q_unread = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM notifications WHERE user_id='$my_id' AND is_read=0");
                     $r_unread = mysqli_fetch_assoc($q_unread);
                     $unread_count = $r_unread['count'];
@@ -83,9 +85,10 @@ if (isset($koneksi)) {
                             while($n = mysqli_fetch_assoc($q_notifs)): 
                                 $ts = strtotime($n['created_at']);
                                 $tgl_notif = date('d', $ts) . ' ' . $bulan_indo_notif[(int)date('m', $ts)] . ' ' . date('Y, H:i', $ts);
+                                $role_param = isset($_SESSION['level']) ? '&role=' . $_SESSION['level'] : '';
                             ?>
                                 <li>
-                                    <a class="dropdown-item d-flex align-items-start py-2" href="<?php echo $base_url; ?>modules/notifikasi/read_notif.php?id=<?php echo $n['id']; ?>">
+                                    <a class="dropdown-item d-flex align-items-start py-2" href="<?php echo $base_url; ?>modules/notifikasi/read_notif.php?id=<?php echo $n['id'] . $role_param; ?>">
                                         <div class="me-3 mt-1">
                                             <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
                                                 <i class="fas fa-envelope"></i>
@@ -137,7 +140,7 @@ if (isset($koneksi)) {
                         <span class="d-none d-lg-inline"><?php echo $u_nama; ?></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="<?php echo $base_url; ?>logout.php"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                        <li><a class="dropdown-item" href="<?php echo $base_url; ?>logout.php?role=<?php echo (isset($_SESSION['level']) ? $_SESSION['level'] : ''); ?>"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
                     </ul>
                 </li>
             </ul>

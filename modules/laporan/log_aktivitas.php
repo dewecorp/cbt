@@ -3,7 +3,7 @@ include '../../config/database.php';
 
 // Cek Session
 if (session_status() == PHP_SESSION_NONE) {
-    session_start();
+    include '../../includes/init_session.php';
 }
 
 // Cek Level Admin

@@ -1,5 +1,5 @@
 <?php
-session_start();
+include '../../includes/init_session.php';
 include '../../config/database.php';
 
 if (!isset($_SESSION['level']) || $_SESSION['level'] !== 'siswa') {
@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_assignment']))
         $_SESSION['error'] = "Tugas tidak ditemukan atau tidak akses.";
     }
     
-    header("Location: student_assignments.php");
+    header("Location: student_assignments.php?role=".$level);
     exit;
 }
 

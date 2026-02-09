@@ -1,5 +1,5 @@
 <?php
-session_start();
+include '../../includes/init_session.php';
 include '../../config/database.php';
 $page_title = 'Materi';
 if (!isset($_SESSION['level'])) { $_SESSION['level'] = 'admin'; }

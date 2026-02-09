@@ -70,7 +70,7 @@ if (isset($_POST['add'])) {
                     timer: 1500,
                     showConfirmButton: false
                 }).then(() => {
-                    window.location.href = 'guru.php';
+                    window.location.href = 'guru.php?role=admin';
                 });
             </script>";
         } else {

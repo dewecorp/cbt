@@ -6,7 +6,7 @@ ini_set('display_errors', 0);
 // Buffer output untuk menangkap whitespace/error yang tidak diinginkan
 ob_start();
 
-session_start();
+include '../../includes/init_session.php';
 
 try {
     include '../../config/database.php';

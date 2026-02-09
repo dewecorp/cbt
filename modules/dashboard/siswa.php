@@ -51,7 +51,7 @@ if (isset($_POST['upload_foto_siswa'])) {
                     timer: 1500,
                     showConfirmButton: false
                 }).then(() => {
-                    window.location.href = 'dashboard.php';
+                    window.location.href = 'dashboard.php?role=siswa';
                 });
             </script>";
         } else {
@@ -147,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_attendance_das
             timer: 2000,
             showConfirmButton: false
         }).then(() => {
-            window.location.href = 'dashboard.php';
+            window.location.href = 'dashboard.php?role=siswa';
         });
         </script>";
 }
@@ -268,7 +268,7 @@ function previewImageSiswa(input) {
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Kartu Asesmen</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            <a href="modules/cetak/print_kartu.php?id_siswa=<?php echo $_SESSION['user_id']; ?>" target="_blank" class="btn btn-info btn-icon-split btn-sm">
+                            <a href="modules/cetak/print_kartu.php?id_siswa=<?php echo $_SESSION['user_id']; ?>&role=siswa" target="_blank" class="btn btn-info btn-icon-split btn-sm">
                                 <span class="icon text-white-50">
                                     <i class="fas fa-print"></i>
                                 </span>
@@ -490,7 +490,7 @@ function previewImageSiswa(input) {
         $icon_class = $jml_belum > 0 ? 'fa-exclamation-circle' : 'fa-check-circle';
     ?>
     <div class="col-xl-3 col-md-6 mb-4">
-        <a href="modules/elearning/course_manage.php?course_id=<?php echo $tc['id_course']; ?>&tab=tugas" class="text-decoration-none">
+        <a href="modules/elearning/course_manage.php?course_id=<?php echo $tc['id_course']; ?>&tab=tugas&role=siswa" class="text-decoration-none">
             <div class="card <?php echo $border_class; ?> shadow h-100 py-2 border-start border-4">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -549,7 +549,7 @@ function previewImageSiswa(input) {
                                 <td><?php echo $u['waktu']; ?> Menit</td>
                                 <td><span class="badge bg-success">Aktif</span></td>
                                 <td>
-                                    <a href="modules/tes/konfirmasi.php?id=<?php echo $u['id_ujian']; ?>" class="btn btn-primary btn-sm">
+                                    <a href="modules/tes/konfirmasi.php?id=<?php echo $u['id_ujian']; ?>&role=siswa" class="btn btn-primary btn-sm">
                                         <i class="fas fa-edit"></i> Kerjakan
                                     </a>
                                 </td>

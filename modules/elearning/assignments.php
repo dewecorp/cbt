@@ -1,5 +1,5 @@
 <?php
-session_start();
+include '../../includes/init_session.php';
 include '../../config/database.php';
 $page_title = 'Tugas';
 if (!isset($_SESSION['level'])) { $_SESSION['level'] = 'admin'; }
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_assignment'])) {
         if ($level === 'admin' || $row['created_by'] == $uid) {
              if ($course_id>0 && !empty($judul) && !empty($deadline)) {
                 mysqli_query($koneksi, "UPDATE assignments SET course_id=$course_id, jenis_tugas='$jenis_tugas', judul='$judul', deskripsi='$deskripsi', deadline='$deadline' WHERE id_assignment=$id_assignment");
-                header("Location: assignments.php?status=updated");
+                header("Location: assignments.php?status=updated&role=".$level);
                 exit;
             }
         }
