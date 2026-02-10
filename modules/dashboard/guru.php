@@ -248,7 +248,7 @@ if ($d_guru) {
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Siswa Kelas <?php echo $tc['nama_kelas']; ?></div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $tc['jumlah_siswa']; ?> Siswa</div>
-                            <a href="../elearning/rekap_absensi.php?id_kelas=<?php echo $tc['id_kelas']; ?>&role=guru" class="text-xs text-success text-decoration-none stretched-link mt-2 d-inline-block">
+                            <a href="modules/elearning/rekap_absensi.php?id_kelas=<?php echo $tc['id_kelas']; ?>&role=guru" class="text-xs text-success text-decoration-none stretched-link mt-2 d-inline-block">
                                 <i class="fas fa-external-link-alt me-1"></i> Kehadiran Kelas
                             </a>
                         </div>
@@ -267,7 +267,7 @@ if ($d_guru) {
         <div class="card shadow mb-4">
             <div class="card-header py-3 d-flex justify-content-between align-items-center">
                 <h6 class="m-0 font-weight-bold text-success"><i class="fas fa-calendar-check me-2"></i>Rekap Absensi Siswa Hari Ini (<?php echo date('d/m/Y'); ?>)</h6>
-                <a href="../elearning/rekap_absensi.php?role=guru" class="btn btn-sm btn-success">
+                <a href="modules/elearning/rekap_absensi.php?role=guru" class="btn btn-sm btn-success">
                     <i class="fas fa-list-alt me-1"></i> Lihat Rekap Bulanan
                 </a>
             </div>
