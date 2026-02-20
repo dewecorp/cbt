@@ -277,24 +277,26 @@ $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
 
     <?php if ($selected_kelas): ?>
     <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-            <h6 class="m-0 font-weight-bold text-success">Daftar Siswa</h6>
-            <div>
-                <button type="button" class="btn btn-danger btn-sm me-2" onclick="confirmResetAllPassword('<?php echo $selected_kelas; ?>')">
-                    <i class="fas fa-key"></i> Reset Semua Password
-                </button>
-                <a href="export_siswa_excel.php?kelas=<?php echo $selected_kelas; ?>" class="btn btn-success btn-sm me-2">
-                    <i class="fas fa-file-excel"></i> Export Excel
-                </a>
-                <a href="export_siswa_pdf.php?kelas=<?php echo $selected_kelas; ?>" target="_blank" class="btn btn-secondary btn-sm me-2">
-                    <i class="fas fa-file-pdf"></i> Export PDF
-                </a>
-                <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#importModal">
-                    <i class="fas fa-file-excel"></i> Import Excel
-                </button>
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
-                    <i class="fas fa-plus"></i> Tambah Siswa
-                </button>
+        <div class="card-header py-3">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-success">Daftar Siswa</h6>
+                <div class="mt-2 mt-md-0 d-flex flex-wrap justify-content-md-end">
+                    <button type="button" class="btn btn-danger btn-sm me-2 mb-2" onclick="confirmResetAllPassword('<?php echo $selected_kelas; ?>')">
+                        <i class="fas fa-key"></i> Reset Semua Password
+                    </button>
+                    <a href="export_siswa_excel.php?kelas=<?php echo $selected_kelas; ?>" class="btn btn-success btn-sm me-2 mb-2">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </a>
+                    <a href="export_siswa_pdf.php?kelas=<?php echo $selected_kelas; ?>" target="_blank" class="btn btn-secondary btn-sm me-2 mb-2">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </a>
+                    <button type="button" class="btn btn-primary btn-sm me-2 mb-2" data-bs-toggle="modal" data-bs-target="#importModal">
+                        <i class="fas fa-file-excel"></i> Import Excel
+                    </button>
+                    <button type="button" class="btn btn-primary btn-sm mb-2" data-bs-toggle="modal" data-bs-target="#addModal">
+                        <i class="fas fa-plus"></i> Tambah Siswa
+                    </button>
+                </div>
             </div>
         </div>
         <div class="card-body">
