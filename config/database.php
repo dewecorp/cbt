@@ -14,8 +14,20 @@ if (!$koneksi) {
 date_default_timezone_set('Asia/Jakarta');
 mysqli_query($koneksi, "SET time_zone = '+07:00'");
 
-// Base URL configuration - adjust as needed
-$base_url = "http://localhost/cbt/";
+// Base URL configuration - dynamically menyesuaikan host (cbt.test / localhost)
+if (isset($_SERVER['HTTP_HOST'])) {
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+    $host = $_SERVER['HTTP_HOST'];
+    
+    if ($host === 'localhost') {
+        $base_url = $scheme . $host . "/cbt/";
+    } else {
+        $base_url = $scheme . $host . "/";
+    }
+} else {
+    // Fallback ketika dijalankan via CLI
+    $base_url = "http://localhost/cbt/";
+}
 
 mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS activity_log (
     id INT AUTO_INCREMENT PRIMARY KEY,

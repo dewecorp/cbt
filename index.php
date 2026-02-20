@@ -1,52 +1,4 @@
 <?php
-// Check for existing sessions based on cookies and collect active sessions
-$active_sessions = [];
-
-if (isset($_COOKIE['CBT_ADMIN'])) {
-    session_write_close();
-    session_name('CBT_ADMIN');
-    session_start();
-    if (isset($_SESSION['user_id']) && $_SESSION['level'] == 'admin') {
-        $active_sessions['admin'] = [
-            'name' => $_SESSION['nama'],
-            'url' => 'admin.php'
-        ];
-    }
-    session_write_close();
-}
-
-if (isset($_COOKIE['CBT_GURU'])) {
-    session_write_close();
-    session_name('CBT_GURU');
-    session_start();
-    if (isset($_SESSION['user_id']) && $_SESSION['level'] == 'guru') {
-        $active_sessions['guru'] = [
-            'name' => $_SESSION['nama'],
-            'url' => 'teacher.php'
-        ];
-    }
-    session_write_close();
-}
-
-if (isset($_COOKIE['CBT_SISWA'])) {
-    session_write_close();
-    session_name('CBT_SISWA');
-    session_start();
-    if (isset($_SESSION['user_id']) && $_SESSION['level'] == 'siswa') {
-        $active_sessions['siswa'] = [
-            'name' => $_SESSION['nama'],
-            'url' => 'student.php'
-        ];
-    }
-    session_write_close();
-}
-
-// Check for default session (fallback)
-if (session_status() == PHP_SESSION_NONE) {
-    session_name('PHPSESSID');
-    session_start();
-}
-
 include 'config/database.php';
 
 // Fetch Settings
@@ -57,63 +9,6 @@ if (isset($koneksi)) {
         $st = mysqli_fetch_assoc($q_st);
     }
 }
-
-// If there are active sessions and user didn't explicitly ask for login form
-if (!empty($active_sessions) && !isset($_GET['action'])) {
-    ?>
-    <!DOCTYPE html>
-    <html lang="id">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Pilih Akun | E-Learning</title>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-        <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-        <link href="assets/css/style.css" rel="stylesheet">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-        <style>
-            body { font-family: 'Poppins', sans-serif; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-            .account-card { max-width: 400px; width: 100%; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.1); overflow: hidden; background: white; }
-            .account-header { background: #0d6efd; color: white; padding: 20px; text-align: center; }
-            .account-list { padding: 20px; }
-            .account-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; border-bottom: 1px solid #eee; transition: background 0.2s; text-decoration: none; color: #333; }
-            .account-item:last-child { border-bottom: none; }
-            .account-item:hover { background: #f8f9fa; }
-            .account-info { display: flex; flex-direction: column; }
-            .account-role { font-size: 0.8rem; color: #6c757d; text-transform: uppercase; font-weight: 600; }
-            .account-name { font-weight: 500; font-size: 1.1rem; }
-            .login-new { background: #f8f9fa; padding: 15px; text-align: center; border-top: 1px solid #eee; }
-        </style>
-    </head>
-    <body>
-        <div class="account-card">
-            <div class="account-header">
-                <h5 class="mb-0">Akun Aktif</h5>
-                <small>Anda sudah login dengan akun berikut:</small>
-            </div>
-            <div class="account-list">
-                <?php foreach($active_sessions as $role => $session): ?>
-                    <a href="<?php echo $session['url']; ?>" class="account-item">
-                        <div class="account-info">
-                            <span class="account-role"><?php echo $role; ?></span>
-                            <span class="account-name"><?php echo $session['name']; ?></span>
-                        </div>
-                        <i class="fas fa-chevron-right text-muted"></i>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-            <div class="login-new">
-                <a href="index.php?action=login" class="btn btn-outline-primary w-100">
-                    <i class="fas fa-plus-circle me-2"></i> Login Akun Lain
-                </a>
-            </div>
-        </div>
-    </body>
-    </html>
-    <?php
-    exit;
-}
-
 
 $error = '';
 

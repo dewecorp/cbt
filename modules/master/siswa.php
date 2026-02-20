@@ -283,6 +283,12 @@ $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
                 <button type="button" class="btn btn-danger btn-sm me-2" onclick="confirmResetAllPassword('<?php echo $selected_kelas; ?>')">
                     <i class="fas fa-key"></i> Reset Semua Password
                 </button>
+                <a href="export_siswa_excel.php?kelas=<?php echo $selected_kelas; ?>" class="btn btn-success btn-sm me-2">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </a>
+                <a href="export_siswa_pdf.php?kelas=<?php echo $selected_kelas; ?>" target="_blank" class="btn btn-secondary btn-sm me-2">
+                    <i class="fas fa-file-pdf"></i> Export PDF
+                </a>
                 <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#importModal">
                     <i class="fas fa-file-excel"></i> Import Excel
                 </button>
