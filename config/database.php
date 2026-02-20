@@ -31,6 +31,8 @@ mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS activity_log (
 
 mysqli_query($koneksi, "DELETE FROM activity_log WHERE created_at < (NOW() - INTERVAL 1 DAY)");
 
+mysqli_query($koneksi, "DELETE FROM notifications WHERE created_at < (NOW() - INTERVAL 1 DAY)");
+
 if (!function_exists('log_activity')) {
 function log_activity($action, $module, $details = '') {
     global $koneksi;

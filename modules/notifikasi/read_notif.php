@@ -7,6 +7,13 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+if (isset($_GET['all']) && $_GET['all'] == '1') {
+    $user_id = $_SESSION['user_id'];
+    mysqli_query($koneksi, "UPDATE notifications SET is_read=1 WHERE user_id='$user_id'");
+    header("Location: " . $base_url . "dashboard.php");
+    exit;
+}
+
 if (isset($_GET['id'])) {
     $id = (int)$_GET['id'];
     $user_id = $_SESSION['user_id'];

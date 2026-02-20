@@ -79,6 +79,15 @@ if (isset($koneksi)) {
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="notifDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
                         <li><h6 class="dropdown-header bg-success text-white">Notifikasi</h6></li>
+                        <li>
+                            <div class="dropdown-item d-flex justify-content-between align-items-center small">
+                                <span class="text-muted">Belum dibaca: <?php echo $unread_count; ?></span>
+                                <?php if($unread_count > 0): ?>
+                                <a href="<?php echo $base_url; ?>modules/notifikasi/read_notif.php?all=1" class="text-success text-decoration-none">Tandai sudah dibaca</a>
+                                <?php endif; ?>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider my-0"></li>
                         <?php if(mysqli_num_rows($q_notifs) > 0): ?>
                             <?php 
                             $bulan_indo_notif = [1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];

@@ -754,7 +754,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
             <!-- Riwayat Kehadiran -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-success">Riwayat Kehadiran Kelas Ini</h6>
+                    <h6 class="m-0 font-weight-bold text-success">Kehadiran Siswa Hari Ini</h6>
                     <?php if($level == 'guru'): ?>
                     <a href="rekap_absensi.php?id_kelas=<?php echo $course['id_kelas']; ?>&role=guru" class="btn btn-sm btn-success">
                         <i class="fas fa-file-alt me-1"></i> Kehadiran Kelas
@@ -841,7 +841,7 @@ $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'info';
                                     SELECT a.tanggal, a.jam_masuk, a.status, a.keterangan, s.nama_siswa 
                                     FROM absensi a 
                                     JOIN siswa s ON a.id_siswa=s.id_siswa 
-                                    WHERE a.id_course='$course_id'
+                                    WHERE a.id_course='$course_id' AND a.tanggal='$today_date'
                                     
                                     UNION ALL
                                     
