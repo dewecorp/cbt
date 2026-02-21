@@ -19,6 +19,12 @@ if (mysqli_num_rows($col_check) == 0) {
     mysqli_query($koneksi, "ALTER TABLE setting ADD COLUMN admin_welcome_text TEXT NULL");
 }
 
+// Ensure column for hero image exists
+$col_check_hero = mysqli_query($koneksi, "SHOW COLUMNS FROM setting LIKE 'hero_image'");
+if (mysqli_num_rows($col_check_hero) == 0) {
+    mysqli_query($koneksi, "ALTER TABLE setting ADD COLUMN hero_image VARCHAR(255) NULL");
+}
+
 // Ensure columns for submissions exist
 $col_check_sub = mysqli_query($koneksi, "SHOW COLUMNS FROM submissions LIKE 'file_provider'");
 if (mysqli_num_rows($col_check_sub) == 0) {
@@ -39,6 +45,7 @@ if (isset($_POST['simpan'])) {
     $admin_welcome_text = mysqli_real_escape_string($koneksi, $_POST['admin_welcome_text']);
     
     $logo_sql = "";
+    $hero_sql = "";
     
     // Handle Logo Upload
     if (isset($_FILES['logo']) && $_FILES['logo']['error'] == 0) {
@@ -67,6 +74,31 @@ if (isset($_POST['simpan'])) {
         }
     }
     
+    // Handle Hero Image Upload
+    if (isset($_FILES['hero_image']) && $_FILES['hero_image']['error'] == 0) {
+        $allowed = ['jpg', 'jpeg', 'png'];
+        $filename = $_FILES['hero_image']['name'];
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        
+        if (in_array(strtolower($ext), $allowed)) {
+            $new_hero = 'hero_' . time() . '.' . $ext;
+            $destination_hero = '../../assets/img/hero/' . $new_hero;
+            
+            if (!file_exists('../../assets/img/hero/')) {
+                mkdir('../../assets/img/hero/', 0777, true);
+            }
+            
+            if (move_uploaded_file($_FILES['hero_image']['tmp_name'], $destination_hero)) {
+                if (!empty($setting['hero_image']) && file_exists('../../assets/img/hero/' . $setting['hero_image'])) {
+                    unlink('../../assets/img/hero/' . $setting['hero_image']);
+                }
+                $hero_sql = ", hero_image='$new_hero'";
+            }
+        } else {
+            echo "<script>Swal.fire('Error', 'Format file hero tidak diizinkan. Gunakan JPG, JPEG, atau PNG', 'error');</script>";
+        }
+    }
+    
     if ($setting) {
         $q_update = "UPDATE setting SET 
             nama_sekolah='$nama_sekolah', 
@@ -78,12 +110,13 @@ if (isset($_POST['simpan'])) {
             panitia_ujian='$panitia_ujian',
             admin_welcome_text='$admin_welcome_text'
             $logo_sql
+            $hero_sql
             WHERE id='".$setting['id']."'";
     } else {
-        // If no setting exists, insert new
         $logo_val = isset($new_filename) ? $new_filename : '';
-        $q_update = "INSERT INTO setting (nama_sekolah, alamat, tahun_ajaran, semester, kepala_madrasah, nip_kepala, panitia_ujian, logo, admin_welcome_text) 
-            VALUES ('$nama_sekolah', '$alamat', '$tahun_ajaran', '$semester', '$kepala_madrasah', '$nip_kepala', '$panitia_ujian', '$logo_val', '$admin_welcome_text')";
+        $hero_val = isset($new_hero) ? $new_hero : '';
+        $q_update = "INSERT INTO setting (nama_sekolah, alamat, tahun_ajaran, semester, kepala_madrasah, nip_kepala, panitia_ujian, logo, admin_welcome_text, hero_image) 
+            VALUES ('$nama_sekolah', '$alamat', '$tahun_ajaran', '$semester', '$kepala_madrasah', '$nip_kepala', '$panitia_ujian', '$logo_val', '$admin_welcome_text', '$hero_val')";
     }
     
     if (mysqli_query($koneksi, $q_update)) {
@@ -175,11 +208,24 @@ elseif (isset($_POST['reset_tahun_ajaran'])) {
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Logo Sekolah</label>
-                                <input type="file" class="form-control" name="logo">
+                                <input type="file" class="form-control" name="logo" accept="image/*">
                                 <?php if(isset($setting['logo']) && !empty($setting['logo'])): ?>
                                     <div class="mt-2">
                                         <img src="../../assets/img/<?php echo $setting['logo']; ?>" alt="Logo" style="max-height: 50px;">
                                         <small class="text-muted d-block">Logo saat ini</small>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Gambar Hero Dashboard (Mobile)</label>
+                                <input type="file" class="form-control" name="hero_image" accept="image/*">
+                                <?php if(isset($setting['hero_image']) && !empty($setting['hero_image'])): ?>
+                                    <div class="mt-2">
+                                        <img src="../../assets/img/hero/<?php echo $setting['hero_image']; ?>" alt="Hero" style="max-height: 80px;">
+                                        <small class="text-muted d-block">Hero saat ini</small>
                                     </div>
                                 <?php endif; ?>
                             </div>

@@ -69,9 +69,9 @@
             </a>
         <?php endif; ?>
 
-        <a href="#" class="nav-item" data-bs-toggle="modal" data-bs-target="#mobileMenuModal">
-            <i class="fas fa-bars"></i>
-            <span>Menu</span>
+        <a href="javascript:void(0);" class="nav-item" onclick="confirmAction('<?php echo $base_url; ?>logout.php?role=<?php echo $level; ?>','Keluar dari aplikasi?','Keluar'); return false;">
+            <i class="fas fa-user"></i>
+            <span>Akun</span>
         </a>
     </nav>
 
