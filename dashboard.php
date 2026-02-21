@@ -3,19 +3,6 @@ include 'config/database.php';
 $page_title = 'Dashboard';
 include 'includes/header.php';
 
-if (isset($_SESSION['login_success'])) {
-    echo "<script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Proses Authentication Berhasil',
-            text: 'Akun anda berhasil diverifikasi',
-            showConfirmButton: false,
-            timer: 1600
-        });
-    </script>";
-    unset($_SESSION['login_success']);
-}
-
 // Helper Functions (Used by modules)
 // time_ago_str moved to config/database.php
 

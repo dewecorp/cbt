@@ -52,10 +52,6 @@ if (isset($_SESSION['info'])) {
     $flash_script .= "Swal.fire({icon: 'info', title: 'Info', text: '" . addslashes($_SESSION['info']) . "'});";
     unset($_SESSION['info']);
 }
-if (isset($_SESSION['login_success'])) {
-    $flash_script .= "Swal.fire({icon: 'success', title: 'Login Berhasil', text: 'Selamat datang di E-Learning', timer: 1500, showConfirmButton: false});";
-    unset($_SESSION['login_success']);
-}
 
 // Close session writing to prevent lock
 session_write_close();

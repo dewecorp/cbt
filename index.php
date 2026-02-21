@@ -40,7 +40,6 @@ if (isset($_POST['login'])) {
             $_SESSION['nama'] = $data['nama_lengkap'];
             $_SESSION['foto'] = isset($data['foto']) ? $data['foto'] : null;
             $_SESSION['level'] = $data['level'];
-            // $_SESSION['login_success'] = 1; // Removed to prevent alert on dashboard
             log_activity('login', 'auth', 'login ' . $data['level']);
             session_write_close(); // Ensure session is saved before redirect
             header("Location: login_success.php?role=" . $data['level']);
@@ -71,13 +70,12 @@ if (isset($_POST['login'])) {
                  $_SESSION['foto'] = isset($data['foto']) ? $data['foto'] : null;
                  $_SESSION['level'] = 'siswa';
                  $_SESSION['id_kelas'] = $data['id_kelas'];
-                 // $_SESSION['login_success'] = 1; // Removed to prevent alert on dashboard
                  
                  // Note: log_activity might use the current session to get user_id. 
                  // Since we just started CBT_SISWA and populated $_SESSION, it should work.
                  log_activity('login', 'auth', 'login siswa');
                  
-                 // Redirect to Student Dashboard
+                 // Redirect to Student Dashboard via login_success page
                  session_write_close(); // Ensure session is saved before redirect
                  header("Location: login_success.php?role=siswa");
                  exit;
@@ -96,6 +94,8 @@ if (isset($_POST['login'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | E-Learning</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/img/logo_1770185899.png">
     <!-- Google Fonts: Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">

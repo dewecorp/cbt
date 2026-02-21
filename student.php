@@ -4,22 +4,7 @@ session_start();
 include 'config/database.php';
 $page_title = 'Dashboard Siswa';
 
-// We need to ensure header.php doesn't try to start a default session
-// Since we already started one, header.php should be fine if it checks session_status()
 include 'includes/header.php';
-
-if (isset($_SESSION['login_success'])) {
-    echo "<script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Login Berhasil',
-            text: 'Selamat datang di E-Learning',
-            showConfirmButton: false,
-            timer: 1600
-        });
-    </script>";
-    unset($_SESSION['login_success']);
-}
 
 // Helper Functions (if not in database.php)
 function get_indo_day($date) {
