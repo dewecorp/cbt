@@ -426,45 +426,51 @@ document.addEventListener('DOMContentLoaded', function(){
 </div>
 
 <script>
-var editSel = document.getElementById('edit_tipe');
-var editFileWrap = document.getElementById('edit_fileWrap');
-var editLinkWrap = document.getElementById('edit_linkWrap');
+document.addEventListener('DOMContentLoaded', function(){
+    var editSel = document.getElementById('edit_tipe');
+    var editFileWrap = document.getElementById('edit_fileWrap');
+    var editLinkWrap = document.getElementById('edit_linkWrap');
 
-if(editSel) {
-    editSel.addEventListener('change', function(){
-        if (editSel.value === 'link') {
-            editFileWrap.classList.add('d-none');
-            editLinkWrap.classList.remove('d-none');
-        } else {
-            editFileWrap.classList.remove('d-none');
-            editLinkWrap.classList.add('d-none');
-        }
-    });
-}
+    if (editSel) {
+        editSel.addEventListener('change', function(){
+            if (editSel.value === 'link') {
+                editFileWrap.classList.add('d-none');
+                editLinkWrap.classList.remove('d-none');
+            } else {
+                editFileWrap.classList.remove('d-none');
+                editLinkWrap.classList.add('d-none');
+            }
+        });
+    }
 
-var editButtons = document.querySelectorAll('.btn-edit');
-editButtons.forEach(function(btn){
-    btn.addEventListener('click', function(){
-        var id = this.getAttribute('data-id');
-        var judul = this.getAttribute('data-judul');
-        var tipe = this.getAttribute('data-tipe');
-        var path = this.getAttribute('data-path');
-        
-        document.getElementById('edit_id_material').value = id;
-        document.getElementById('edit_judul').value = judul;
-        document.getElementById('edit_tipe').value = tipe;
-        
+    document.addEventListener('click', function(e){
+        var btn = e.target.closest('.btn-edit');
+        if (!btn) return;
+
+        var id = btn.getAttribute('data-id');
+        var judul = btn.getAttribute('data-judul');
+        var tipe = btn.getAttribute('data-tipe');
+        var path = btn.getAttribute('data-path');
+
+        var idInput = document.getElementById('edit_id_material');
+        var judulInput = document.getElementById('edit_judul');
+        var tipeSelect = document.getElementById('edit_tipe');
+        var linkInput = document.getElementById('edit_link_url');
+
+        if (!idInput || !judulInput || !tipeSelect) return;
+
+        idInput.value = id;
+        judulInput.value = judul;
+        tipeSelect.value = tipe;
+
         if (tipe === 'link') {
-            document.getElementById('edit_link_url').value = path;
+            if (linkInput) linkInput.value = path;
             editFileWrap.classList.add('d-none');
             editLinkWrap.classList.remove('d-none');
         } else {
             editFileWrap.classList.remove('d-none');
             editLinkWrap.classList.add('d-none');
         }
-        
-        // Trigger change event manually if needed, or rely on above logic
-        // But setting .value doesn't trigger 'change' automatically
     });
 });
 </script>
@@ -507,24 +513,25 @@ document.addEventListener('DOMContentLoaded', function(){
     var previewTitle = document.getElementById('previewTitle');
     var btnDownload = document.getElementById('btnDownloadOriginal');
 
-    document.querySelectorAll('.btn-preview').forEach(function(btn){
-        btn.addEventListener('click', function(e){
-            e.preventDefault();
-            var id = this.getAttribute('data-id');
-            var tipe = this.getAttribute('data-tipe');
-            var path = this.getAttribute('data-path');
-            var judul = this.getAttribute('data-judul');
+    document.addEventListener('click', function(e){
+        var btn = e.target.closest('.btn-preview');
+        if (!btn) return;
 
-            previewTitle.textContent = judul;
-            btnDownload.href = path;
-            
-            // Reset container
-            previewContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 p-5"><div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div></div>';
-            previewContainer.style.backgroundColor = (tipe === 'pdf') ? '#525659' : '#f8f9fa';
-            
-            modalPreview.show();
+        e.preventDefault();
+        var id = btn.getAttribute('data-id');
+        var tipe = btn.getAttribute('data-tipe');
+        var path = btn.getAttribute('data-path');
+        var judul = btn.getAttribute('data-judul');
 
-            setTimeout(function(){
+        previewTitle.textContent = judul;
+        btnDownload.href = path;
+        
+        previewContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 p-5"><div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+        previewContainer.style.backgroundColor = (tipe === 'pdf') ? '#525659' : '#f8f9fa';
+        
+        modalPreview.show();
+
+        setTimeout(function(){
                 var content = '';
                 if (tipe === 'pdf') {
                     // Use Proxy Script via fetch to bypass IDM
@@ -619,8 +626,7 @@ document.addEventListener('DOMContentLoaded', function(){
                     content = '<div class="text-center p-5">Format tidak didukung untuk preview. Silakan unduh file.</div>';
                     previewContainer.innerHTML = content;
                 }
-            }, 500);
-        });
+        }, 500);
     });
     
     // Clear content when modal is hidden

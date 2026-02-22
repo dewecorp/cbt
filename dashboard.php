@@ -125,6 +125,42 @@ if ($level === 'admin') {
             <img src="<?php echo $base_url . 'assets/img/hero/' . $hero_image; ?>" class="hero-kenburns-image" alt="Hero">
         </div>
         <?php endif; ?>
+
+        <?php if ($level === 'guru'): ?>
+        <div class="mb-3">
+            <div class="card shadow border-left-success py-2">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-auto pr-3">
+                            <div class="position-relative" style="width: 72px; height: 72px;">
+                                <?php 
+                                $foto_path_guru = 'assets/img/guru/' . ($_SESSION['foto'] ?? 'default.png');
+                                if (empty($_SESSION['foto']) || !file_exists($foto_path_guru)) {
+                                    echo '<div class="rounded-circle bg-success d-flex align-items-center justify-content-center text-white fw-bold" style="width: 72px; height: 72px; font-size: 28px;">' . strtoupper(substr($_SESSION['nama'], 0, 1)) . '</div>';
+                                } else {
+                                    echo '<img src="' . $foto_path_guru . '?' . time() . '" class="rounded-circle border border-white shadow-sm" style="width: 72px; height: 72px; object-fit: cover;">';
+                                }
+                                ?>
+                                <button type="button" class="btn btn-sm btn-light rounded-circle shadow-sm position-absolute" 
+                                        style="bottom: 0; right: 0; width: 28px; height: 28px; padding: 0; border: 1px solid #e3e6f0;"
+                                        data-bs-toggle="modal" data-bs-target="#modalEditFotoGuru">
+                                    <i class="fas fa-camera text-success"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="h6 fw-bold text-success text-uppercase mb-1">Selamat Datang, <?php echo $_SESSION['nama']; ?></div>
+                            <p class="mb-0" style="font-size: 0.85rem;">Selamat datang di halaman Dashboard Guru. Anda dapat mengelola Bank Soal dan Jadwal Asesmen.</p>
+                        </div>
+                        <div class="col-auto d-none d-sm-block">
+                            <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <?php if (!empty($menu_items)): ?>
         <div class="card mb-3">
             <div class="card-body">

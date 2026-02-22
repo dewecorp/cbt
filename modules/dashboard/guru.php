@@ -141,7 +141,7 @@ if ($d_guru) {
 ?>
 
 <div class="row">
-    <div class="col-12 mb-4">
+    <div class="col-12 mb-4 d-none d-md-block">
         <div class="card shadow border-left-success py-2">
             <div class="card-body">
                 <div class="row align-items-center">
