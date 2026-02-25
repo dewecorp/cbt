@@ -76,7 +76,7 @@ $q_siswa = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_kelas='$id_kelas
 <div class="container-fluid">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Monitoring Asesmen</h1>
-        <a href="jadwal_ujian.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
+        <a href="jadwal_ujian.php?role=<?php echo $_SESSION['level']; ?>" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
     </div>
 
     <div class="card shadow mb-4">
@@ -157,7 +157,7 @@ $q_siswa = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_kelas='$id_kelas
                             <td><?php echo $sisa_waktu_str; ?></td>
                             <td>
                                 <?php if($us && $us['status'] == 'selesai'): ?>
-                                <a href="lihat_jawaban.php?id=<?php echo $us['id_ujian_siswa']; ?>" class="btn btn-info btn-sm text-white" title="Lihat Jawaban">
+                                <a href="lihat_jawaban.php?id=<?php echo $us['id_ujian_siswa']; ?>&role=<?php echo $_SESSION['level']; ?>" class="btn btn-info btn-sm text-white" title="Lihat Jawaban">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 <button type="button" class="btn btn-warning btn-sm text-dark" 
@@ -200,6 +200,7 @@ $q_siswa = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_kelas='$id_kelas
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST">
+                <input type="hidden" name="role" value="<?php echo $_SESSION['level']; ?>">
                 <input type="hidden" name="id_ujian_siswa" id="time_id_ujian_siswa">
                 <div class="modal-body">
                     <p>Menambahkan waktu untuk siswa: <strong id="time_nama_siswa"></strong></p>
@@ -226,6 +227,7 @@ $q_siswa = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_kelas='$id_kelas
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST">
+                <input type="hidden" name="role" value="<?php echo $_SESSION['level']; ?>">
                 <input type="hidden" name="id_ujian_siswa" id="reset_id_ujian_siswa">
                 <div class="modal-body">
                     <p>Apakah Anda yakin ingin mengizinkan siswa <strong id="reset_nama_siswa"></strong> untuk melanjutkan ujian?</p>

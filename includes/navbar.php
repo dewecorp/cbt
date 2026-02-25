@@ -88,8 +88,10 @@ if (isset($koneksi)) {
                         <li>
                             <div class="dropdown-item d-flex justify-content-between align-items-center small">
                                 <span class="text-muted">Belum dibaca: <?php echo $unread_count; ?></span>
-                                <?php if($unread_count > 0): ?>
-                                <a href="<?php echo $base_url; ?>modules/notifikasi/read_notif.php?all=1" class="text-success text-decoration-none">Tandai sudah dibaca</a>
+                                <?php if($unread_count > 0): 
+                                    $role_param_notif = isset($_SESSION['level']) ? '&role=' . $_SESSION['level'] : '';
+                                ?>
+                                <a href="<?php echo $base_url; ?>modules/notifikasi/read_notif.php?all=1<?php echo $role_param_notif; ?>" class="text-success text-decoration-none">Tandai sudah dibaca</a>
                                 <?php endif; ?>
                             </div>
                         </li>

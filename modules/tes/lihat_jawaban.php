@@ -48,7 +48,7 @@ $q_soal = mysqli_query($koneksi, $query_soal);
 <div class="container-fluid">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Detail Jawaban Siswa</h1>
-        <a href="hasil_ujian.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
+        <a href="hasil_ujian.php?role=<?php echo $_SESSION['level']; ?>" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
     </div>
 
     <!-- Student Info Card -->

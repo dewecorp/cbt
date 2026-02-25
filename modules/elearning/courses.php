@@ -339,6 +339,7 @@ if (isset($_GET['edit_id'])) {
 <div class="modal fade" id="modalCourse" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" class="modal-content">
+      <input type="hidden" name="role" value="<?php echo $level; ?>">
       <div class="modal-header">
         <h5 class="modal-title"><?php echo $edit_course ? 'Edit Kelas Online' : 'Buat Kelas Online'; ?></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

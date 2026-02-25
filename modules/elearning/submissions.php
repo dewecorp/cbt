@@ -13,7 +13,7 @@ $uid = $_SESSION['user_id'];
 $level = $_SESSION['level'];
 
 if ($assignment_id <= 0) {
-    header("Location: assignments.php");
+    header("Location: assignments.php?role=" . $level);
     exit;
 }
 
@@ -90,8 +90,8 @@ while($sub = mysqli_fetch_assoc($q_subs)) {
             </p>
         </div>
         <div>
-            <a href="export_submissions_excel.php?assignment_id=<?php echo $assignment_id; ?>" target="_blank" class="btn btn-success btn-sm me-2"><i class="fas fa-file-excel"></i> Export Excel</a>
-            <a href="export_submissions_pdf.php?assignment_id=<?php echo $assignment_id; ?>" target="_blank" class="btn btn-danger btn-sm me-2"><i class="fas fa-file-pdf"></i> Export PDF</a>
+            <a href="export_submissions_excel.php?assignment_id=<?php echo $assignment_id; ?>&role=<?php echo $level; ?>" target="_blank" class="btn btn-success btn-sm me-2"><i class="fas fa-file-excel"></i> Export Excel</a>
+            <a href="export_submissions_pdf.php?assignment_id=<?php echo $assignment_id; ?>&role=<?php echo $level; ?>" target="_blank" class="btn btn-danger btn-sm me-2"><i class="fas fa-file-pdf"></i> Export PDF</a>
             <a href="course_manage.php?course_id=<?php echo $assignment['course_id']; ?>&tab=tugas&role=<?php echo $level; ?>" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Kembali</a>
         </div>
     </div>
@@ -183,6 +183,7 @@ while($sub = mysqli_fetch_assoc($q_subs)) {
                                     <div class="modal fade" id="modalGrade<?php echo $sub['id_submission']; ?>" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <form method="post" class="modal-content">
+                                                <input type="hidden" name="role" value="<?php echo $level; ?>">
                                                 <div class="modal-header">
                                                     <h5 class="modal-title">Beri Nilai: <?php echo htmlspecialchars($student['nama_siswa']); ?></h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

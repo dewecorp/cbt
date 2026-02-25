@@ -69,32 +69,20 @@ if (session_status() == PHP_SESSION_NONE) {
     } elseif ($role === 'admin') {
         session_name('CBT_ADMIN');
     } else {
-        // 5. Ambiguity Handling
+        // 5. Ambiguity Handling - Check for existing session cookies
         $has_siswa = isset($_COOKIE['CBT_SISWA']);
         $has_guru = isset($_COOKIE['CBT_GURU']);
         $has_admin = isset($_COOKIE['CBT_ADMIN']);
-        $count = ($has_siswa ? 1 : 0) + ($has_guru ? 1 : 0) + ($has_admin ? 1 : 0);
-
-        if ($count > 1) {
-            // Multiple sessions exist.
-            // STABILITY FIX: Instead of redirecting to account selector (which confuses users), 
-            // we default to the most privileged active session.
-            // This ensures the page loads ("Normal" behavior) even if role param is missing.
-            
-            if ($has_admin) {
-                session_name('CBT_ADMIN');
-            } elseif ($has_guru) {
-                session_name('CBT_GURU');
-            } elseif ($has_siswa) {
-                session_name('CBT_SISWA');
-            }
-        } elseif ($count === 1) {
-             // Only one choice, safe to use.
-             if ($has_siswa) session_name('CBT_SISWA');
-             elseif ($has_guru) session_name('CBT_GURU');
-             elseif ($has_admin) session_name('CBT_ADMIN');
+        
+        // If we found exactly one session cookie, use it
+        if ($has_admin) {
+            session_name('CBT_ADMIN');
+        } elseif ($has_guru) {
+            session_name('CBT_GURU');
+        } elseif ($has_siswa) {
+            session_name('CBT_SISWA');
         }
-        // If count is 0, let session_start() use default PHPSESSID or create new (Login page)
+        // If none found, session_start() will use default PHPSESSID or create new (Login page)
     }
     
     session_start();

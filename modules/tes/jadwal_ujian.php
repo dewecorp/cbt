@@ -117,6 +117,7 @@ if ($_SESSION['level'] == 'guru') {
     <div class="card mb-4">
         <div class="card-body">
             <form method="GET" action="" class="row g-3">
+                <input type="hidden" name="role" value="<?php echo $_SESSION['level']; ?>">
                 <div class="col-md-4">
                     <label class="form-label">Pilih Kelas</label>
                     <select name="id_kelas" class="form-select" onchange="this.form.submit()" <?php echo ($single_class_id) ? 'disabled' : ''; ?>>
@@ -203,7 +204,7 @@ if ($_SESSION['level'] == 'guru') {
                                 </td>
                                 <?php if($_SESSION['level'] == 'guru'): ?>
                                 <td>
-                                    <a href="monitoring_ujian.php?id=<?php echo $row['id_ujian']; ?>" class="btn btn-success btn-sm text-white" title="Monitoring Asesmen">
+                                    <a href="monitoring_ujian.php?id=<?php echo $row['id_ujian']; ?>&role=<?php echo $_SESSION['level']; ?>" class="btn btn-success btn-sm text-white" title="Monitoring Asesmen">
                                         <i class="fas fa-desktop"></i>
                                     </a>
                                     <button type="button" class="btn btn-warning btn-sm text-white"  
@@ -241,6 +242,7 @@ if ($_SESSION['level'] == 'guru') {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST">
+                <input type="hidden" name="role" value="<?php echo $_SESSION['level']; ?>">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Bank Soal</label>
@@ -282,6 +284,7 @@ if ($_SESSION['level'] == 'guru') {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST">
+                <input type="hidden" name="role" value="<?php echo $_SESSION['level']; ?>">
                 <input type="hidden" name="id_ujian" id="edit_id_ujian">
                 <div class="modal-body">
                     <div class="mb-3">

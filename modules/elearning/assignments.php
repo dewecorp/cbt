@@ -45,7 +45,7 @@ if (isset($_GET['delete']) && ($level === 'admin' || $level === 'guru')) {
             mysqli_query($koneksi, "DELETE FROM assignments WHERE id_assignment=$id_del");
             // Also delete submissions
             mysqli_query($koneksi, "DELETE FROM submissions WHERE assignment_id=$id_del");
-            header("Location: assignments.php?status=deleted");
+            header("Location: assignments.php?status=deleted&role=" . $level);
             exit;
         }
     }
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_assignment']))
     $deadline = mysqli_real_escape_string($koneksi, $_POST['deadline']);
     if ($course_id>0 && !empty($judul) && !empty($deadline)) {
         mysqli_query($koneksi, "INSERT INTO assignments(course_id,jenis_tugas,judul,deskripsi,deadline,created_by) VALUES($course_id,'$jenis_tugas','$judul','$deskripsi','$deadline',$uid)");
-        header("Location: assignments.php?status=created");
+        header("Location: assignments.php?status=created&role=" . $level);
         exit;
     }
 }

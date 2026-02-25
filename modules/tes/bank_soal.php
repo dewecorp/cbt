@@ -153,6 +153,7 @@ if ($_SESSION['level'] == 'guru') {
     <div class="card mb-4">
         <div class="card-body">
             <form method="GET" action="" class="row g-3">
+                <input type="hidden" name="role" value="<?php echo $_SESSION['level']; ?>">
                 <div class="col-md-4">
                     <label class="form-label">Pilih Kelas</label>
                     <select name="id_kelas" class="form-select" onchange="this.form.submit()" <?php echo ($single_class_id) ? 'disabled' : ''; ?>>
@@ -299,6 +300,7 @@ if ($_SESSION['level'] == 'guru') {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST">
+                <input type="hidden" name="role" value="<?php echo $_SESSION['level']; ?>">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Kode Bank Soal</label>
@@ -352,6 +354,7 @@ if ($_SESSION['level'] == 'guru') {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST">
+                <input type="hidden" name="role" value="<?php echo $_SESSION['level']; ?>">
                 <input type="hidden" name="id_bank_soal" id="edit_id_bank_soal">
                 <div class="modal-body">
                     <div class="mb-3">

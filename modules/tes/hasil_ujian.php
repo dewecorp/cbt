@@ -80,6 +80,7 @@ if ($level == 'admin' || $level == 'guru') {
     <div class="card mb-4">
         <div class="card-body">
             <form method="GET" action="" class="row g-3">
+                <input type="hidden" name="role" value="<?php echo $_SESSION['level']; ?>">
                 <div class="col-md-4">
                     <label class="form-label">Filter Kelas</label>
                     <select name="id_kelas" class="form-select" onchange="this.form.submit()" <?php echo ($single_class_id) ? 'disabled' : ''; ?>>
@@ -152,7 +153,7 @@ if ($level == 'admin' || $level == 'guru') {
                             <td><?php echo $row['waktu_selesai']; ?></td>
                             <?php if ($level == 'guru' || $level == 'admin'): ?>                            <td class="text-center">
                                 <?php if($row['status'] == 'selesai'): ?>       
-                                <a href="lihat_jawaban.php?id=<?php echo $row['id_ujian_siswa']; ?>" class="btn btn-primary btn-sm" title="Lihat Jawaban">      
+                                <a href="lihat_jawaban.php?id=<?php echo $row['id_ujian_siswa']; ?>&role=<?php echo $_SESSION['level']; ?>" class="btn btn-primary btn-sm" title="Lihat Jawaban">      
                                     <i class="fas fa-eye"></i> Lihat Jawaban    
                                 </a>
                                 <?php endif; ?>

@@ -10,7 +10,14 @@ if (!isset($_SESSION['user_id'])) {
 if (isset($_GET['all']) && $_GET['all'] == '1') {
     $user_id = $_SESSION['user_id'];
     mysqli_query($koneksi, "UPDATE notifications SET is_read=1 WHERE user_id='$user_id'");
-    header("Location: " . $base_url . "dashboard.php");
+    
+    $role = isset($_SESSION['level']) ? $_SESSION['level'] : '';
+    $redirect_to = "dashboard.php";
+    if ($role === 'admin') $redirect_to = "admin.php";
+    elseif ($role === 'guru') $redirect_to = "teacher.php";
+    elseif ($role === 'siswa') $redirect_to = "student.php";
+    
+    header("Location: " . $base_url . $redirect_to . "?role=" . $role);
     exit;
 }
 
@@ -32,7 +39,10 @@ if (isset($_GET['id'])) {
         $role = isset($_SESSION['level']) ? $_SESSION['level'] : '';
         if ($role) {
             if (strpos($link, '?') !== false) {
-                $link .= '&role=' . $role;
+                // Check if role is already in the link
+                if (strpos($link, 'role=') === false) {
+                    $link .= '&role=' . $role;
+                }
             } else {
                 $link .= '?role=' . $role;
             }
@@ -45,6 +55,12 @@ if (isset($_GET['id'])) {
 }
 
 // Fallback if error or not found
-header("Location: " . $base_url . "dashboard.php");
+$role = isset($_SESSION['level']) ? $_SESSION['level'] : '';
+$redirect_to = "dashboard.php";
+if ($role === 'admin') $redirect_to = "admin.php";
+elseif ($role === 'guru') $redirect_to = "teacher.php";
+elseif ($role === 'siswa') $redirect_to = "student.php";
+
+header("Location: " . $base_url . $redirect_to . "?role=" . $role);
 exit;
 ?>
