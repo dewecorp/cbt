@@ -32,6 +32,57 @@ $d_setting_dash = $q_setting_dash ? mysqli_fetch_assoc($q_setting_dash) : null;
 if ($d_setting_dash && isset($d_setting_dash['admin_welcome_text']) && !empty($d_setting_dash['admin_welcome_text'])) {
     $admin_welcome_text = $d_setting_dash['admin_welcome_text'];
 }
+
+// Function to get system uptime
+function get_system_uptime($koneksi) {
+    $uptime = "N/A";
+    
+    // Method 1: Try System Uptime (Shell Exec)
+    if (function_exists('shell_exec')) {
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            // Windows Uptime using WMIC
+            $out = @shell_exec('wmic os get lastbootuptime');
+            if ($out && preg_match('/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/', $out, $match)) {
+                $boot_time = mktime($match[4], $match[5], $match[6], $match[2], $match[3], $match[1]);
+                $diff = time() - $boot_time;
+                $uptime = format_uptime_diff($diff);
+            }
+        } else {
+            // Linux Uptime
+            $str = @file_get_contents('/proc/uptime');
+            if ($str !== false) {
+                $num = (int)floatval($str);
+                $uptime = format_uptime_diff($num);
+            }
+        }
+    }
+
+    // Method 2: Fallback to Database Uptime (Very reliable for Web Apps)
+    if ($uptime === "N/A" || empty($uptime)) {
+        $res = mysqli_query($koneksi, "SHOW GLOBAL STATUS LIKE 'Uptime'");
+        if ($res) {
+            $row = mysqli_fetch_assoc($res);
+            $seconds = $row['Value'];
+            $uptime = format_uptime_diff($seconds) . " (Database)";
+        }
+    }
+    
+    return $uptime;
+}
+
+// Helper to format seconds into readable string
+function format_uptime_diff($diff) {
+    $days = floor($diff / 86400);
+    $hours = floor(($diff % 86400) / 3600);
+    $minutes = floor(($diff % 3600) / 60);
+    
+    $result = "";
+    if ($days > 0) $result .= "$days Hari, ";
+    $result .= "$hours Jam, $minutes Menit";
+    return $result;
+}
+
+$system_uptime = get_system_uptime($koneksi);
 ?>
 
 <div class="row">
@@ -205,23 +256,31 @@ if ($d_setting_dash && isset($d_setting_dash['admin_welcome_text']) && !empty($d
                     <div class="col-md-6">
                         <table class="table table-sm table-borderless mb-0">
                             <tr>
-                                <td width="40%" class="text-muted small">Max Upload:</td>
-                                <td class="small fw-bold text-dark"><?php echo ini_get('upload_max_filesize'); ?></td>
+                                <td width="40%" class="text-muted small">OS Server:</td>
+                                <td class="small fw-bold text-dark"><?php echo PHP_OS_FAMILY . ' (' . PHP_OS . ')'; ?></td>
                             </tr>
                             <tr>
-                                <td class="text-muted small">Memory Limit:</td>
-                                <td class="small fw-bold text-dark"><?php echo ini_get('memory_limit'); ?></td>
+                                <td width="40%" class="text-muted small">Uptime Sistem:</td>
+                                <td class="small fw-bold text-dark"><?php echo $system_uptime; ?></td>
+                            </tr>
+                            <tr>
+                                <td width="40%" class="text-muted small">Max Upload:</td>
+                                <td class="small fw-bold text-dark"><?php echo ini_get('upload_max_filesize'); ?></td>
                             </tr>
                         </table>
                     </div>
                     <div class="col-md-6">
                         <table class="table table-sm table-borderless mb-0">
                             <tr>
+                                <td width="40%" class="text-muted small">Memory Limit:</td>
+                                <td class="small fw-bold text-dark"><?php echo ini_get('memory_limit'); ?></td>
+                            </tr>
+                            <tr>
                                 <td width="40%" class="text-muted small">Post Max Size:</td>
                                 <td class="small fw-bold text-dark"><?php echo ini_get('post_max_size'); ?></td>
                             </tr>
                             <tr>
-                                <td class="text-muted small">Execution Time:</td>
+                                <td width="40%" class="text-muted small">Execution Time:</td>
                                 <td class="small fw-bold text-dark"><?php echo ini_get('max_execution_time'); ?>s</td>
                             </tr>
                         </table>
