@@ -195,7 +195,7 @@
                 <?php endif; ?>
                 
                 <li class="nav-item mt-4 mb-5">
-                    <a href="<?php echo $base_url; ?>logout.php?role=<?php echo $level; ?>" class="nav-link bg-danger text-white">
+                    <a href="javascript:void(0);" onclick="confirmAction('<?php echo $base_url; ?>logout.php?role=<?php echo $level; ?>','Keluar dari aplikasi?','Keluar');" class="nav-link bg-danger text-white">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </li>

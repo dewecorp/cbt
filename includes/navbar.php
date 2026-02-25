@@ -166,7 +166,7 @@ if (isset($koneksi)) {
                         <span class="d-none d-lg-inline"><?php echo $u_nama; ?></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="<?php echo $base_url; ?>logout.php?role=<?php echo (isset($_SESSION['level']) ? $_SESSION['level'] : ''); ?>"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0);" onclick="confirmAction('<?php echo $base_url; ?>logout.php?role=<?php echo (isset($_SESSION['level']) ? $_SESSION['level'] : ''); ?>','Keluar dari aplikasi?','Keluar');"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
                     </ul>
                 </li>
             </ul>
@@ -281,47 +281,5 @@ document.addEventListener("DOMContentLoaded", function(event) {
            overlay.classList.remove('show');
        });
    }
-
-   document.querySelectorAll('a[href$="logout.php"]').forEach(function(el){
-       el.addEventListener('click', function(e){
-           e.preventDefault();
-           const href = el.getAttribute('href');
-           Swal.fire({
-               title: 'Konfirmasi Logout',
-               text: 'Anda yakin ingin keluar?',
-               icon: 'warning',
-               showCancelButton: true,
-               confirmButtonColor: '#d33',
-               cancelButtonColor: '#198754',
-               confirmButtonText: 'Ya, Logout',
-               cancelButtonText: 'Batal'
-           }).then((result) => {
-               if (result.isConfirmed) {
-                   window.location.href = href;
-               }
-           });
-       });
-   });
-
-   document.addEventListener('click', function(e){
-       const anchor = e.target.closest('a[href$="logout.php"]');
-       if (!anchor) return;
-       e.preventDefault();
-       const href = anchor.getAttribute('href');
-       Swal.fire({
-           title: 'Konfirmasi Logout',
-           text: 'Anda yakin ingin keluar?',
-           icon: 'warning',
-           showCancelButton: true,
-           confirmButtonColor: '#d33',
-           cancelButtonColor: '#198754',
-           confirmButtonText: 'Ya, Logout',
-           cancelButtonText: 'Batal'
-       }).then((result) => {
-           if (result.isConfirmed) {
-               window.location.href = href;
-           }
-       });
-   });
 });
 </script>

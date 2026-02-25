@@ -115,7 +115,7 @@
                         <?php endif; ?>
 
                          <div class="list-group-item bg-light fw-bold text-uppercase small text-muted">Akun</div>
-                         <a href="<?php echo $base_url; ?>logout.php?role=<?php echo $level; ?>" class="list-group-item list-group-item-action text-danger"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+                         <a href="javascript:void(0);" onclick="confirmAction('<?php echo $base_url; ?>logout.php?role=<?php echo $level; ?>','Keluar dari aplikasi?','Keluar');" class="list-group-item list-group-item-action text-danger"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
                     </div>
                 </div>
             </div>
