@@ -13,7 +13,7 @@ if (isset($koneksi)) {
 ?>
 
 <!-- Mobile Header (Logo + App Name + Madrasah Name) -->
-<div class="mobile-header d-flex align-items-center justify-content-center py-2 bg-white border-bottom shadow-sm d-md-none sticky-top" style="z-index: 1020;">
+<div class="mobile-header d-flex align-items-center justify-content-between px-3 py-2 bg-white border-bottom shadow-sm d-md-none sticky-top" style="z-index: 1020;">
     <div class="d-flex align-items-center">
         <?php if($m_school_logo): ?>
             <img src="<?php echo $base_url; ?>assets/img/<?php echo $m_school_logo; ?>" alt="Logo" height="45" class="me-3">
@@ -23,6 +23,12 @@ if (isset($koneksi)) {
             <div class="fw-bold text-dark lh-1" style="font-size: 0.9rem; font-family: 'Poppins', sans-serif;"><?php echo $m_school_name; ?></div>
         </div>
     </div>
+    <?php if (isset($_SESSION['level']) && ($_SESSION['level'] == 'admin' || $_SESSION['level'] == 'guru')): ?>
+    <!-- Mobile Internet Status Indicator -->
+    <div id="internet-status-mobile" class="badge rounded-pill bg-secondary" style="font-size: 0.65rem;" title="Koneksi Internet">
+        <i class="fas fa-wifi"></i> <span>...</span>
+    </div>
+    <?php endif; ?>
 </div>
 
 <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top w-100 d-none d-md-flex">
@@ -120,6 +126,15 @@ if (isset($koneksi)) {
                 </li>
                 <?php endif; ?>
 
+                <?php if (isset($_SESSION['level']) && ($_SESSION['level'] == 'admin' || $_SESSION['level'] == 'guru')): ?>
+                <!-- Internet Status Indicator -->
+                <li class="nav-item d-flex align-items-center me-3" id="internet-status-container">
+                    <div id="internet-status" class="badge rounded-pill bg-secondary" style="font-size: 0.75rem; cursor: default;" title="Mengecek koneksi internet...">
+                        <i class="fas fa-wifi me-1"></i> <span>Mengecek...</span>
+                    </div>
+                </li>
+                <?php endif; ?>
+
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <?php 
@@ -186,7 +201,58 @@ setInterval(updateClock, 1000);
 // Initial call
 updateClock();
 
+// Internet Connection Status logic
+function updateInternetStatus() {
+    const statusElement = document.getElementById('internet-status');
+    const statusElementMobile = document.getElementById('internet-status-mobile');
+    if (!statusElement && !statusElementMobile) return;
+    
+    const elements = [statusElement, statusElementMobile].filter(el => el !== null);
+    
+    if (!navigator.onLine) {
+        elements.forEach(el => {
+            el.className = 'badge rounded-pill bg-danger';
+            el.querySelector('span').textContent = 'Offline';
+        });
+        return;
+    }
+
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    let className = 'badge rounded-pill bg-success';
+    let text = 'Online';
+
+    if (connection) {
+        const speed = connection.downlink; // in Mbps
+        if (speed >= 2) {
+            className = 'badge rounded-pill bg-success';
+            text = 'Cepat';
+        } else if (speed >= 0.5) {
+            className = 'badge rounded-pill bg-warning text-dark';
+            text = 'Sedang';
+        } else {
+            className = 'badge rounded-pill bg-danger';
+            text = 'Lambat';
+        }
+    }
+
+    elements.forEach(el => {
+        el.className = className;
+        el.querySelector('span').textContent = text;
+    });
+}
+
+// Event listeners for connection changes
+if (navigator.connection) {
+    navigator.connection.addEventListener('change', updateInternetStatus);
+}
+window.addEventListener('online', updateInternetStatus);
+window.addEventListener('offline', updateInternetStatus);
+
+// Periodic check every 5 seconds
+setInterval(updateInternetStatus, 5000);
+
 document.addEventListener("DOMContentLoaded", function(event) {
+    updateInternetStatus();
    const toggle = document.getElementById('sidebarToggle');
    const sidebar = document.getElementById('sidebar');
    const closeBtn = document.getElementById('sidebarClose');

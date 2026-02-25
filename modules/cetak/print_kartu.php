@@ -172,14 +172,26 @@ if (isset($id_kelas)) {
                 <div class="sig-box">
                     Mengetahui,<br>
                     Kepala Madrasah<br>
-                    <br><br><br>
+                    <div style="margin: 5px 0;">
+                        <?php 
+                        $qr_data_kepala = "Kartu Asesmen Sah: " . ($setting['kepala_madrasah'] ?? 'Kepala Madrasah');
+                        $qr_url_kepala = "https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=" . urlencode($qr_data_kepala);
+                        ?>
+                        <img src="<?php echo $qr_url_kepala; ?>" alt="QR" style="width: 45px; height: 45px;">
+                    </div>
                     <u><strong><?php echo isset($setting['kepala_madrasah']) ? $setting['kepala_madrasah'] : '..................'; ?></strong></u><br>
                     NIP. <?php echo isset($setting['nip_kepala']) ? $setting['nip_kepala'] : '-'; ?>
                 </div>
                 <div class="sig-box">
                     Panitia Asesmen,<br>
                     Ketua<br>
-                    <br><br><br>
+                    <div style="margin: 5px 0;">
+                        <?php 
+                        $qr_data_panitia = "Panitia Asesmen Sah: " . ($setting['panitia_ujian'] ?? 'Ketua Panitia');
+                        $qr_url_panitia = "https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=" . urlencode($qr_data_panitia);
+                        ?>
+                        <img src="<?php echo $qr_url_panitia; ?>" alt="QR" style="width: 45px; height: 45px;">
+                    </div>
                     <u><strong><?php echo isset($setting['panitia_ujian']) ? $setting['panitia_ujian'] : '..................'; ?></strong></u>
                 </div>
             </div>

@@ -73,6 +73,63 @@ $jml_ujian_guru = mysqli_fetch_assoc($q_ujian_guru)['count'];
 $q_course_guru = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM courses WHERE pengampu='$id_guru'");
 $jml_course_guru = mysqli_fetch_assoc($q_course_guru)['count'];
 
+// Tambahan Statistik Siswa (Tugas & CBT) untuk Guru
+// Siswa mengerjakan tugas di kelas yang diampu guru ini
+$q_siswa_tugas_guru = mysqli_query($koneksi, "
+    SELECT COUNT(DISTINCT s.siswa_id) as count 
+    FROM submissions s
+    JOIN assignments a ON s.assignment_id = a.id_assignment
+    JOIN courses c ON a.course_id = c.id_course
+    WHERE c.pengampu = '$id_guru'
+");
+$jml_siswa_tugas_guru = mysqli_fetch_assoc($q_siswa_tugas_guru)['count'];
+
+// Siswa mengerjakan CBT di bank soal yang dibuat guru ini
+$q_siswa_cbt_guru = mysqli_query($koneksi, "
+    SELECT COUNT(DISTINCT us.id_siswa) as count 
+    FROM ujian_siswa us
+    JOIN ujian u ON us.id_ujian = u.id_ujian
+    JOIN bank_soal b ON u.id_bank_soal = b.id_bank_soal
+    WHERE b.id_guru = '$id_guru'
+");
+$jml_siswa_cbt_guru = mysqli_fetch_assoc($q_siswa_cbt_guru)['count'];
+
+// Total siswa unik di semua kelas yang diampu guru
+$total_siswa_diampu = 0;
+$q_guru_info = mysqli_query($koneksi, "SELECT mengajar_kelas FROM users WHERE id_user='$id_guru'");
+$d_guru_info = mysqli_fetch_assoc($q_guru_info);
+if ($d_guru_info && !empty($d_guru_info['mengajar_kelas'])) {
+    $kelas_ids = explode(',', $d_guru_info['mengajar_kelas']);
+    $clean_kelas_ids = array_filter(array_map('trim', $kelas_ids));
+    if (!empty($clean_kelas_ids)) {
+        $ids_str = implode("','", array_map(function($id) use ($koneksi) { return mysqli_real_escape_string($koneksi, $id); }, $clean_kelas_ids));
+        $q_total_siswa = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM siswa WHERE id_kelas IN ('$ids_str') AND status='aktif'");
+        $total_siswa_diampu = mysqli_fetch_assoc($q_total_siswa)['count'];
+    }
+}
+$jml_siswa_belum_tugas_guru = max(0, $total_siswa_diampu - $jml_siswa_tugas_guru);
+$jml_siswa_belum_cbt_guru = max(0, $total_siswa_diampu - $jml_siswa_cbt_guru);
+
+// Statistik Tambahan Guru (Materi, Tugas, Pengumuman)
+$q_guru_materi = mysqli_query($koneksi, "
+    SELECT COUNT(*) as count 
+    FROM materials m
+    JOIN courses c ON m.course_id = c.id_course
+    WHERE c.pengampu = '$id_guru'
+");
+$jml_materi_guru = mysqli_fetch_assoc($q_guru_materi)['count'];
+
+$q_guru_tugas = mysqli_query($koneksi, "
+    SELECT COUNT(*) as count 
+    FROM assignments a
+    JOIN courses c ON a.course_id = c.id_course
+    WHERE c.pengampu = '$id_guru'
+");
+$jml_tugas_guru = mysqli_fetch_assoc($q_guru_tugas)['count'];
+
+$q_guru_ann = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM announcements WHERE created_by = '$id_guru'");
+$jml_ann_guru = mysqli_fetch_assoc($q_guru_ann)['count'];
+
 // Data Siswa per Kelas yang diajar
 $teacher_classes = [];
 $attendance_summary = [];
@@ -141,8 +198,8 @@ if ($d_guru) {
 ?>
 
 <div class="row">
-    <div class="col-12 mb-4 d-none d-md-block">
-        <div class="card shadow border-left-success py-2">
+    <div class="col-xl-9 col-lg-8 mb-4 d-none d-md-block">
+        <div class="card shadow border-left-success py-2 h-100">
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto pr-3">
@@ -174,6 +231,26 @@ if ($d_guru) {
             </div>
         </div>
     </div>
+
+    <!-- Statistik Total Siswa Diampu -->
+    <div class="col-xl-3 col-lg-4 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2 border-start border-4 border-primary">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Siswa Anda</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $total_siswa_diampu; ?> Siswa</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
 
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-info shadow h-100 py-2 border-start border-4 border-info">
@@ -239,29 +316,122 @@ if ($d_guru) {
         </div>
     </div>
 
-    <?php if(!empty($teacher_classes)): ?>
-        <?php foreach($teacher_classes as $tc): ?>
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Siswa Kelas <?php echo $tc['nama_kelas']; ?></div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $tc['jumlah_siswa']; ?> Siswa</div>
-                            <a href="modules/elearning/rekap_absensi.php?id_kelas=<?php echo $tc['id_kelas']; ?>&role=guru" class="text-xs text-success text-decoration-none stretched-link mt-2 d-inline-block">
-                                <i class="fas fa-external-link-alt me-1"></i> Kehadiran Kelas
-                            </a>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-users fa-2x text-gray-300"></i>
-                        </div>
+    <!-- Materi, Tugas, Pengumuman Guru -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2 border-start border-4 border-primary">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Materi Anda</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_materi_guru; ?></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-book-open fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
         </div>
-        <?php endforeach; ?>
-    <?php endif; ?>
+    </div>
 
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2 border-start border-4 border-info">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tugas Anda</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_tugas_guru; ?></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-secondary shadow h-100 py-2 border-start border-4 border-secondary">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">Pengumuman Anda</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_ann_guru; ?></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-bullhorn fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistik Siswa (Tugas & CBT) -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Siswa Sudah Tugas</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_siswa_tugas_guru; ?></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-check fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-danger shadow h-100 py-2 border-start border-4 border-danger">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Siswa Belum Tugas</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_siswa_belum_tugas_guru; ?></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-times fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Siswa Sudah CBT</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_siswa_cbt_guru; ?></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-edit fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-12 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2 border-start border-4 border-warning">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Siswa Belum CBT</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_siswa_belum_cbt_guru; ?></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-clock fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
     <!-- Rekap Absensi Hari Ini -->
     <div class="col-12 mb-4">
         <div class="card shadow mb-4">

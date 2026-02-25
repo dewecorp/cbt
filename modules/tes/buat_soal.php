@@ -305,7 +305,7 @@ if (isset($_POST['update_soal'])) {
 if (isset($_GET['delete_soal'])) {
     $id_soal = $_GET['delete_soal'];
     mysqli_query($koneksi, "DELETE FROM soal WHERE id_soal='$id_soal'");
-    echo "<script>window.location.href = 'buat_soal.php?id=$id_bank';</script>";
+    echo "<script>window.location.href = 'buat_soal.php?id=$id_bank&role=" . $_SESSION['level'] . "';</script>";
 }
 ?>
 
@@ -516,7 +516,7 @@ if (isset($_GET['edit_soal'])) {
                     <div class="mt-4">
                         <?php if($is_edit): ?>
                             <button type="submit" name="update_soal" class="btn btn-warning text-white"><i class="fas fa-save"></i> Update Soal</button>
-                            <a href="buat_soal.php?id=<?php echo $id_bank; ?>" class="btn btn-secondary ms-2"><i class="fas fa-times"></i> Batal</a>
+                            <a href="buat_soal.php?id=<?php echo $id_bank; ?>&role=<?php echo $_SESSION['level']; ?>" class="btn btn-secondary ms-2"><i class="fas fa-times"></i> Batal</a>
                         <?php else: ?>
                             <button type="submit" name="simpan_soal" class="btn btn-success"><i class="fas fa-save"></i> Simpan Soal</button>
                         <?php endif; ?>
@@ -546,8 +546,8 @@ if (isset($_GET['edit_soal'])) {
                         <span class="badge bg-info text-dark small ms-2">Bobot: <?php echo isset($s['bobot']) ? $s['bobot'] : '1.00'; ?></span>
                     </h5>
                     <div>
-                        <a href="buat_soal.php?id=<?php echo $id_bank; ?>&edit_soal=<?php echo $s['id_soal']; ?>" class="btn btn-warning btn-sm text-white me-1"><i class="fas fa-edit"></i></a>
-                        <a href="buat_soal.php?id=<?php echo $id_bank; ?>&delete_soal=<?php echo $s['id_soal']; ?>" class="btn btn-danger btn-sm" onclick="confirmDeleteSoal(event, this.href); return false;"><i class="fas fa-trash"></i></a>
+                        <a href="buat_soal.php?id=<?php echo $id_bank; ?>&edit_soal=<?php echo $s['id_soal']; ?>&role=<?php echo $_SESSION['level']; ?>" class="btn btn-warning btn-sm text-white me-1"><i class="fas fa-edit"></i></a>
+                        <a href="buat_soal.php?id=<?php echo $id_bank; ?>&delete_soal=<?php echo $s['id_soal']; ?>&role=<?php echo $_SESSION['level']; ?>" class="btn btn-danger btn-sm" onclick="confirmDeleteSoal(event, this.href); return false;"><i class="fas fa-trash"></i></a>
                     </div>
                 </div>
                 <div class="mb-2"><?php echo $s['pertanyaan']; ?></div>

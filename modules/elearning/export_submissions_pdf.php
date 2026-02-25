@@ -159,10 +159,40 @@ if (!$setting) {
             </tbody>
         </table>
         
-        <div style="margin-top: 30px; text-align: right;">
-            <p>Guru Pengampu,</p>
-            <br><br><br>
-            <p><b><?php echo $_SESSION['nama']; ?></b></p>
+        <!-- Tanda Tangan Section -->
+        <div style="margin-top: 40px; page-break-inside: avoid;">
+            <table style="width: 100%; border: none; border-collapse: collapse; table-layout: fixed;">
+                <tr>
+                    <td style="border: none; text-align: center; width: 45%; padding: 0;">
+                        <?php if(!empty($setting['kepala_madrasah'])): ?>
+                            <p style="margin-bottom: 5px;">Mengetahui,</p>
+                            <p style="margin-bottom: 10px;">Kepala Madrasah</p>
+                            <div style="margin: 10px 0;">
+                                <?php 
+                                $qr_data_kepala = "Dokumen Sah Elektronik: " . $setting['kepala_madrasah'] . " (NIP: " . $setting['nip_kepala'] . ")";
+                                $qr_url_kepala = "https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=" . urlencode($qr_data_kepala);
+                                ?>
+                                <img src="<?php echo $qr_url_kepala; ?>" alt="QR Signature" style="width: 80px; height: 80px;">
+                            </div>
+                            <p style="font-weight: bold; text-decoration: underline; margin-bottom: 0;"><?php echo $setting['kepala_madrasah']; ?></p>
+                            <p style="margin-top: 0;">NIP. <?php echo $setting['nip_kepala']; ?></p>
+                        <?php endif; ?>
+                    </td>
+                    <td style="border: none; width: 10%;"></td>
+                    <td style="border: none; text-align: center; width: 45%; padding: 0;">
+                        <p style="margin-bottom: 5px;">Jepara, <?php echo date('d F Y'); ?></p>
+                        <p style="margin-bottom: 10px;">Guru Pengampu,</p>
+                        <div style="margin: 10px 0;">
+                            <?php 
+                            $qr_data_guru = "Dokumen Sah Elektronik: " . $_SESSION['nama'];
+                            $qr_url_guru = "https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=" . urlencode($qr_data_guru);
+                            ?>
+                            <img src="<?php echo $qr_url_guru; ?>" alt="QR Signature" style="width: 80px; height: 80px;">
+                        </div>
+                        <p style="font-weight: bold; text-decoration: underline; margin-bottom: 0;"><?php echo $_SESSION['nama']; ?></p>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 </body>

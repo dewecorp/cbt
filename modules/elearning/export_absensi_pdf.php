@@ -143,14 +143,36 @@ while($row = mysqli_fetch_assoc($q_att)) {
         </tbody>
     </table>
 
-    <div style="margin-top: 30px; text-align: right; page-break-inside: avoid;">
+    <div style="margin-top: 30px; page-break-inside: avoid;">
         <table style="width: 100%; border: none;">
             <tr>
-                <td style="border: none; width: 70%;"></td>
-                <td style="border: none; text-align: center;">
+                <td style="border: none; text-align: center; width: 40%;">
+                    <?php if(!empty($setting['kepala_madrasah'])): ?>
+                        <p>Mengetahui,</p>
+                        <p>Kepala Madrasah</p>
+                        <div style="margin: 10px 0;">
+                            <?php 
+                            $qr_data_kepala = "Dokumen Sah Elektronik: " . $setting['kepala_madrasah'] . " (NIP: " . $setting['nip_kepala'] . ")";
+                            $qr_url_kepala = "https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=" . urlencode($qr_data_kepala);
+                            ?>
+                            <img src="<?php echo $qr_url_kepala; ?>" alt="QR Signature" style="width: 80px; height: 80px;">
+                        </div>
+                        <p style="font-weight: bold; text-decoration: underline; margin-bottom: 0;"><?php echo $setting['kepala_madrasah']; ?></p>
+                        <p style="margin-top: 0;">NIP. <?php echo $setting['nip_kepala']; ?></p>
+                    <?php endif; ?>
+                </td>
+                <td style="border: none; width: 20%;"></td>
+                <td style="border: none; text-align: center; width: 40%;">
+                    <p>Jepara, <?php echo date('d') . ' ' . $month_names[date('m')] . ' ' . date('Y'); ?></p>
                     <p>Guru Wali Kelas,</p>
-                    <br><br><br>
-                    <p style="font-weight: bold;"><?php echo $wali_kelas; ?></p>
+                    <div style="margin: 10px 0;">
+                        <?php 
+                        $qr_data_wali = "Dokumen Sah Elektronik: " . $wali_kelas;
+                        $qr_url_wali = "https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=" . urlencode($qr_data_wali);
+                        ?>
+                        <img src="<?php echo $qr_url_wali; ?>" alt="QR Signature" style="width: 80px; height: 80px;">
+                    </div>
+                    <p style="font-weight: bold; text-decoration: underline;"><?php echo $wali_kelas; ?></p>
                 </td>
             </tr>
         </table>

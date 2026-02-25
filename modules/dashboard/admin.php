@@ -12,6 +12,19 @@ $jml_kelas = mysqli_fetch_assoc($q_kelas_count)['count'];
 $q_ujian_count = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM ujian WHERE status='aktif' AND NOW() BETWEEN tgl_mulai AND tgl_selesai");
 $jml_ujian = mysqli_fetch_assoc($q_ujian_count)['count'];
 
+// Tambahan Statistik E-Learning
+$q_course_count = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM courses");
+$jml_course = mysqli_fetch_assoc($q_course_count)['count'];
+
+$q_tugas_count = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM assignments");
+$jml_tugas = mysqli_fetch_assoc($q_tugas_count)['count'];
+
+$q_materi_count = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM materials");
+$jml_materi = mysqli_fetch_assoc($q_materi_count)['count'];
+
+$q_ann_count = mysqli_query($koneksi, "SELECT COUNT(*) as count FROM announcements");
+$jml_ann = mysqli_fetch_assoc($q_ann_count)['count'];
+
 // Admin welcome text
 $admin_welcome_text = "Aplikasi Computer Based Test (CBT) ini dirancang untuk memudahkan pelaksanaan ujian di MI Sultan Fattah Sukosono. Silahkan gunakan menu di samping untuk mengelola data dan ujian.";
 $q_setting_dash = mysqli_query($koneksi, "SELECT * FROM setting LIMIT 1");
@@ -24,11 +37,11 @@ if ($d_setting_dash && isset($d_setting_dash['admin_welcome_text']) && !empty($d
 <div class="row">
     <!-- Data Guru Widget -->
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
+        <div class="card border-left-primary shadow h-100 py-2 border-start border-4 border-primary">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Data Guru</div>
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Data Guru</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_guru; ?></div>
                     </div>
                     <div class="col-auto">
@@ -56,11 +69,11 @@ if ($d_setting_dash && isset($d_setting_dash['admin_welcome_text']) && !empty($d
     </div>
 
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
+        <div class="card border-left-info shadow h-100 py-2 border-start border-4 border-info">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Data Kelas</div>
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Data Kelas</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_kelas; ?></div>
                     </div>
                     <div class="col-auto">
@@ -81,6 +94,74 @@ if ($d_setting_dash && isset($d_setting_dash['admin_welcome_text']) && !empty($d
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-file-alt fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kelas Online Widget -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-secondary shadow h-100 py-2 border-start border-4 border-secondary">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">Kelas Online</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_course; ?></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-chalkboard fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tugas Widget -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2 border-start border-4 border-primary">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Tugas</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_tugas; ?></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Materi Widget -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2 border-start border-4 border-info">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Materi</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_materi; ?></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-book-open fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pengumuman Widget -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Pengumuman</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_ann; ?></div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-bullhorn fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
