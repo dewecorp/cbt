@@ -155,8 +155,9 @@ $result = mysqli_query($koneksi, $query);
         <div style="margin-top: 40px; page-break-inside: avoid;">
             <table style="width: 100%; border: none; border-collapse: collapse; table-layout: fixed;">
                 <tr>
-                    <td style="border: none; text-align: center; width: 45%; padding: 0;">
+                    <td style="border: none; text-align: center; width: 45%; padding: 0; vertical-align: top;">
                         <?php if(!empty($setting['kepala_madrasah'])): ?>
+                            <p style="margin-bottom: 5px;">&nbsp;</p> <!-- Spacing to align with date -->
                             <p style="margin-bottom: 5px;">Mengetahui,</p>
                             <p style="margin-bottom: 10px;">Kepala Madrasah</p>
                             <div style="margin: 10px 0;">
@@ -171,8 +172,9 @@ $result = mysqli_query($koneksi, $query);
                         <?php endif; ?>
                     </td>
                     <td style="border: none; width: 10%;"></td>
-                    <td style="border: none; text-align: center; width: 45%; padding: 0;">
+                    <td style="border: none; text-align: center; width: 45%; padding: 0; vertical-align: top;">
                         <p style="margin-bottom: 5px;">Jepara, <?php echo date('d F Y'); ?></p>
+                        <p style="margin-bottom: 5px;">&nbsp;</p> <!-- Mengetahui equivalent -->
                         <p style="margin-bottom: 10px;">Guru Mapel,</p>
                         <div style="margin: 10px 0;">
                             <?php 

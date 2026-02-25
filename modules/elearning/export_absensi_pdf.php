@@ -144,12 +144,13 @@ while($row = mysqli_fetch_assoc($q_att)) {
     </table>
 
     <div style="margin-top: 30px; page-break-inside: avoid;">
-        <table style="width: 100%; border: none;">
+        <table style="width: 100%; border: none; border-collapse: collapse; table-layout: fixed;">
             <tr>
-                <td style="border: none; text-align: center; width: 40%;">
+                <td style="border: none; text-align: center; width: 45%; padding: 0; vertical-align: top;">
                     <?php if(!empty($setting['kepala_madrasah'])): ?>
-                        <p>Mengetahui,</p>
-                        <p>Kepala Madrasah</p>
+                        <p style="margin-bottom: 5px;">&nbsp;</p> <!-- Spacing to align with date -->
+                        <p style="margin-bottom: 5px;">Mengetahui,</p>
+                        <p style="margin-bottom: 10px;">Kepala Madrasah</p>
                         <div style="margin: 10px 0;">
                             <?php 
                             $qr_data_kepala = "Dokumen Sah Elektronik: " . $setting['kepala_madrasah'] . " (NIP: " . $setting['nip_kepala'] . ")";
@@ -161,10 +162,11 @@ while($row = mysqli_fetch_assoc($q_att)) {
                         <p style="margin-top: 0;">NIP. <?php echo $setting['nip_kepala']; ?></p>
                     <?php endif; ?>
                 </td>
-                <td style="border: none; width: 20%;"></td>
-                <td style="border: none; text-align: center; width: 40%;">
-                    <p>Jepara, <?php echo date('d') . ' ' . $month_names[date('m')] . ' ' . date('Y'); ?></p>
-                    <p>Guru Wali Kelas,</p>
+                <td style="border: none; width: 10%;"></td>
+                <td style="border: none; text-align: center; width: 45%; padding: 0; vertical-align: top;">
+                    <p style="margin-bottom: 5px;">Jepara, <?php echo date('d') . ' ' . $month_names[date('m')] . ' ' . date('Y'); ?></p>
+                    <p style="margin-bottom: 5px;">&nbsp;</p> <!-- Mengetahui equivalent -->
+                    <p style="margin-bottom: 10px;">Guru Wali Kelas,</p>
                     <div style="margin: 10px 0;">
                         <?php 
                         $qr_data_wali = "Dokumen Sah Elektronik: " . $wali_kelas;
