@@ -110,6 +110,10 @@ if ($d_guru_info && !empty($d_guru_info['mengajar_kelas'])) {
 $jml_siswa_belum_tugas_guru = max(0, $total_siswa_diampu - $jml_siswa_tugas_guru);
 $jml_siswa_belum_cbt_guru = max(0, $total_siswa_diampu - $jml_siswa_cbt_guru);
 
+// Hitung Persentase Progres
+$percent_tugas = $total_siswa_diampu > 0 ? round(($jml_siswa_tugas_guru / $total_siswa_diampu) * 100) : 0;
+$percent_cbt = $total_siswa_diampu > 0 ? round(($jml_siswa_cbt_guru / $total_siswa_diampu) * 100) : 0;
+
 // Statistik Tambahan Guru (Materi, Tugas, Pengumuman)
 $q_guru_materi = mysqli_query($koneksi, "
     SELECT COUNT(*) as count 
@@ -372,7 +376,17 @@ if ($d_guru) {
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Siswa Sudah Tugas</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_siswa_tugas_guru; ?></div>
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-auto">
+                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800"><?php echo $jml_siswa_tugas_guru; ?></div>
+                            </div>
+                            <div class="col">
+                                <div class="progress progress-sm mr-2">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo $percent_tugas; ?>%" aria-valuenow="<?php echo $percent_tugas; ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-xs text-muted mt-1"><?php echo $percent_tugas; ?>% dari total siswa</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-user-check fa-2x text-gray-300"></i>
@@ -404,7 +418,17 @@ if ($d_guru) {
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Siswa Sudah CBT</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $jml_siswa_cbt_guru; ?></div>
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-auto">
+                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800"><?php echo $jml_siswa_cbt_guru; ?></div>
+                            </div>
+                            <div class="col">
+                                <div class="progress progress-sm mr-2">
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: <?php echo $percent_cbt; ?>%" aria-valuenow="<?php echo $percent_cbt; ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-xs text-muted mt-1"><?php echo $percent_cbt; ?>% dari total siswa</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-user-edit fa-2x text-gray-300"></i>
@@ -414,7 +438,7 @@ if ($d_guru) {
         </div>
     </div>
 
-    <div class="col-xl-4 col-md-12 mb-4">
+    <div class="col-xl-4 col-md-6 mb-4">
         <div class="card border-left-warning shadow h-100 py-2 border-start border-4 border-warning">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">

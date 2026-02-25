@@ -170,6 +170,69 @@ if ($d_setting_dash && isset($d_setting_dash['admin_welcome_text']) && !empty($d
 </div>
 
 <div class="row mt-4">
+    <!-- Info Server Widget -->
+    <div class="col-lg-12">
+        <div class="card shadow mb-4 border-left-info">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-info"><i class="fas fa-server me-2"></i>Informasi Server & Sistem</h6>
+                <span class="badge bg-info text-white px-3 py-2"><i class="fas fa-sync-alt fa-spin me-1"></i> Realtime Status</span>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 col-sm-6 mb-3 border-end">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Versi PHP</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo PHP_VERSION; ?></div>
+                        <small class="text-muted"><?php echo php_sapi_name(); ?></small>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3 border-end">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Versi MySQL</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo mysqli_get_server_info($koneksi); ?></div>
+                        <small class="text-muted">Database Engine</small>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3 border-end">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">IP Server</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $_SERVER['SERVER_ADDR'] ?? '127.0.0.1'; ?></div>
+                        <small class="text-muted"><?php echo $_SERVER['SERVER_NAME']; ?></small>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Waktu Server</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo date('H:i:s'); ?></div>
+                        <small class="text-muted"><?php echo date('d M Y'); ?></small>
+                    </div>
+                </div>
+                <hr class="my-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr>
+                                <td width="40%" class="text-muted small">Max Upload:</td>
+                                <td class="small fw-bold text-dark"><?php echo ini_get('upload_max_filesize'); ?></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted small">Memory Limit:</td>
+                                <td class="small fw-bold text-dark"><?php echo ini_get('memory_limit'); ?></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr>
+                                <td width="40%" class="text-muted small">Post Max Size:</td>
+                                <td class="small fw-bold text-dark"><?php echo ini_get('post_max_size'); ?></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted small">Execution Time:</td>
+                                <td class="small fw-bold text-dark"><?php echo ini_get('max_execution_time'); ?>s</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
     <div class="col-lg-12">
         <div class="card shadow mb-4">
             <div class="card-header py-3">
