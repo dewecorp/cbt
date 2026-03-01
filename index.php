@@ -27,6 +27,9 @@ if (isset($_POST['login'])) {
             // Close default session first!
             session_write_close();
             
+            // Ensure custom session path is used
+            include 'includes/session_settings.php';
+            
             if ($role == 'admin') {
                 session_name('CBT_ADMIN');
             } elseif ($role == 'guru') {
@@ -60,6 +63,10 @@ if (isset($_POST['login'])) {
             if ($password == $data['password'] || password_verify($password, $data['password'])) {
                  // SWITCH TO SISWA SESSION
                  session_write_close(); // Close default session
+                 
+                 // Ensure custom session path is used
+                 include 'includes/session_settings.php';
+                 
                  session_name('CBT_SISWA'); // Set specific name
                  session_start();
                  

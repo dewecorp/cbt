@@ -1,6 +1,6 @@
 <?php
-session_name('CBT_SISWA');
-session_start();
+include 'includes/init_session.php';
+
 include 'config/database.php';
 $page_title = 'Dashboard Siswa';
 

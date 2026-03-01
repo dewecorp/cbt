@@ -1,6 +1,5 @@
 <?php
-session_name('CBT_GURU');
-session_start();
+include 'includes/init_session.php';
 
 // Ensure only guru access
 if (!isset($_SESSION['level']) || $_SESSION['level'] !== 'guru') {

@@ -85,21 +85,9 @@ if (session_status() == PHP_SESSION_NONE) {
         // If none found, session_start() will use default PHPSESSID or create new (Login page)
     }
     
-    // 6. Set Session Lifetime (Prevent premature GC cleanup)
-    // Request: 24 jam session life time to override hosting defaults (usually 24 mins)
-    $lifetime = 86400; // 24 hours
-    ini_set('session.gc_maxlifetime', $lifetime);
-    session_set_cookie_params($lifetime);
-    
-    // Set Custom Session Path to avoid Hosting Cron Job Cleanup
-    // Create 'sessions' folder in root if not exists
-    $session_save_path = dirname(__DIR__) . '/sessions';
-    if (!file_exists($session_save_path)) {
-        @mkdir($session_save_path, 0777, true);
-    }
-    if (is_writable($session_save_path)) {
-        session_save_path($session_save_path);
-    }
+    // 6. Set Session Lifetime & Path (Prevent premature GC cleanup & hosting wipe)
+    // Use shared config to ensure login (index.php) and dashboard use same path
+    include __DIR__ . '/session_settings.php';
 
     session_start();
     
