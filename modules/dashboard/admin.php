@@ -36,16 +36,38 @@ if ($d_setting_dash && isset($d_setting_dash['admin_welcome_text']) && !empty($d
 // Function to get system uptime
 function get_system_uptime($koneksi) {
     $uptime = "N/A";
+    $source = "";
     
     // Method 1: Try System Uptime (Shell Exec)
     if (function_exists('shell_exec')) {
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             // Windows Uptime using WMIC
-            $out = @shell_exec('wmic os get lastbootuptime');
+            $out = @shell_exec('wmic os get lastbootuptime 2>&1');
             if ($out && preg_match('/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/', $out, $match)) {
                 $boot_time = mktime($match[4], $match[5], $match[6], $match[2], $match[3], $match[1]);
                 $diff = time() - $boot_time;
                 $uptime = format_uptime_diff($diff);
+                $source = "OS";
+            }
+            
+            // Fallback: Net Statistics (Common on Windows if WMIC fails)
+            if (($uptime === "N/A" || empty($uptime))) {
+                 $out = @shell_exec('net statistics workstation');
+                 if ($out && preg_match('/Statistics since (.*)/i', $out, $m)) {
+                     $time_str = trim($m[1]);
+                     // Fix potential dot separators in time (e.g. 11.03.54 -> 11:03:54)
+                     $time_str = preg_replace('/(\d{2})\.(\d{2})\.(\d{2})$/', '$1:$2:$3', $time_str);
+                     $boot_time = strtotime($time_str);
+                     
+                     if ($boot_time && $boot_time <= time()) {
+                         $diff = time() - $boot_time;
+                         // Sanity check: if uptime > 5 years, probably parsing error (e.g. MM/DD vs DD/MM issue)
+                         // But for now, just accept it or check against DB uptime?
+                         // If DB uptime is available, we can compare.
+                         $uptime = format_uptime_diff($diff);
+                         $source = "OS";
+                     }
+                 }
             }
         } else {
             // Linux Uptime
@@ -53,6 +75,7 @@ function get_system_uptime($koneksi) {
             if ($str !== false) {
                 $num = (int)floatval($str);
                 $uptime = format_uptime_diff($num);
+                $source = "OS";
             }
         }
     }
@@ -63,8 +86,13 @@ function get_system_uptime($koneksi) {
         if ($res) {
             $row = mysqli_fetch_assoc($res);
             $seconds = $row['Value'];
-            $uptime = format_uptime_diff($seconds) . " (Database)";
+            $uptime = format_uptime_diff($seconds);
+            $source = "DB";
         }
+    }
+    
+    if ($source == "DB") {
+        return $uptime . " <small class='text-muted'>(Database)</small>";
     }
     
     return $uptime;
@@ -273,8 +301,8 @@ $system_uptime = get_system_uptime($koneksi);
                                 <td class="small fw-bold text-dark"><?php echo PHP_OS_FAMILY . ' (' . PHP_OS . ')'; ?></td>
                             </tr>
                             <tr>
-                                <td width="40%" class="text-muted small">Uptime Sistem:</td>
-                                <td class="small fw-bold text-dark"><?php echo $system_uptime; ?></td>
+                                <td width="40%" class="text-muted small">Waktu Nyala Server:</td>
+                                <td class="small fw-bold text-dark" title="Lama waktu server/komputer menyala"><?php echo $system_uptime; ?></td>
                             </tr>
                             <tr>
                                 <td width="40%" class="text-muted small">Max Upload:</td>

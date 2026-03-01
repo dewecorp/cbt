@@ -1,9 +1,12 @@
 <?php
 include '../../config/database.php';
 
-// Cek Session
-session_name('CBT_SISWA');
+// Use centralized session init to ensure correct timeouts (24h gc, 2h idle)
+include '../../includes/init_session.php';
+
+// Fallback if init_session didn't start (unlikely)
 if (session_status() == PHP_SESSION_NONE) {
+    session_name('CBT_SISWA');
     session_start();
 }
 if (!isset($_SESSION['user_id']) || $_SESSION['level'] != 'siswa') {
@@ -265,29 +268,45 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // Heartbeat Session (Setiap 5 menit)
+    setInterval(function() {
+        $.ajax({
+            url: 'keep_alive.php',
+            success: function(response) {
+                console.log('Session active: ' + response.timestamp);
+            }
+        });
+    }, 300000); // 5 menit
+
     // Timer Countdown
     var sisaDetik = <?php echo $sisa_detik; ?>;
     
     function updateTimer() {
+        if (sisaDetik < 0) sisaDetik = 0;
+        
         var hours = Math.floor(sisaDetik / 3600);
         var minutes = Math.floor((sisaDetik % 3600) / 60);
         var seconds = sisaDetik % 60;
         
-        document.getElementById('timer').innerText = 
-            (hours < 10 ? "0" : "") + hours + ":" + 
-            (minutes < 10 ? "0" : "") + minutes + ":" + 
-            (seconds < 10 ? "0" : "") + seconds;
+        var timerDisplay = (hours < 10 ? "0" : "") + hours + ":" + 
+                           (minutes < 10 ? "0" : "") + minutes + ":" + 
+                           (seconds < 10 ? "0" : "") + seconds;
+        
+        var el = document.getElementById('timer');
+        if (el) el.innerText = timerDisplay;
             
         if (sisaDetik <= 0) {
             clearInterval(timerInterval);
             Swal.fire({
                 title: 'Waktu Habis!',
-                text: 'Waktu pengerjaan ujian telah berakhir.',
+                text: 'Waktu pengerjaan ujian telah berakhir. Jawaban akan tersimpan otomatis.',
                 icon: 'warning',
                 confirmButtonText: 'OK',
                 allowOutsideClick: false
             }).then((result) => {
-                window.location.href = "selesai_ujian.php?id=<?php echo $id_ujian; ?>";
+                // Auto submit via form or redirect
+                // Use selesai_ujian.php directly or submit form
+                window.location.href = "selesai_ujian.php?id=<?php echo $id_ujian; ?>&auto=1";
             });
         }
         sisaDetik--;

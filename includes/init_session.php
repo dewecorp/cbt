@@ -85,6 +85,50 @@ if (session_status() == PHP_SESSION_NONE) {
         // If none found, session_start() will use default PHPSESSID or create new (Login page)
     }
     
+    // 6. Set Session Lifetime (Prevent premature GC cleanup)
+    // Request: 24 jam session life time to override hosting defaults (usually 24 mins)
+    $lifetime = 86400; // 24 hours
+    ini_set('session.gc_maxlifetime', $lifetime);
+    session_set_cookie_params($lifetime);
+    
+    // Set Custom Session Path to avoid Hosting Cron Job Cleanup
+    // Create 'sessions' folder in root if not exists
+    $session_save_path = dirname(__DIR__) . '/sessions';
+    if (!file_exists($session_save_path)) {
+        @mkdir($session_save_path, 0777, true);
+    }
+    if (is_writable($session_save_path)) {
+        session_save_path($session_save_path);
+    }
+
     session_start();
+    
+    // 7. Idle Timeout Logic (2 Hours)
+    // Logout otomatis jika tidak ada aktivitas selama 2 jam
+    $idle_limit = 7200; // 2 hours in seconds
+    
+    if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > $idle_limit)) {
+        // Session expired
+        session_unset();     // unset $_SESSION variable for the run-time 
+        session_destroy();   // destroy session data in storage
+        
+        // Redirect if possible (prevent infinite loop if already on login page)
+        if (basename($_SERVER['PHP_SELF']) != 'index.php' && basename($_SERVER['PHP_SELF']) != 'login.php') {
+            // Check if it is an AJAX request
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+                 // Return 401 Unauthorized for AJAX
+                 header('HTTP/1.1 401 Unauthorized');
+                 exit;
+            } else {
+                 header("Location: ../../index.php?msg=timeout"); 
+                 // Note: path might need adjustment depending on where this is included.
+                 // Safer: use absolute path if base_url known, but here we might not have it.
+                 // Let's rely on the caller script's redirection or just let the page reload to find no session.
+            }
+        }
+    }
+    
+    // Update last activity time stamp
+    $_SESSION['last_activity'] = time();
 }
 ?>

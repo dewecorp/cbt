@@ -245,6 +245,14 @@ $q_siswa = mysqli_query($koneksi, "SELECT * FROM siswa WHERE id_kelas='$id_kelas
 </div>
 
 <script>
+    // Auto Refresh every 60 seconds to update status and keep session alive
+    setInterval(function() {
+        // Only reload if no modal is open
+        if (!document.querySelector('.modal.show')) {
+            window.location.reload();
+        }
+    }, 60000);
+
     var addTimeModal = document.getElementById('addTimeModal');
     if (addTimeModal) {
         addTimeModal.addEventListener('show.bs.modal', function (event) {
