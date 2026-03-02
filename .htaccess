@@ -1,0 +1,25 @@
+Options -Multiviews
+RewriteEngine On
+RewriteBase /
+
+# 1. Redirect index.php to root /
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/index\.php [NC]
+RewriteRule ^index\.php$ / [R=301,L]
+
+# 2. External Redirect: .php files to extensionless URL
+# Exclude index.php (handled above)
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+(.+?)\.php[\s?] [NC]
+RewriteRule ^(.+?)\.php$ /$1 [R=301,L,NE]
+
+# 3. Do not rewrite requests for static assets
+RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|map|pdf)$ [NC]
+RewriteRule ^ - [L]
+
+# 4. Internal Rewrite: Map extensionless URL to .php file
+# Only if the .php file actually exists
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/$1.php -f
+RewriteRule ^(.+?)/?$ $1.php [L]
+
+# 5. Handle directory root (fallback)
+RewriteRule ^$ index.php [L]

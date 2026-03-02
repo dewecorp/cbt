@@ -36,7 +36,7 @@
             <span>Beranda</span>
         </a>
         
-        <a href="<?php echo $base_url; ?>modules/elearning/courses.php<?php echo $role_param; ?>" class="nav-item <?php echo $is_courses ? 'active' : ''; ?>">
+        <a href="<?php echo $base_url; ?>modules/elearning/courses<?php echo $role_param; ?>" class="nav-item <?php echo $is_courses ? 'active' : ''; ?>">
             <i class="fas fa-layer-group"></i>
             <span>Kelas</span>
         </a>
@@ -46,11 +46,11 @@
             $is_tugas = (strpos($_SERVER['PHP_SELF'], 'student_assignments.php') !== false);
             $is_nilai = (strpos($_SERVER['PHP_SELF'], 'student_grades.php') !== false);
             ?>
-            <a href="<?php echo $base_url; ?>modules/elearning/student_assignments.php<?php echo $role_param; ?>" class="nav-item <?php echo $is_tugas ? 'active' : ''; ?>">
+            <a href="<?php echo $base_url; ?>modules/elearning/student_assignments<?php echo $role_param; ?>" class="nav-item <?php echo $is_tugas ? 'active' : ''; ?>">
                 <i class="fas fa-paper-plane"></i>
                 <span>Tugas</span>
             </a>
-            <a href="<?php echo $base_url; ?>modules/elearning/student_grades.php<?php echo $role_param; ?>" class="nav-item <?php echo $is_nilai ? 'active' : ''; ?>">
+            <a href="<?php echo $base_url; ?>modules/elearning/student_grades<?php echo $role_param; ?>" class="nav-item <?php echo $is_nilai ? 'active' : ''; ?>">
                 <i class="fas fa-star"></i>
                 <span>Nilai</span>
             </a>
@@ -59,17 +59,17 @@
             $is_materi = (strpos($_SERVER['PHP_SELF'], 'elearning/materials.php') !== false);
             $is_tugas_g = (strpos($_SERVER['PHP_SELF'], 'elearning/assignments.php') !== false);
             ?>
-            <a href="<?php echo $base_url; ?>modules/elearning/materials.php<?php echo $role_param; ?>" class="nav-item <?php echo $is_materi ? 'active' : ''; ?>">
+            <a href="<?php echo $base_url; ?>modules/elearning/materials<?php echo $role_param; ?>" class="nav-item <?php echo $is_materi ? 'active' : ''; ?>">
                 <i class="fas fa-book-open"></i>
                 <span>Materi</span>
             </a>
-            <a href="<?php echo $base_url; ?>modules/elearning/assignments.php<?php echo $role_param; ?>" class="nav-item <?php echo $is_tugas_g ? 'active' : ''; ?>">
+            <a href="<?php echo $base_url; ?>modules/elearning/assignments<?php echo $role_param; ?>" class="nav-item <?php echo $is_tugas_g ? 'active' : ''; ?>">
                 <i class="fas fa-tasks"></i>
                 <span>Tugas</span>
             </a>
         <?php endif; ?>
 
-        <a href="javascript:void(0);" class="nav-item" onclick="confirmAction('<?php echo $base_url; ?>logout.php?role=<?php echo $level; ?>','Keluar dari aplikasi?','Keluar'); return false;">
+        <a href="javascript:void(0);" class="nav-item" onclick="confirmAction('<?php echo $base_url; ?>logout<?php echo $role_param; ?>','Keluar dari aplikasi?','Keluar'); return false;">
             <i class="fas fa-user"></i>
             <span>Akun</span>
         </a>
