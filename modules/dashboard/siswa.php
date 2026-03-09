@@ -306,6 +306,8 @@ function previewImageSiswa(input) {
             $has_schedule = true;
         }
     }
+    $bulan_indo_dash = [1 => 'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    $display_date_indo = get_indo_day($today) . ', ' . date('d') . ' ' . $bulan_indo_dash[(int)date('m')] . ' ' . date('Y');
     ?>
     <div class="col-12 mb-4">
         <div class="card shadow mb-4">
@@ -313,7 +315,7 @@ function previewImageSiswa(input) {
                 <h6 class="m-0 font-weight-bold text-success">Absensi Hari Ini</h6>
             </div>
             <div class="card-body text-center">
-                <p class="mb-4"><?php echo get_indo_day($today) . ', ' . date('d F Y'); ?></p>
+                <p class="mb-4"><?php echo $display_date_indo; ?></p>
                 
                 <?php if (!$has_schedule): ?>
                     <div class="card bg-info bg-opacity-10 border border-info text-info p-3 rounded text-center mb-3">
@@ -453,24 +455,38 @@ function previewImageSiswa(input) {
                 <h6 class="m-0 font-weight-bold text-success"><i class="fas fa-bullhorn me-2"></i>Pengumuman Terbaru</h6>
             </div>
             <div class="card-body">
-                <div class="row">
+                <style>
+                    .timeline { position: relative; margin-left: .25rem; padding-left: 1.25rem; }
+                    .timeline:before { content: ""; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: #e0f2f1; }
+                    .timeline-item { position: relative; padding-left: 1.25rem; margin-bottom: 1rem; }
+                    .timeline-marker { position: absolute; left: 0; top: .6rem; width: 12px; height: 12px; background: #17a2b8; border-radius: 50%; box-shadow: 0 0 0 4px rgba(23,162,184,.15); }
+                </style>
+                <div class="timeline">
                     <?php while($ann = mysqli_fetch_assoc($ann_siswa)): ?>
-                    <div class="col-md-6 mb-3">
-                        <div class="card bg-info bg-opacity-10 border border-info text-info shadow-sm h-100 p-3 rounded">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <h5 class="font-weight-bold mb-1"><i class="fas fa-info-circle me-1"></i> <?php echo htmlspecialchars($ann['title'] ?? ''); ?></h5>
-                                <small class="text-muted text-nowrap ms-2"><?php echo time_ago_str($ann['created_at']); ?></small>
-                            </div>
-                            <hr class="my-2 border-info opacity-25">
-                            <p class="mb-2"><?php echo nl2br(htmlspecialchars($ann['body'] ?? '')); ?></p>
-                            <div class="small opacity-75 mt-2 d-flex justify-content-between">
-                                <span><i class="fas fa-user me-1"></i> <?php echo htmlspecialchars($ann['nama_lengkap']); ?></span>
-                                <?php if($ann['nama_course']): ?>
-                                    <span><i class="fas fa-chalkboard me-1"></i> <?php echo htmlspecialchars($ann['nama_course']); ?></span>
-                                <?php endif; ?>
+                        <div class="timeline-item">
+                            <span class="timeline-marker"></span>
+                            <div class="card bg-info bg-opacity-10 border-0 shadow-sm p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-1 text-info"><i class="fas fa-info-circle me-1"></i> <?php echo htmlspecialchars($ann['title'] ?? ''); ?></h6>
+                                    <small class="text-muted"><?php echo time_ago_str($ann['created_at']); ?></small>
+                                </div>
+                                <?php
+                                    $ts_ann = strtotime($ann['created_at']);
+                                    $bulan_arr = isset($bulan_indo_dash) ? $bulan_indo_dash : [1 => 'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+                                    $hari_abs = get_indo_day($ann['created_at']);
+                                    $tgl_abs = date('d', $ts_ann) . ' ' . $bulan_arr[(int)date('m', $ts_ann)] . ' ' . date('Y', $ts_ann);
+                                    $jam_abs = date('H:i', $ts_ann) . ' WIB';
+                                ?>
+                                <div class="small text-muted mb-2"><i class="far fa-clock me-1"></i><?php echo $hari_abs . ', ' . $tgl_abs . ' • ' . $jam_abs; ?></div>
+                                <div class="text-dark mb-2"><?php echo nl2br(htmlspecialchars($ann['body'] ?? '')); ?></div>
+                                <div class="small text-muted">
+                                    <i class="fas fa-user me-1"></i> <?php echo htmlspecialchars($ann['nama_lengkap']); ?>
+                                    <?php if($ann['nama_course']): ?>
+                                        <span class="ms-3"><i class="fas fa-chalkboard me-1"></i> <?php echo htmlspecialchars($ann['nama_course']); ?></span>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     <?php endwhile; ?>
                 </div>
             </div>
