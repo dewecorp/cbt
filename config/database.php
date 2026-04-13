@@ -72,4 +72,8 @@ function time_ago_str($datetime) {
     return floor($diff / 86400) . " hari lalu";
 }
 }
+
+if (!defined('SIMAD_STUDENT_API_URL')) {
+    define('SIMAD_STUDENT_API_URL', 'https://simad.misultanfattah.sch.id/api/v1/students.php?api_key=SIS_CENTRAL_HUB_SECRET_2026');
+}
 ?>
