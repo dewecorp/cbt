@@ -10,8 +10,13 @@ CREATE TABLE `users` (
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
   `nama_lengkap` varchar(100) NOT NULL,
+  `jk` enum('L','P') DEFAULT NULL,
+  `password_plain` varchar(100) DEFAULT NULL,
+  `foto` varchar(255) DEFAULT NULL,
   `level` enum('admin','guru') NOT NULL,
   `status` enum('aktif','nonaktif') NOT NULL DEFAULT 'aktif',
+  `mengajar_kelas` text DEFAULT NULL,
+  `mengajar_mapel` text DEFAULT NULL,
   `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_user`)
 );
@@ -30,13 +35,17 @@ CREATE TABLE `kelas` (
 -- Tabel Siswa
 CREATE TABLE `siswa` (
   `id_siswa` int(11) NOT NULL AUTO_INCREMENT,
-  `nis` varchar(20) NOT NULL,
+  `nisn` varchar(20) NOT NULL,
   `nama_siswa` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
+  `tempat_lahir` varchar(100) DEFAULT NULL,
+  `tanggal_lahir` date DEFAULT NULL,
+  `jk` enum('L','P') DEFAULT NULL,
+  `foto` varchar(255) DEFAULT NULL,
   `id_kelas` int(11) NOT NULL,
   `status` enum('aktif','nonaktif') NOT NULL DEFAULT 'aktif',
   PRIMARY KEY (`id_siswa`),
-  UNIQUE KEY `nis` (`nis`),
+  UNIQUE KEY `nisn` (`nisn`),
   FOREIGN KEY (`id_kelas`) REFERENCES `kelas` (`id_kelas`) ON DELETE CASCADE
 );
 

@@ -45,6 +45,58 @@ mysqli_query($koneksi, "DELETE FROM activity_log WHERE created_at < (NOW() - INT
 
 mysqli_query($koneksi, "DELETE FROM notifications WHERE created_at < (NOW() - INTERVAL 1 DAY)");
 
+// --- AUTO MIGRATION SECTION ---
+// Check and add columns for 'users' table
+$check_users_jk = mysqli_query($koneksi, "SHOW COLUMNS FROM users LIKE 'jk'");
+if (mysqli_num_rows($check_users_jk) == 0) {
+    mysqli_query($koneksi, "ALTER TABLE users ADD COLUMN jk ENUM('L', 'P') AFTER nama_lengkap");
+}
+$check_users_plain = mysqli_query($koneksi, "SHOW COLUMNS FROM users LIKE 'password_plain'");
+if (mysqli_num_rows($check_users_plain) == 0) {
+    mysqli_query($koneksi, "ALTER TABLE users ADD COLUMN password_plain VARCHAR(100) AFTER password");
+}
+$check_users_foto = mysqli_query($koneksi, "SHOW COLUMNS FROM users LIKE 'foto'");
+if (mysqli_num_rows($check_users_foto) == 0) {
+    mysqli_query($koneksi, "ALTER TABLE users ADD COLUMN foto VARCHAR(255) AFTER nama_lengkap");
+}
+$check_users_mk = mysqli_query($koneksi, "SHOW COLUMNS FROM users LIKE 'mengajar_kelas'");
+if (mysqli_num_rows($check_users_mk) == 0) {
+    mysqli_query($koneksi, "ALTER TABLE users ADD COLUMN mengajar_kelas TEXT NULL");
+}
+$check_users_mm = mysqli_query($koneksi, "SHOW COLUMNS FROM users LIKE 'mengajar_mapel'");
+if (mysqli_num_rows($check_users_mm) == 0) {
+    mysqli_query($koneksi, "ALTER TABLE users ADD COLUMN mengajar_mapel TEXT NULL");
+}
+
+// Check and add columns for 'siswa' table
+$check_siswa_nisn = mysqli_query($koneksi, "SHOW COLUMNS FROM siswa LIKE 'nisn'");
+if (mysqli_num_rows($check_siswa_nisn) == 0) {
+    // Check if 'nis' exists to rename it, otherwise just add 'nisn'
+    $check_nis = mysqli_query($koneksi, "SHOW COLUMNS FROM siswa LIKE 'nis'");
+    if (mysqli_num_rows($check_nis) > 0) {
+        mysqli_query($koneksi, "ALTER TABLE siswa CHANGE nis nisn VARCHAR(20) NOT NULL");
+    } else {
+        mysqli_query($koneksi, "ALTER TABLE siswa ADD COLUMN nisn VARCHAR(20) NOT NULL AFTER id_siswa");
+    }
+}
+$check_siswa_tpl = mysqli_query($koneksi, "SHOW COLUMNS FROM siswa LIKE 'tempat_lahir'");
+if (mysqli_num_rows($check_siswa_tpl) == 0) {
+    mysqli_query($koneksi, "ALTER TABLE siswa ADD COLUMN tempat_lahir VARCHAR(100) AFTER nama_siswa");
+}
+$check_siswa_tgl = mysqli_query($koneksi, "SHOW COLUMNS FROM siswa LIKE 'tanggal_lahir'");
+if (mysqli_num_rows($check_siswa_tgl) == 0) {
+    mysqli_query($koneksi, "ALTER TABLE siswa ADD COLUMN tanggal_lahir DATE AFTER tempat_lahir");
+}
+$check_siswa_jk = mysqli_query($koneksi, "SHOW COLUMNS FROM siswa LIKE 'jk'");
+if (mysqli_num_rows($check_siswa_jk) == 0) {
+    mysqli_query($koneksi, "ALTER TABLE siswa ADD COLUMN jk ENUM('L', 'P') AFTER tanggal_lahir");
+}
+$check_siswa_foto = mysqli_query($koneksi, "SHOW COLUMNS FROM siswa LIKE 'foto'");
+if (mysqli_num_rows($check_siswa_foto) == 0) {
+    mysqli_query($koneksi, "ALTER TABLE siswa ADD COLUMN foto VARCHAR(255) AFTER jk");
+}
+// ------------------------------
+
 if (!function_exists('log_activity')) {
 function log_activity($action, $module, $details = '') {
     global $koneksi;

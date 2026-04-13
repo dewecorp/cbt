@@ -24,6 +24,7 @@ while($m = mysqli_fetch_assoc($q_mapel)) {
 if (isset($_POST['add'])) {
     $username = mysqli_real_escape_string($koneksi, $_POST['username']);
     $nama_lengkap = mysqli_real_escape_string($koneksi, $_POST['nama_lengkap']);
+    $jk = mysqli_real_escape_string($koneksi, $_POST['jk']);
     $password_plain = $_POST['password'];
     $password_hash = password_hash($password_plain, PASSWORD_DEFAULT);
     
@@ -59,7 +60,7 @@ if (isset($_POST['add'])) {
             });
         </script>";
     } else {
-        $query = "INSERT INTO users (username, password, password_plain, nama_lengkap, foto, level, mengajar_kelas, mengajar_mapel) VALUES ('$username', '$password_hash', '$password_plain', '$nama_lengkap', '$foto', 'guru', '$mengajar_kelas', '$mengajar_mapel')";
+        $query = "INSERT INTO users (username, password, password_plain, nama_lengkap, jk, foto, level, mengajar_kelas, mengajar_mapel) VALUES ('$username', '$password_hash', '$password_plain', '$nama_lengkap', '$jk', '$foto', 'guru', '$mengajar_kelas', '$mengajar_mapel')";
         if(mysqli_query($koneksi, $query)) {
             log_activity('create', 'guru', 'tambah guru ' . $username);
             echo "<script>
@@ -84,6 +85,7 @@ if (isset($_POST['edit'])) {
     $id_user = $_POST['id_user'];
     $username = mysqli_real_escape_string($koneksi, $_POST['username']);
     $nama_lengkap = mysqli_real_escape_string($koneksi, $_POST['nama_lengkap']);
+    $jk = mysqli_real_escape_string($koneksi, $_POST['jk']);
     $password_plain = $_POST['password'];
     
     // Handle Multiselect
@@ -116,7 +118,7 @@ if (isset($_POST['edit'])) {
         }
     }
     
-    $query_str = "UPDATE users SET username='$username', nama_lengkap='$nama_lengkap', foto='$foto', mengajar_kelas='$mengajar_kelas', mengajar_mapel='$mengajar_mapel'";
+    $query_str = "UPDATE users SET username='$username', nama_lengkap='$nama_lengkap', jk='$jk', foto='$foto', mengajar_kelas='$mengajar_kelas', mengajar_mapel='$mengajar_mapel'";
     
     if(!empty($password_plain)) {
         $password_hash = password_hash($password_plain, PASSWORD_DEFAULT);
@@ -207,13 +209,6 @@ if (isset($_POST['import'])) {
 if (isset($_GET['delete'])) {
     $id_user = $_GET['delete'];
     
-    // Get photo to delete
-    $q_del = mysqli_query($koneksi, "SELECT foto FROM users WHERE id_user='$id_user'");
-    $d_del = mysqli_fetch_assoc($q_del);
-    if ($d_del['foto'] && file_exists("../../assets/img/guru/" . $d_del['foto'])) {
-        unlink("../../assets/img/guru/" . $d_del['foto']);
-    }
-    
     if(mysqli_query($koneksi, "DELETE FROM users WHERE id_user='$id_user'")) {
         log_activity('delete', 'guru', 'hapus guru ' . $id_user);
         echo "<script>
@@ -231,6 +226,17 @@ if (isset($_GET['delete'])) {
         echo "<script>Swal.fire('Error', '".mysqli_error($koneksi)."', 'error');</script>";
     }
 }
+
+// Get Statistics for Guru
+$stats_query = mysqli_query($koneksi, "SELECT 
+    COUNT(*) as total,
+    SUM(CASE WHEN jk = 'L' THEN 1 ELSE 0 END) as total_l,
+    SUM(CASE WHEN jk = 'P' THEN 1 ELSE 0 END) as total_p
+    FROM users WHERE level='guru'");
+$stats_res = mysqli_fetch_assoc($stats_query);
+$total_guru = $stats_res['total'] ?? 0;
+$total_l = $stats_res['total_l'] ?? 0;
+$total_p = $stats_res['total_p'] ?? 0;
 ?>
 
 <!-- Select2 CSS -->
@@ -267,8 +273,14 @@ if (isset($_GET['delete'])) {
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Data Guru</h1>
-    <div>
-        <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#importModal">
+    <div class="d-flex flex-wrap gap-2">
+        <a href="export_guru_excel.php" class="btn btn-success">
+            <i class="fas fa-file-excel"></i> Export Excel
+        </a>
+        <a href="export_guru_pdf.php" target="_blank" class="btn btn-secondary">
+            <i class="fas fa-file-pdf"></i> Export PDF
+        </a>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importModal">
             <i class="fas fa-file-excel"></i> Import Excel
         </button>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
@@ -279,6 +291,21 @@ if (isset($_GET['delete'])) {
 
 <div class="card shadow mb-4">
     <div class="card-body">
+        <div class="row align-items-center mb-3">
+            <div class="col-md-12">
+                <div class="d-flex flex-wrap gap-2 justify-content-start">
+                    <div class="badge bg-primary px-3 py-2 fs-6 fw-normal">
+                        <i class="fas fa-users me-1"></i> Total Guru: <?php echo $total_guru; ?>
+                    </div>
+                    <div class="badge bg-info px-3 py-2 fs-6 fw-normal text-white">
+                        <i class="fas fa-mars me-1"></i> Laki-laki: <?php echo $total_l; ?>
+                    </div>
+                    <div class="badge bg-danger px-3 py-2 fs-6 fw-normal">
+                        <i class="fas fa-venus me-1"></i> Perempuan: <?php echo $total_p; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="table-responsive">
             <table class="table table-bordered table-hover table-datatable" width="100%" cellspacing="0">
                 <thead class="bg-light">
@@ -287,6 +314,7 @@ if (isset($_GET['delete'])) {
                         <th width="10%">Foto</th>
                         <th>NUPTK</th>
                         <th>Nama Lengkap</th>
+                        <th>L/P</th>
                         <th>Password</th>
                         <th>Mengajar Kelas</th>
                         <th>Mengajar Mapel</th>
@@ -318,15 +346,13 @@ if (isset($_GET['delete'])) {
                     ?>
                         <tr>
                             <td><?php echo $no++; ?></td>
-                            <td class="text-center">
-                                <?php if($row['foto']): ?>
-                                    <img src="../../assets/img/guru/<?php echo $row['foto']; ?>" alt="Foto" class="img-thumbnail" style="height: 50px;">
-                                <?php else: ?>
-                                    <img src="https://ui-avatars.com/api/?name=<?php echo urlencode($row['nama_lengkap']); ?>&background=random" alt="Foto" class="img-thumbnail" style="height: 50px;">
-                                <?php endif; ?>
+                            <td>
+                                <img src="<?php echo !empty($row['foto']) && file_exists('../../assets/img/guru/'.$row['foto']) ? '../../assets/img/guru/'.$row['foto'] : 'https://ui-avatars.com/api/?name='.urlencode($row['nama_lengkap']).'&size=40&background=random'; ?>" 
+                                     class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
                             </td>
                             <td><?php echo $row['username']; ?></td>
                             <td><?php echo $row['nama_lengkap']; ?></td>
+                            <td><?php echo $row['jk'] ? $row['jk'] : '-'; ?></td>
                             <td><?php echo $row['password_plain']; ?></td>
                             <td>
                                 <?php 
@@ -355,6 +381,7 @@ if (isset($_GET['delete'])) {
                                     data-id="<?php echo $row['id_user']; ?>" 
                                     data-username="<?php echo htmlspecialchars($row['username']); ?>"
                                     data-nama="<?php echo htmlspecialchars($row['nama_lengkap']); ?>"
+                                    data-jk="<?php echo $row['jk']; ?>"
                                     data-password="<?php echo htmlspecialchars($row['password_plain']); ?>"
                                     data-kelas="<?php echo htmlspecialchars($row['mengajar_kelas'] ?? ''); ?>"
                                     data-mapel="<?php echo htmlspecialchars($row['mengajar_mapel'] ?? ''); ?>"
@@ -391,6 +418,14 @@ if (isset($_GET['delete'])) {
                     <div class="mb-3">
                         <label class="form-label">Nama Lengkap</label>
                         <input type="text" class="form-control" name="nama_lengkap" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Jenis Kelamin</label>
+                        <select class="form-select" name="jk" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="L">Laki-laki</option>
+                            <option value="P">Perempuan</option>
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Mengajar Kelas</label>
@@ -445,6 +480,13 @@ if (isset($_GET['delete'])) {
                     <div class="mb-3">
                         <label class="form-label">Nama Lengkap</label>
                         <input type="text" class="form-control" name="nama_lengkap" id="edit_nama_lengkap" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Jenis Kelamin</label>
+                        <select class="form-select" name="jk" id="edit_jk" required>
+                            <option value="L">Laki-laki</option>
+                            <option value="P">Perempuan</option>
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Mengajar Kelas</label>
@@ -542,6 +584,7 @@ if (isset($_GET['delete'])) {
             var id = $(this).attr('data-id');
             var username = $(this).attr('data-username');
             var nama = $(this).attr('data-nama');
+            var jk = $(this).attr('data-jk');
             var password = $(this).attr('data-password');
             var kelas = $(this).attr('data-kelas');
             var mapel = $(this).attr('data-mapel');
@@ -549,6 +592,7 @@ if (isset($_GET['delete'])) {
             $('#edit_id_user').val(id);
             $('#edit_username').val(username);
             $('#edit_nama_lengkap').val(nama);
+            $('#edit_jk').val(jk);
             $('#edit_password').val(password);
             
             // Set Select2 values
