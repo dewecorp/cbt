@@ -73,6 +73,7 @@ if ($level === 'admin') {
         ['icon' => 'fa-hdd', 'label' => 'Backup', 'url' => $base_url . 'modules/backup/index.php' . $role_param],
     ];
 } elseif ($level === 'guru') {
+    // Sinkron dengan sidebar: E-Learning + seluruh Asesmen (+ Pengumuman)
     $menu_items = [
         ['icon' => 'fa-tachometer-alt', 'label' => 'Dashboard', 'url' => $base_url . $dashboard_url],
         ['icon' => 'fa-layer-group', 'label' => 'Kelas Online', 'url' => $base_url . 'modules/elearning/courses.php' . $role_param],
@@ -80,8 +81,12 @@ if ($level === 'admin') {
         ['icon' => 'fa-tasks', 'label' => 'Tugas', 'url' => $base_url . 'modules/elearning/assignments.php' . $role_param],
         ['icon' => 'fa-calendar-check', 'label' => 'Kehadiran', 'url' => $base_url . 'modules/elearning/rekap_absensi.php' . $role_param],
         ['icon' => 'fa-comments', 'label' => 'Forum', 'url' => $base_url . 'modules/elearning/forum.php' . $role_param],
+        ['icon' => 'fa-bullhorn', 'label' => 'Pengumuman', 'url' => $base_url . 'modules/elearning/announcements.php' . $role_param],
+        ['icon' => 'fa-database', 'label' => 'Bank Soal', 'url' => $base_url . 'modules/tes/bank_soal.php' . $role_param],
         ['icon' => 'fa-calendar-alt', 'label' => 'Jadwal Asesmen', 'url' => $base_url . 'modules/tes/jadwal_ujian.php' . $role_param],
         ['icon' => 'fa-poll', 'label' => 'Hasil Asesmen', 'url' => $base_url . 'modules/tes/hasil_ujian.php' . $role_param],
+        ['icon' => 'fa-file-alt', 'label' => 'Rekap Nilai', 'url' => $base_url . 'modules/tes/rekap_nilai.php' . $role_param],
+        ['icon' => 'fa-print', 'label' => 'Cetak Kartu', 'url' => $base_url . 'modules/cetak/kartu_ujian.php' . $role_param],
     ];
 } elseif ($level === 'siswa') {
     $menu_items = [
