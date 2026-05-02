@@ -99,7 +99,7 @@ if ($level === 'admin') {
     <div class="d-block d-md-none mt-3 mb-3">
         <div class="card mb-3" style="background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);">
             <div class="card-body d-flex align-items-center text-white">
-                <div class="me-3">
+                <div class="me-3 position-relative flex-shrink-0" style="width: 56px; height: 56px;">
                     <?php
                     $foto = isset($_SESSION['foto']) ? $_SESSION['foto'] : '';
                     $avatar_folder = ($level === 'siswa') ? 'assets/img/siswa/' : 'assets/img/guru/';
@@ -112,6 +112,13 @@ if ($level === 'admin') {
                             <?php echo strtoupper(substr($user_name, 0, 1)); ?>
                         </div>
                     <?php endif; ?>
+                    <?php if ($level === 'guru'): ?>
+                    <button type="button" class="btn btn-sm btn-light rounded-circle shadow-sm position-absolute border-0 p-0"
+                            style="bottom: -2px; right: -2px; width: 22px; height: 22px; line-height: 1;"
+                            data-bs-toggle="modal" data-bs-target="#modalEditFotoGuru" title="Ganti foto">
+                        <i class="fas fa-camera text-success" style="font-size: 0.65rem;"></i>
+                    </button>
+                    <?php endif; ?>
                 </div>
                 <div>
                     <div class="small mb-1">Hai,</div>
@@ -123,41 +130,6 @@ if ($level === 'admin') {
         <?php if (!empty($hero_image)): ?>
         <div class="mb-3 hero-kenburns-wrapper">
             <img src="<?php echo $base_url . 'assets/img/hero/' . $hero_image; ?>" class="hero-kenburns-image" alt="Hero">
-        </div>
-        <?php endif; ?>
-
-        <?php if ($level === 'guru'): ?>
-        <div class="mb-3">
-            <div class="card shadow border-left-success py-2">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-auto pr-3">
-                            <div class="position-relative" style="width: 72px; height: 72px;">
-                                <?php 
-                                $foto_path_guru = 'assets/img/guru/' . ($_SESSION['foto'] ?? 'default.png');
-                                if (empty($_SESSION['foto']) || !file_exists($foto_path_guru)) {
-                                    echo '<div class="rounded-circle bg-success d-flex align-items-center justify-content-center text-white fw-bold" style="width: 72px; height: 72px; font-size: 28px;">' . strtoupper(substr($_SESSION['nama'], 0, 1)) . '</div>';
-                                } else {
-                                    echo '<img src="' . $foto_path_guru . '?' . time() . '" class="rounded-circle border border-white shadow-sm" style="width: 72px; height: 72px; object-fit: cover;">';
-                                }
-                                ?>
-                                <button type="button" class="btn btn-sm btn-light rounded-circle shadow-sm position-absolute" 
-                                        style="bottom: 0; right: 0; width: 28px; height: 28px; padding: 0; border: 1px solid #e3e6f0;"
-                                        data-bs-toggle="modal" data-bs-target="#modalEditFotoGuru">
-                                    <i class="fas fa-camera text-success"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="h6 fw-bold text-success text-uppercase mb-1">Selamat Datang, <?php echo $_SESSION['nama']; ?></div>
-                            <p class="mb-0" style="font-size: 0.85rem;">Selamat datang di halaman Dashboard Guru. Anda dapat mengelola Bank Soal dan Jadwal Asesmen.</p>
-                        </div>
-                        <div class="col-auto d-none d-sm-block">
-                            <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
         <?php endif; ?>
 
