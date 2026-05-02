@@ -20,6 +20,483 @@ while($m = mysqli_fetch_assoc($q_mapel)) {
     $mapel_opts[] = $m;
 }
 
+function simad_guru_normalize_gender($value) {
+    $v = strtolower(trim((string)$value));
+    if ($v === 'l' || $v === 'laki-laki' || $v === 'laki laki' || $v === 'laki' || $v === 'male' || $v === 'm') {
+        return 'L';
+    }
+    if ($v === 'p' || $v === 'perempuan' || $v === 'female' || $v === 'f') {
+        return 'P';
+    }
+    return '';
+}
+
+function simad_guru_normalize_kelas_key($value) {
+    $raw = strtoupper(trim((string)$value));
+    if ($raw === '') {
+        return '';
+    }
+    $raw = preg_replace('/\s+/', ' ', $raw);
+    $raw = preg_replace('/\bKELAS\b/i', '', $raw);
+    $raw = trim($raw);
+
+    if (preg_match('/(\d{1,2})\s*([A-Z])?/i', $raw, $m)) {
+        $num = (int)$m[1];
+        $letter = isset($m[2]) ? strtoupper(trim($m[2])) : '';
+        return (string)$num . $letter;
+    }
+
+    $romanMap = [
+        'I' => 1, 'II' => 2, 'III' => 3, 'IV' => 4, 'V' => 5, 'VI' => 6,
+        'VII' => 7, 'VIII' => 8, 'IX' => 9, 'X' => 10, 'XI' => 11, 'XII' => 12,
+    ];
+    if (preg_match('/\b(XII|XI|X|IX|VIII|VII|VI|V|IV|III|II|I)\b\s*([A-Z])?/i', $raw, $m)) {
+        $roman = strtoupper($m[1]);
+        $num = isset($romanMap[$roman]) ? $romanMap[$roman] : 0;
+        $letter = isset($m[2]) ? strtoupper(trim($m[2])) : '';
+        if ($num > 0) {
+            return (string)$num . $letter;
+        }
+    }
+
+    $raw = preg_replace('/[^A-Z0-9]/', '', $raw);
+    return $raw;
+}
+
+function simad_guru_kelas_id_by_name($kelas_opts, $nama_kelas) {
+    $nama_kelas = trim(preg_replace('/\s+/', ' ', (string)$nama_kelas));
+    if ($nama_kelas === '') {
+        return 0;
+    }
+    foreach ($kelas_opts as $k) {
+        if (strcasecmp(trim((string)$k['nama_kelas']), $nama_kelas) === 0) {
+            return (int)$k['id_kelas'];
+        }
+    }
+    $key = simad_guru_normalize_kelas_key($nama_kelas);
+    if ($key === '') {
+        return 0;
+    }
+    foreach ($kelas_opts as $k) {
+        if (simad_guru_normalize_kelas_key($k['nama_kelas']) === $key) {
+            return (int)$k['id_kelas'];
+        }
+    }
+    return 0;
+}
+
+function simad_guru_mapel_id_by_name($mapel_opts, $nama_mapel) {
+    $nama_mapel = trim(preg_replace('/\s+/', ' ', (string)$nama_mapel));
+    if ($nama_mapel === '') {
+        return 0;
+    }
+    foreach ($mapel_opts as $m) {
+        if (strcasecmp(trim((string)$m['nama_mapel']), $nama_mapel) === 0) {
+            return (int)$m['id_mapel'];
+        }
+    }
+    return 0;
+}
+
+function simad_guru_collect_kelas_mapel_from_api_row($teacher, $kelas_opts, $mapel_opts) {
+    $kelas_ids = [];
+    $mapel_ids = [];
+
+    $wali_csv = isset($teacher['kelas_wali']) ? trim((string)$teacher['kelas_wali']) : '';
+    if ($wali_csv !== '') {
+        foreach (preg_split('/\s*,\s*/', $wali_csv) as $nm) {
+            $id = simad_guru_kelas_id_by_name($kelas_opts, $nm);
+            if ($id > 0) {
+                $kelas_ids[$id] = true;
+            }
+        }
+    }
+
+    $list = isset($teacher['mengajar_list']) ? $teacher['mengajar_list'] : null;
+    if (is_array($list)) {
+        foreach ($list as $item) {
+            if (is_string($item)) {
+                $idk = simad_guru_kelas_id_by_name($kelas_opts, $item);
+                if ($idk > 0) {
+                    $kelas_ids[$idk] = true;
+                }
+                continue;
+            }
+            if (!is_array($item)) {
+                continue;
+            }
+            $nk = '';
+            foreach (['nama_kelas', 'kelas', 'nama_kelas_wali', 'class', 'kelas_nama'] as $ck) {
+                if (!empty($item[$ck])) {
+                    $nk = trim((string)$item[$ck]);
+                    break;
+                }
+            }
+            if ($nk !== '') {
+                $idk = simad_guru_kelas_id_by_name($kelas_opts, $nk);
+                if ($idk > 0) {
+                    $kelas_ids[$idk] = true;
+                }
+            }
+            $nm = '';
+            foreach (['nama_mapel', 'mapel', 'mata_pelajaran', 'subject', 'nama_mata_pelajaran'] as $cm) {
+                if (!empty($item[$cm])) {
+                    $nm = trim((string)$item[$cm]);
+                    break;
+                }
+            }
+            if ($nm !== '') {
+                $idm = simad_guru_mapel_id_by_name($mapel_opts, $nm);
+                if ($idm > 0) {
+                    $mapel_ids[$idm] = true;
+                }
+            }
+        }
+    }
+
+    return [
+        'kelas_csv' => implode(',', array_keys($kelas_ids)),
+        'mapel_csv' => implode(',', array_keys($mapel_ids)),
+    ];
+}
+
+function simad_guru_random_password($length = 8) {
+    return substr(str_shuffle('0123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz'), 0, $length);
+}
+
+function simad_guru_api_origin() {
+    $u = defined('SIMAD_TEACHER_API_URL') ? SIMAD_TEACHER_API_URL : '';
+    $p = parse_url($u);
+    if (!$p || empty($p['scheme']) || empty($p['host'])) {
+        return '';
+    }
+    $port = isset($p['port']) ? ':' . (int)$p['port'] : '';
+    return $p['scheme'] . '://' . $p['host'] . $port;
+}
+
+function simad_guru_try_save_foto($username_base, $foto_raw) {
+    $foto_raw = trim((string)$foto_raw);
+    if ($foto_raw === '') {
+        return '';
+    }
+    $origin = simad_guru_api_origin();
+    $url = '';
+    if (preg_match('#^https?://#i', $foto_raw)) {
+        $url = $foto_raw;
+    } elseif ($origin !== '' && $foto_raw[0] === '/') {
+        $url = $origin . $foto_raw;
+    } elseif ($origin !== '') {
+        $url = rtrim($origin, '/') . '/' . ltrim($foto_raw, '/');
+    }
+    if ($url === '' || !function_exists('curl_init')) {
+        return '';
+    }
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 8);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'CBT-Sync/1.0');
+    $bin = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $ctype = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+    curl_close($ch);
+    if ($bin === false || $code < 200 || $code >= 300 || strlen($bin) < 32) {
+        return '';
+    }
+    $ext = 'jpg';
+    if (is_string($ctype)) {
+        if (stripos($ctype, 'png') !== false) {
+            $ext = 'png';
+        } elseif (stripos($ctype, 'jpeg') !== false || stripos($ctype, 'jpg') !== false) {
+            $ext = 'jpg';
+        }
+    }
+    $path = parse_url($url, PHP_URL_PATH);
+    if (is_string($path) && preg_match('/\.(jpe?g|png)$/i', $path, $mm)) {
+        $ext = strtolower($mm[1]) === 'jpeg' ? 'jpg' : strtolower($mm[1]);
+    }
+    $safe_user = preg_replace('/[^a-zA-Z0-9_-]/', '_', $username_base);
+    $target_dir = __DIR__ . '/../../assets/img/guru/';
+    if (!is_dir($target_dir)) {
+        @mkdir($target_dir, 0777, true);
+    }
+    $fname = $safe_user . '_simad_' . time() . '.' . $ext;
+    $full = $target_dir . $fname;
+    if (@file_put_contents($full, $bin) === false) {
+        return '';
+    }
+    return $fname;
+}
+
+function simad_guru_build_api_url($updated_since, $limit) {
+    $base = defined('SIMAD_TEACHER_API_URL') ? SIMAD_TEACHER_API_URL : '';
+    if ($base === '') {
+        return '';
+    }
+    $q = [];
+    if ($updated_since !== '') {
+        $q['updated_since'] = $updated_since;
+    }
+    if ($limit > 0) {
+        $q['limit'] = $limit;
+    }
+    if ($q === []) {
+        return $base;
+    }
+    $sep = strpos($base, '?') !== false ? '&' : '?';
+    return $base . $sep . http_build_query($q);
+}
+
+function simad_guru_fetch($apiUrl) {
+    if (!function_exists('curl_init')) {
+        return ['ok' => false, 'error' => 'cURL tidak tersedia di server'];
+    }
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $apiUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 45);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 12);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'CBT-Sync/1.0 (+https://simad.misultanfattah.sch.id)');
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Accept: application/json',
+    ]);
+    $response = curl_exec($ch);
+    $curlErr = curl_error($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($response === false) {
+        return ['ok' => false, 'error' => $curlErr ? $curlErr : 'Gagal mengambil data guru dari SIMAD'];
+    }
+    $json = json_decode($response, true);
+    if (!is_array($json)) {
+        if ($httpCode < 200 || $httpCode >= 300) {
+            return ['ok' => false, 'error' => 'HTTP ' . $httpCode . ' dari SIMAD'];
+        }
+        return ['ok' => false, 'error' => 'Respon SIMAD bukan JSON valid'];
+    }
+    if ($httpCode < 200 || $httpCode >= 300) {
+        $msg = isset($json['message']) ? (string)$json['message'] : ('HTTP ' . $httpCode);
+        return ['ok' => false, 'error' => $msg, 'http' => $httpCode];
+    }
+    if (!isset($json['status']) || $json['status'] !== 'success') {
+        $msg = isset($json['message']) ? (string)$json['message'] : 'Status SIMAD tidak sukses';
+        return ['ok' => false, 'error' => $msg];
+    }
+    $data = isset($json['data']) && is_array($json['data']) ? $json['data'] : [];
+    $last_sync = isset($json['last_sync']) ? trim((string)$json['last_sync']) : date('Y-m-d H:i:s');
+    $sync_mode = isset($json['sync_mode']) ? (string)$json['sync_mode'] : 'full';
+    return ['ok' => true, 'data' => $data, 'last_sync' => $last_sync, 'sync_mode' => $sync_mode];
+}
+
+function simad_guru_resolve_login_username($row) {
+    $nuptk = isset($row['nuptk']) ? trim((string)$row['nuptk']) : '';
+    if ($nuptk !== '') {
+        return $nuptk;
+    }
+    $kode = isset($row['kode_guru']) ? trim((string)$row['kode_guru']) : '';
+    if ($kode !== '') {
+        return $kode;
+    }
+    return '';
+}
+
+// Sinkron guru dari SIMAD (admin)
+if (isset($_POST['sync_simad_guru'])) {
+    if (!isset($_SESSION['level']) || $_SESSION['level'] !== 'admin') {
+        echo "<script>
+            Swal.fire({icon:'error', title:'Akses Ditolak', text:'Fitur sinkronisasi hanya untuk admin.'})
+            .then(() => { window.location.href = 'guru.php'; });
+        </script>";
+    } else {
+        $apiBase = defined('SIMAD_TEACHER_API_URL') ? SIMAD_TEACHER_API_URL : '';
+        if ($apiBase === '') {
+            echo "<script>
+                Swal.fire({icon:'error', title:'Konfigurasi', text:'SIMAD_TEACHER_API_URL belum dikonfigurasi.'})
+                .then(() => { window.location.href = 'guru.php'; });
+            </script>";
+        } else {
+            $cursor_since = '';
+            $qc = mysqli_query($koneksi, "SELECT cursor_since FROM simad_sync_cursor WHERE sync_type='guru' LIMIT 1");
+            if ($qc && mysqli_num_rows($qc) > 0) {
+                $rc = mysqli_fetch_assoc($qc);
+                $cursor_since = trim((string)($rc['cursor_since'] ?? ''));
+            }
+
+            $try_incremental = $cursor_since !== '';
+            $url = simad_guru_build_api_url($try_incremental ? $cursor_since : '', 1000);
+            $res = simad_guru_fetch($url);
+
+            if (!$res['ok'] && $try_incremental && isset($res['http']) && (int)$res['http'] === 400) {
+                $errLower = strtolower($res['error']);
+                if (strpos($errLower, 'updated_since') !== false || strpos($errLower, 'updated_at') !== false) {
+                    $url = simad_guru_build_api_url('', 1000);
+                    $res = simad_guru_fetch($url);
+                }
+            }
+
+            if (!$res['ok']) {
+                $err = addslashes($res['error']);
+                echo "<script>
+                    Swal.fire({icon:'error', title:'Gagal Sinkron', text:'$err'})
+                    .then(() => { window.location.href = 'guru.php'; });
+                </script>";
+            } else {
+                $inserted = 0;
+                $updated = 0;
+                $skipped_invalid = 0;
+                $skipped_username_conflict = 0;
+                $errors = 0;
+
+                foreach ($res['data'] as $t) {
+                    if (!is_array($t)) {
+                        $skipped_invalid++;
+                        continue;
+                    }
+                    $login = simad_guru_resolve_login_username($t);
+                    if ($login === '') {
+                        $skipped_invalid++;
+                        continue;
+                    }
+                    if (strlen($login) > 50) {
+                        $login = substr($login, 0, 50);
+                    }
+
+                    $nama_raw = isset($t['nama_guru']) ? trim((string)$t['nama_guru']) : '';
+                    if ($nama_raw === '') {
+                        $skipped_invalid++;
+                        continue;
+                    }
+
+                    $jk = simad_guru_normalize_gender(isset($t['jenis_kelamin']) ? $t['jenis_kelamin'] : '');
+                    $jk_sql_val = ($jk === 'L' || $jk === 'P') ? "'" . mysqli_real_escape_string($koneksi, $jk) . "'" : 'NULL';
+
+                    $mapped = simad_guru_collect_kelas_mapel_from_api_row($t, $kelas_opts, $mapel_opts);
+                    $mengajar_kelas = $mapped['kelas_csv'];
+                    $mengajar_mapel = $mapped['mapel_csv'];
+
+                    $id_simad = isset($t['id_guru']) ? (int)$t['id_guru'] : 0;
+                    $u_esc = mysqli_real_escape_string($koneksi, $login);
+                    $nama_esc = mysqli_real_escape_string($koneksi, $nama_raw);
+
+                    $loc = null;
+                    if ($id_simad > 0) {
+                        $qby_simad = mysqli_query($koneksi, "SELECT id_user, level, foto, mengajar_kelas, mengajar_mapel, username FROM users WHERE level='guru' AND simad_id_guru='" . $id_simad . "' LIMIT 1");
+                        if ($qby_simad && mysqli_num_rows($qby_simad) > 0) {
+                            $loc = mysqli_fetch_assoc($qby_simad);
+                        }
+                    }
+                    if ($loc === null) {
+                        $qexist = mysqli_query($koneksi, "SELECT id_user, level, foto, mengajar_kelas, mengajar_mapel, username FROM users WHERE username='$u_esc' LIMIT 1");
+                        if (!$qexist) {
+                            $errors++;
+                            continue;
+                        }
+                        if (mysqli_num_rows($qexist) > 0) {
+                            $loc = mysqli_fetch_assoc($qexist);
+                        }
+                    }
+
+                    $foto_new = '';
+                    if (!empty($t['foto'])) {
+                        $foto_new = simad_guru_try_save_foto($login, $t['foto']);
+                    }
+
+                    if ($loc === null) {
+                        $pass = simad_guru_random_password(8);
+                        $pass_h = password_hash($pass, PASSWORD_DEFAULT);
+                        $pass_e = mysqli_real_escape_string($koneksi, $pass);
+                        $pass_h_e = mysqli_real_escape_string($koneksi, $pass_h);
+                        $mk_e = mysqli_real_escape_string($koneksi, $mengajar_kelas);
+                        $mm_e = mysqli_real_escape_string($koneksi, $mengajar_mapel);
+                        $foto_sql = $foto_new !== '' ? "'" . mysqli_real_escape_string($koneksi, $foto_new) . "'" : "''";
+                        $simad_col = $id_simad > 0 ? ", simad_id_guru" : '';
+                        $simad_val = $id_simad > 0 ? ", " . $id_simad : '';
+                        $sql = "INSERT INTO users (username, password, password_plain, nama_lengkap, jk, foto, level, mengajar_kelas, mengajar_mapel$simad_col)
+                                VALUES ('$u_esc', '$pass_h_e', '$pass_e', '$nama_esc', $jk_sql_val, $foto_sql, 'guru', '$mk_e', '$mm_e'$simad_val)";
+                        if (mysqli_query($koneksi, $sql)) {
+                            $inserted++;
+                        } else {
+                            $errors++;
+                        }
+                    } else {
+                        if (($loc['level'] ?? '') !== 'guru') {
+                            $skipped_username_conflict++;
+                            continue;
+                        }
+                        $id_user = (int)$loc['id_user'];
+                        $foto_keep = $loc['foto'] ?? '';
+                        $img_dir = __DIR__ . '/../../assets/img/guru/';
+                        if (array_key_exists('foto', $t)) {
+                            $simad_foto = trim((string)$t['foto']);
+                            if ($simad_foto === '') {
+                                if ($foto_keep !== '' && is_file($img_dir . $foto_keep)) {
+                                    @unlink($img_dir . $foto_keep);
+                                }
+                                $foto_keep = '';
+                            } elseif ($foto_new !== '') {
+                                if ($foto_keep !== '' && is_file($img_dir . $foto_keep)) {
+                                    @unlink($img_dir . $foto_keep);
+                                }
+                                $foto_keep = $foto_new;
+                            }
+                        } elseif ($foto_new !== '') {
+                            if ($foto_keep !== '' && is_file($img_dir . $foto_keep)) {
+                                @unlink($img_dir . $foto_keep);
+                            }
+                            $foto_keep = $foto_new;
+                        }
+                        $foto_e = mysqli_real_escape_string($koneksi, $foto_keep);
+
+                        $mk_e = mysqli_real_escape_string($koneksi, $mengajar_kelas);
+                        $mm_e = mysqli_real_escape_string($koneksi, $mengajar_mapel);
+
+                        $simad_sql = $id_simad > 0 ? ", simad_id_guru='" . $id_simad . "'" : '';
+                        $username_fix_sql = '';
+                        $cur_username = isset($loc['username']) ? (string)$loc['username'] : '';
+                        if ($cur_username !== $login) {
+                            $q_other = mysqli_query($koneksi, "SELECT id_user FROM users WHERE username='$u_esc' AND id_user <> '" . $id_user . "' LIMIT 1");
+                            if ($q_other && mysqli_num_rows($q_other) === 0) {
+                                $username_fix_sql = ", username='$u_esc'";
+                            }
+                        }
+                        // Password & password_plain tidak diubah — tetap sandi CBT.
+                        $upd = "UPDATE users SET nama_lengkap='$nama_esc', jk=$jk_sql_val, foto='$foto_e', mengajar_kelas='$mk_e', mengajar_mapel='$mm_e'$simad_sql$username_fix_sql WHERE id_user='$id_user'";
+                        if (mysqli_query($koneksi, $upd)) {
+                            $updated++;
+                        } else {
+                            $errors++;
+                        }
+                    }
+                }
+
+                $last_sync = $res['last_sync'];
+                if ($last_sync !== '') {
+                    $ls_esc = mysqli_real_escape_string($koneksi, $last_sync);
+                    mysqli_query($koneksi, "INSERT INTO simad_sync_cursor (sync_type, cursor_since) VALUES ('guru', '$ls_esc')
+                        ON DUPLICATE KEY UPDATE cursor_since='$ls_esc'");
+                }
+
+                log_activity('sync', 'guru', 'SIMAD mode ' . ($res['sync_mode'] ?? '') . ' baru ' . $inserted . ', perbarui ' . $updated . ', skip_invalid ' . $skipped_invalid . ', skip_bukan_guru ' . $skipped_username_conflict . ', err ' . $errors);
+
+                $msg = 'Guru baru ditambahkan: ' . $inserted . ', Guru diperbarui: ' . $updated . ', Lewati (data tidak valid): ' . $skipped_invalid . ', Lewati (username sudah dipakai non-guru): ' . $skipped_username_conflict . ', Error: ' . $errors;
+                $msg = addslashes($msg);
+                echo "<script>
+                    Swal.fire({icon:'success', title:'Sinkron SIMAD Selesai', text:'$msg'})
+                    .then(() => { window.location.href = 'guru.php'; });
+                </script>";
+            }
+        }
+    }
+}
+
 // Handle Add
 if (isset($_POST['add'])) {
     $username = mysqli_real_escape_string($koneksi, $_POST['username']);
@@ -274,6 +751,11 @@ $total_p = $stats_res['total_p'] ?? 0;
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Data Guru</h1>
     <div class="d-flex flex-wrap gap-2">
+        <?php if (isset($_SESSION['level']) && $_SESSION['level'] === 'admin'): ?>
+        <button type="button" class="btn btn-success" onclick="confirmSyncSimadGuru()">
+            <i class="fas fa-sync"></i> Sinkron SIMAD
+        </button>
+        <?php endif; ?>
         <a href="export_guru_excel.php" class="btn btn-success">
             <i class="fas fa-file-excel"></i> Export Excel
         </a>
@@ -566,6 +1048,32 @@ $total_p = $stats_res['total_p'] ?? 0;
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
+    function confirmSyncSimadGuru() {
+        Swal.fire({
+            title: 'Sinkron Data Guru SIMAD?',
+            html: '<ul class="text-start mb-0 ps-3"><li><strong>Nama di CBT</strong> selalu diganti agar <strong>sama persis</strong> dengan SIMAD (termasuk gelar/spasi).</li><li><strong>Password akun yang sudah ada tidak diubah</strong>—tetap sandi CBT. Guru <strong>baru</strong> dari SIMAD mendapat password acak (lihat kolom Password).</li><li>Pencocokan akun: NUPTK/kode dari SIMAD, atau <code>simad_id_guru</code> jika sudah pernah tertaut; NUPTK di CBT dapat diperbaiki ke yang benar dari SIMAD bila belum dipakai akun lain.</li><li>Jenis kelamin, kelas/mapel mengajar, dan foto mengikuti aturan sinkron.</li></ul><p class="mb-0 mt-2 small text-muted">Sinkron berikutnya inkremental bila SIMAD mendukung <code>updated_at</code>.</p>',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#198754',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Sinkron',
+            cancelButtonText: 'Batal'
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '';
+                var inputSync = document.createElement('input');
+                inputSync.type = 'hidden';
+                inputSync.name = 'sync_simad_guru';
+                inputSync.value = '1';
+                form.appendChild(inputSync);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
+
     $(document).ready(function() {
         // Init Select2 for Add Modal
         $('.select2-add').select2({

@@ -97,6 +97,18 @@ if (mysqli_num_rows($check_siswa_foto) == 0) {
 }
 // ------------------------------
 
+mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS simad_sync_cursor (
+    sync_type VARCHAR(32) NOT NULL,
+    cursor_since VARCHAR(19) DEFAULT NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (sync_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+$check_users_simad_guru = mysqli_query($koneksi, "SHOW COLUMNS FROM users LIKE 'simad_id_guru'");
+if (mysqli_num_rows($check_users_simad_guru) == 0) {
+    mysqli_query($koneksi, "ALTER TABLE users ADD COLUMN simad_id_guru INT NULL DEFAULT NULL AFTER level");
+}
+
 if (!function_exists('log_activity')) {
 function log_activity($action, $module, $details = '') {
     global $koneksi;
@@ -127,5 +139,8 @@ function time_ago_str($datetime) {
 
 if (!defined('SIMAD_STUDENT_API_URL')) {
     define('SIMAD_STUDENT_API_URL', 'https://simad.misultanfattah.sch.id/api/v1/students.php?api_key=SIS_CENTRAL_HUB_SECRET_2026');
+}
+if (!defined('SIMAD_TEACHER_API_URL')) {
+    define('SIMAD_TEACHER_API_URL', 'https://simad.misultanfattah.sch.id/api/v1/teachers.php?api_key=SIS_CENTRAL_HUB_SECRET_2026');
 }
 ?>
