@@ -43,25 +43,39 @@ if (isset($id_kelas)) {
             print-color-adjust: exact;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        /* mm lebih konsisten di cetak daripada 1px (sering pudar / terpotong di tepi) */
+        :root {
+            --kartu-garis: 0.4mm solid #000;
         }
         .card-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-start;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            column-gap: 14mm;
+            row-gap: 16mm;
             width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            /* Jarak dari tepi area cetak supaya border kanan/kiri tidak “lenyap” di non-printable zone */
+            padding: 1mm 2.5mm;
         }
         .card-box {
-            width: 46%; /* Approx 90mm width to fit 2 cols */
-            border: 1px solid #000;
-            margin: 1.5%; /* Spacing */
+            width: auto;
+            min-width: 0;
+            border: var(--kartu-garis);
+            border-color: #000;
+            margin: 0;
             padding: 0;
             page-break-inside: avoid;
             box-sizing: border-box;
-            float: left;
             position: relative;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
         .header {
-            border-bottom: 2px solid #000;
+            border-bottom: var(--kartu-garis);
+            border-color: #000;
             padding: 5px 10px;
             text-align: center;
             background-color: #f0f0f0;
@@ -86,7 +100,8 @@ if (isset($id_kelas)) {
         .separator { width: 10px; }
         .value { flex: 1; }
         .footer {
-            border-top: 1px solid #000;
+            border-top: var(--kartu-garis);
+            border-color: #000;
             padding: 5px;
             text-align: center;
             font-size: 10px;
@@ -104,8 +119,27 @@ if (isset($id_kelas)) {
         }
         @media print {
             .no-print { display: none; }
+            html, body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
             .card-box {
                 break-inside: avoid;
+                border: 0.4mm solid #000;
+                border-color: #000 !important;
+            }
+            .header {
+                border-bottom: 0.4mm solid #000 !important;
+                border-bottom-color: #000 !important;
+            }
+            .footer {
+                border-top: 0.4mm solid #000 !important;
+                border-top-color: #000 !important;
+            }
+            .card-container {
+                column-gap: 17mm;
+                row-gap: 19mm;
+                padding: 1.5mm 3mm;
             }
         }
     </style>
@@ -125,11 +159,14 @@ if (isset($id_kelas)) {
             <?php endif; ?>
             <div class="header-text">
                 <h3>KARTU PESERTA ASESMEN</h3>
-                <h4><?php echo isset($setting['nama_sekolah']) ? $setting['nama_sekolah'] : 'MI Sultan Fattah'; ?></h4>
-                <small>
-                    <?php echo isset($setting['tahun_ajaran']) ? 'Th. '.$setting['tahun_ajaran'] : ''; ?>
-                    <?php echo isset($setting['semester']) ? ' - Sem. '.$setting['semester'] : ''; ?>
-                </small>
+                <?php
+                $nama_sekolah_kartu = isset($setting['nama_sekolah']) && $setting['nama_sekolah'] !== '' ? $setting['nama_sekolah'] : 'MI Sultan Fattah';
+                $nama_sekolah_kartu = function_exists('mb_strtoupper') ? mb_strtoupper($nama_sekolah_kartu, 'UTF-8') : strtoupper($nama_sekolah_kartu);
+                ?>
+                <h4><?php echo htmlspecialchars($nama_sekolah_kartu, ENT_QUOTES, 'UTF-8'); ?></h4>
+                <?php if (!empty($setting['tahun_ajaran'])): ?>
+                <small>Tahun Ajaran <?php echo htmlspecialchars($setting['tahun_ajaran'], ENT_QUOTES, 'UTF-8'); ?></small>
+                <?php endif; ?>
             </div>
         </div>
         <div class="content">
