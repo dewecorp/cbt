@@ -85,22 +85,9 @@ function simad_guru_kelas_id_by_name($kelas_opts, $nama_kelas) {
     return 0;
 }
 
-function simad_guru_mapel_id_by_name($mapel_opts, $nama_mapel) {
-    $nama_mapel = trim(preg_replace('/\s+/', ' ', (string)$nama_mapel));
-    if ($nama_mapel === '') {
-        return 0;
-    }
-    foreach ($mapel_opts as $m) {
-        if (strcasecmp(trim((string)$m['nama_mapel']), $nama_mapel) === 0) {
-            return (int)$m['id_mapel'];
-        }
-    }
-    return 0;
-}
-
-function simad_guru_collect_kelas_mapel_from_api_row($teacher, $kelas_opts, $mapel_opts) {
+/** Hanya kelas (wali + mengajar_list); mapel tidak dipakai sinkron agar data lokal CBT tidak tertimpa. */
+function simad_guru_collect_kelas_csv_from_api_row($teacher, $kelas_opts) {
     $kelas_ids = [];
-    $mapel_ids = [];
 
     $wali_csv = isset($teacher['kelas_wali']) ? trim((string)$teacher['kelas_wali']) : '';
     if ($wali_csv !== '') {
@@ -138,26 +125,10 @@ function simad_guru_collect_kelas_mapel_from_api_row($teacher, $kelas_opts, $map
                     $kelas_ids[$idk] = true;
                 }
             }
-            $nm = '';
-            foreach (['nama_mapel', 'mapel', 'mata_pelajaran', 'subject', 'nama_mata_pelajaran'] as $cm) {
-                if (!empty($item[$cm])) {
-                    $nm = trim((string)$item[$cm]);
-                    break;
-                }
-            }
-            if ($nm !== '') {
-                $idm = simad_guru_mapel_id_by_name($mapel_opts, $nm);
-                if ($idm > 0) {
-                    $mapel_ids[$idm] = true;
-                }
-            }
         }
     }
 
-    return [
-        'kelas_csv' => implode(',', array_keys($kelas_ids)),
-        'mapel_csv' => implode(',', array_keys($mapel_ids)),
-    ];
+    return implode(',', array_keys($kelas_ids));
 }
 
 function simad_guru_random_password($length = 8) {
@@ -183,7 +154,7 @@ function simad_guru_try_save_foto($username_base, $foto_raw) {
     $url = '';
     if (preg_match('#^https?://#i', $foto_raw)) {
         $url = $foto_raw;
-    } elseif ($origin !== '' && $foto_raw[0] === '/') {
+    } elseif ($origin !== '' && isset($foto_raw[0]) && $foto_raw[0] === '/') {
         $url = $origin . $foto_raw;
     } elseif ($origin !== '') {
         $url = rtrim($origin, '/') . '/' . ltrim($foto_raw, '/');
@@ -378,9 +349,7 @@ if (isset($_POST['sync_simad_guru'])) {
                     $jk = simad_guru_normalize_gender(isset($t['jenis_kelamin']) ? $t['jenis_kelamin'] : '');
                     $jk_sql_val = ($jk === 'L' || $jk === 'P') ? "'" . mysqli_real_escape_string($koneksi, $jk) . "'" : 'NULL';
 
-                    $mapped = simad_guru_collect_kelas_mapel_from_api_row($t, $kelas_opts, $mapel_opts);
-                    $mengajar_kelas = $mapped['kelas_csv'];
-                    $mengajar_mapel = $mapped['mapel_csv'];
+                    $mengajar_kelas = simad_guru_collect_kelas_csv_from_api_row($t, $kelas_opts);
 
                     $id_simad = isset($t['id_guru']) ? (int)$t['id_guru'] : 0;
                     $u_esc = mysqli_real_escape_string($koneksi, $login);
@@ -388,13 +357,13 @@ if (isset($_POST['sync_simad_guru'])) {
 
                     $loc = null;
                     if ($id_simad > 0) {
-                        $qby_simad = mysqli_query($koneksi, "SELECT id_user, level, foto, mengajar_kelas, mengajar_mapel, username FROM users WHERE level='guru' AND simad_id_guru='" . $id_simad . "' LIMIT 1");
+                        $qby_simad = mysqli_query($koneksi, "SELECT id_user, level, username, foto FROM users WHERE level='guru' AND simad_id_guru='" . $id_simad . "' LIMIT 1");
                         if ($qby_simad && mysqli_num_rows($qby_simad) > 0) {
                             $loc = mysqli_fetch_assoc($qby_simad);
                         }
                     }
                     if ($loc === null) {
-                        $qexist = mysqli_query($koneksi, "SELECT id_user, level, foto, mengajar_kelas, mengajar_mapel, username FROM users WHERE username='$u_esc' LIMIT 1");
+                        $qexist = mysqli_query($koneksi, "SELECT id_user, level, username, foto FROM users WHERE username='$u_esc' LIMIT 1");
                         if (!$qexist) {
                             $errors++;
                             continue;
@@ -415,12 +384,11 @@ if (isset($_POST['sync_simad_guru'])) {
                         $pass_e = mysqli_real_escape_string($koneksi, $pass);
                         $pass_h_e = mysqli_real_escape_string($koneksi, $pass_h);
                         $mk_e = mysqli_real_escape_string($koneksi, $mengajar_kelas);
-                        $mm_e = mysqli_real_escape_string($koneksi, $mengajar_mapel);
                         $foto_sql = $foto_new !== '' ? "'" . mysqli_real_escape_string($koneksi, $foto_new) . "'" : "''";
                         $simad_col = $id_simad > 0 ? ", simad_id_guru" : '';
                         $simad_val = $id_simad > 0 ? ", " . $id_simad : '';
                         $sql = "INSERT INTO users (username, password, password_plain, nama_lengkap, jk, foto, level, mengajar_kelas, mengajar_mapel$simad_col)
-                                VALUES ('$u_esc', '$pass_h_e', '$pass_e', '$nama_esc', $jk_sql_val, $foto_sql, 'guru', '$mk_e', '$mm_e'$simad_val)";
+                                VALUES ('$u_esc', '$pass_h_e', '$pass_e', '$nama_esc', $jk_sql_val, $foto_sql, 'guru', '$mk_e', ''$simad_val)";
                         if (mysqli_query($koneksi, $sql)) {
                             $inserted++;
                         } else {
@@ -432,6 +400,8 @@ if (isset($_POST['sync_simad_guru'])) {
                             continue;
                         }
                         $id_user = (int)$loc['id_user'];
+                        $mk_e = mysqli_real_escape_string($koneksi, $mengajar_kelas);
+
                         $foto_keep = $loc['foto'] ?? '';
                         $img_dir = __DIR__ . '/../../assets/img/guru/';
                         if (array_key_exists('foto', $t)) {
@@ -455,9 +425,6 @@ if (isset($_POST['sync_simad_guru'])) {
                         }
                         $foto_e = mysqli_real_escape_string($koneksi, $foto_keep);
 
-                        $mk_e = mysqli_real_escape_string($koneksi, $mengajar_kelas);
-                        $mm_e = mysqli_real_escape_string($koneksi, $mengajar_mapel);
-
                         $simad_sql = $id_simad > 0 ? ", simad_id_guru='" . $id_simad . "'" : '';
                         $username_fix_sql = '';
                         $cur_username = isset($loc['username']) ? (string)$loc['username'] : '';
@@ -467,8 +434,8 @@ if (isset($_POST['sync_simad_guru'])) {
                                 $username_fix_sql = ", username='$u_esc'";
                             }
                         }
-                        // Password & password_plain tidak diubah — tetap sandi CBT.
-                        $upd = "UPDATE users SET nama_lengkap='$nama_esc', jk=$jk_sql_val, foto='$foto_e', mengajar_kelas='$mk_e', mengajar_mapel='$mm_e'$simad_sql$username_fix_sql WHERE id_user='$id_user'";
+                        // SIMAD: nama, NUPTK/username, jk, mengajar_kelas, foto. Password & mengajar_mapel tidak diubah.
+                        $upd = "UPDATE users SET nama_lengkap='$nama_esc', jk=$jk_sql_val, foto='$foto_e', mengajar_kelas='$mk_e'$simad_sql$username_fix_sql WHERE id_user='$id_user'";
                         if (mysqli_query($koneksi, $upd)) {
                             $updated++;
                         } else {
@@ -1051,7 +1018,6 @@ $total_p = $stats_res['total_p'] ?? 0;
     function confirmSyncSimadGuru() {
         Swal.fire({
             title: 'Sinkron Data Guru SIMAD?',
-            html: '<ul class="text-start mb-0 ps-3"><li><strong>Nama di CBT</strong> selalu diganti agar <strong>sama persis</strong> dengan SIMAD (termasuk gelar/spasi).</li><li><strong>Password akun yang sudah ada tidak diubah</strong>—tetap sandi CBT. Guru <strong>baru</strong> dari SIMAD mendapat password acak (lihat kolom Password).</li><li>Pencocokan akun: NUPTK/kode dari SIMAD, atau <code>simad_id_guru</code> jika sudah pernah tertaut; NUPTK di CBT dapat diperbaiki ke yang benar dari SIMAD bila belum dipakai akun lain.</li><li>Jenis kelamin, kelas/mapel mengajar, dan foto mengikuti aturan sinkron.</li></ul><p class="mb-0 mt-2 small text-muted">Sinkron berikutnya inkremental bila SIMAD mendukung <code>updated_at</code>.</p>',
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#198754',
