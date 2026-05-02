@@ -237,7 +237,7 @@ if ($d_guru) {
     </div>
 
     <!-- Statistik Total Siswa Diampu -->
-    <div class="col-xl-3 col-lg-4 mb-4">
+    <div class="col-12 col-lg-4 col-xl-3 mb-4">
         <div class="card border-left-primary shadow h-100 py-2 border-start border-4 border-primary">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -256,7 +256,7 @@ if ($d_guru) {
 
 <div class="row">
 
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-info shadow h-100 py-2 border-start border-4 border-info">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -272,7 +272,7 @@ if ($d_guru) {
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-warning shadow h-100 py-2 border-start border-4 border-warning">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -288,7 +288,7 @@ if ($d_guru) {
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -304,7 +304,7 @@ if ($d_guru) {
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -321,7 +321,7 @@ if ($d_guru) {
     </div>
 
     <!-- Materi, Tugas, Pengumuman Guru -->
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-primary shadow h-100 py-2 border-start border-4 border-primary">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -337,7 +337,7 @@ if ($d_guru) {
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-info shadow h-100 py-2 border-start border-4 border-info">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -353,7 +353,7 @@ if ($d_guru) {
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-secondary shadow h-100 py-2 border-start border-4 border-secondary">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -370,7 +370,7 @@ if ($d_guru) {
     </div>
 
     <!-- Statistik Siswa (Tugas & CBT) -->
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -396,7 +396,7 @@ if ($d_guru) {
         </div>
     </div>
 
-    <div class="col-xl-4 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-4 mb-4">
         <div class="card border-left-danger shadow h-100 py-2 border-start border-4 border-danger">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -412,7 +412,7 @@ if ($d_guru) {
         </div>
     </div>
 
-    <div class="col-xl-4 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-4 mb-4">
         <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -438,7 +438,7 @@ if ($d_guru) {
         </div>
     </div>
 
-    <div class="col-xl-4 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-4 mb-4">
         <div class="card border-left-warning shadow h-100 py-2 border-start border-4 border-warning">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">

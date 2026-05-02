@@ -115,7 +115,7 @@ $system_uptime = get_system_uptime($koneksi);
 
 <div class="row">
     <!-- Data Guru Widget -->
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-primary shadow h-100 py-2 border-start border-4 border-primary">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -131,7 +131,7 @@ $system_uptime = get_system_uptime($koneksi);
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -147,7 +147,7 @@ $system_uptime = get_system_uptime($koneksi);
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-info shadow h-100 py-2 border-start border-4 border-info">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -163,7 +163,7 @@ $system_uptime = get_system_uptime($koneksi);
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-warning shadow h-100 py-2 border-start border-4 border-warning">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -180,7 +180,7 @@ $system_uptime = get_system_uptime($koneksi);
     </div>
 
     <!-- Kelas Online Widget -->
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-secondary shadow h-100 py-2 border-start border-4 border-secondary">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -197,7 +197,7 @@ $system_uptime = get_system_uptime($koneksi);
     </div>
 
     <!-- Tugas Widget -->
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-primary shadow h-100 py-2 border-start border-4 border-primary">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -214,7 +214,7 @@ $system_uptime = get_system_uptime($koneksi);
     </div>
 
     <!-- Materi Widget -->
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-info shadow h-100 py-2 border-start border-4 border-info">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -231,7 +231,7 @@ $system_uptime = get_system_uptime($koneksi);
     </div>
 
     <!-- Pengumuman Widget -->
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-6 col-md-6 col-xl-3 mb-4">
         <div class="card border-left-success shadow h-100 py-2 border-start border-4 border-success">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -271,22 +271,22 @@ $system_uptime = get_system_uptime($koneksi);
             </div>
             <div class="card-body">
                 <div class="row text-center">
-                    <div class="col-md-3 col-sm-6 mb-3 border-end">
+                    <div class="col-6 col-md-3 col-sm-6 mb-3 border-end">
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Versi PHP</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo PHP_VERSION; ?></div>
                         <small class="text-muted"><?php echo php_sapi_name(); ?></small>
                     </div>
-                    <div class="col-md-3 col-sm-6 mb-3 border-end">
+                    <div class="col-6 col-md-3 col-sm-6 mb-3 border-end">
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Versi MySQL</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo mysqli_get_server_info($koneksi); ?></div>
                         <small class="text-muted">Database Engine</small>
                     </div>
-                    <div class="col-md-3 col-sm-6 mb-3 border-end">
+                    <div class="col-6 col-md-3 col-sm-6 mb-3 border-end">
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">IP Server</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $_SERVER['SERVER_ADDR'] ?? '127.0.0.1'; ?></div>
                         <small class="text-muted"><?php echo $_SERVER['SERVER_NAME']; ?></small>
                     </div>
-                    <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="col-6 col-md-3 col-sm-6 mb-3">
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Waktu Server</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo date('H:i:s'); ?></div>
                         <small class="text-muted"><?php echo date('d M Y'); ?></small>
@@ -294,7 +294,7 @@ $system_uptime = get_system_uptime($koneksi);
                 </div>
                 <hr class="my-3">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <table class="table table-sm table-borderless mb-0">
                             <tr>
                                 <td width="40%" class="text-muted small">OS Server:</td>
@@ -310,7 +310,7 @@ $system_uptime = get_system_uptime($koneksi);
                             </tr>
                         </table>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <table class="table table-sm table-borderless mb-0">
                             <tr>
                                 <td width="40%" class="text-muted small">Memory Limit:</td>
