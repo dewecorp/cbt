@@ -44,8 +44,23 @@ if (isset($_POST['import_soal'])) {
                 $opsi_b = isset($r[3]) ? mysqli_real_escape_string($koneksi, $r[3]) : '';
                 $opsi_c = isset($r[4]) ? mysqli_real_escape_string($koneksi, $r[4]) : '';
                 $opsi_d = isset($r[5]) ? mysqli_real_escape_string($koneksi, $r[5]) : '';
-                $opsi_e = isset($r[6]) ? mysqli_real_escape_string($koneksi, $r[6]) : '';
-                $kunci = isset($r[7]) ? mysqli_real_escape_string($koneksi, $r[7]) : '';
+                $opsi_e = '';
+                if ($jenis != 'pilihan_ganda' && $jenis != 'pilihan_ganda_kompleks' && isset($r[6])) {
+                    $opsi_e = mysqli_real_escape_string($koneksi, $r[6]);
+                }
+                $kunci_raw = isset($r[7]) ? trim((string) $r[7]) : '';
+                if ($jenis == 'pilihan_ganda_kompleks') {
+                    $parts = array_values(array_filter(array_map('trim', explode(',', $kunci_raw)), function ($x) {
+                        return $x !== '' && strtoupper($x) !== 'E';
+                    }));
+                    $kunci = mysqli_real_escape_string($koneksi, implode(',', $parts));
+                } elseif ($jenis == 'pilihan_ganda') {
+                    $ku = strtoupper($kunci_raw);
+                    $ku = in_array($ku, ['A', 'B', 'C', 'D'], true) ? $ku : 'A';
+                    $kunci = mysqli_real_escape_string($koneksi, $ku);
+                } else {
+                    $kunci = mysqli_real_escape_string($koneksi, $kunci_raw);
+                }
 
                 if (empty($jenis) || empty($pertanyaan)) continue;
 
@@ -83,12 +98,15 @@ if (isset($_POST['import_soal_word'])) {
             $count = 0;
             foreach ($questions as $q) {
                 $jenis = $q['jenis'];
+                if ($jenis == 'pilihan_ganda' || $jenis == 'pilihan_ganda_kompleks') {
+                    $q['opsi_e'] = '';
+                }
                 $pertanyaan = mysqli_real_escape_string($koneksi, $q['pertanyaan']);
                 $opsi_a = mysqli_real_escape_string($koneksi, $q['opsi_a']);
                 $opsi_b = mysqli_real_escape_string($koneksi, $q['opsi_b']);
                 $opsi_c = mysqli_real_escape_string($koneksi, $q['opsi_c']);
                 $opsi_d = mysqli_real_escape_string($koneksi, $q['opsi_d']);
-                $opsi_e = mysqli_real_escape_string($koneksi, $q['opsi_e']);
+                $opsi_e = mysqli_real_escape_string($koneksi, $q['opsi_e'] ?? '');
                 $kunci = mysqli_real_escape_string($koneksi, $q['kunci']);
                 
                 // Handle Menjodohkan specific format
@@ -149,18 +167,21 @@ if (isset($_POST['simpan_soal'])) {
         $opsi_b = mysqli_real_escape_string($koneksi, $_POST['pg_b']);
         $opsi_c = mysqli_real_escape_string($koneksi, $_POST['pg_c']);
         $opsi_d = mysqli_real_escape_string($koneksi, $_POST['pg_d']);
-        $opsi_e = mysqli_real_escape_string($koneksi, $_POST['pg_e']);
-        $kunci = $_POST['pg_kunci'];
+        $opsi_e = '';
+        $ku = strtoupper(trim($_POST['pg_kunci'] ?? 'A'));
+        $kunci = in_array($ku, ['A', 'B', 'C', 'D'], true) ? $ku : 'A';
     } elseif ($jenis == 'pilihan_ganda_kompleks') {
         $opsi_a = mysqli_real_escape_string($koneksi, $_POST['pgk_a']);
         $opsi_b = mysqli_real_escape_string($koneksi, $_POST['pgk_b']);
         $opsi_c = mysqli_real_escape_string($koneksi, $_POST['pgk_c']);
         $opsi_d = mysqli_real_escape_string($koneksi, $_POST['pgk_d']);
-        $opsi_e = mysqli_real_escape_string($koneksi, $_POST['pgk_e']);
-        
-        // Gabungkan jawaban yang dipilih (array) menjadi string
-        if(isset($_POST['pgk_kunci'])) {
-            $kunci = implode(",", $_POST['pgk_kunci']);
+        $opsi_e = '';
+        $allowed = ['A', 'B', 'C', 'D'];
+        if (isset($_POST['pgk_kunci'])) {
+            $picked = array_intersect($allowed, array_map('strtoupper', (array) $_POST['pgk_kunci']));
+            $kunci = implode(',', $picked);
+        } else {
+            $kunci = '';
         }
     } elseif ($jenis == 'menjodohkan') {
         // Simpan data menjodohkan dalam format JSON di kolom opsi_a (kiri) dan opsi_b (kanan)
@@ -230,17 +251,21 @@ if (isset($_POST['update_soal'])) {
         $opsi_b = mysqli_real_escape_string($koneksi, $_POST['pg_b']);
         $opsi_c = mysqli_real_escape_string($koneksi, $_POST['pg_c']);
         $opsi_d = mysqli_real_escape_string($koneksi, $_POST['pg_d']);
-        $opsi_e = mysqli_real_escape_string($koneksi, $_POST['pg_e']);
-        $kunci = $_POST['pg_kunci'];
+        $opsi_e = '';
+        $ku = strtoupper(trim($_POST['pg_kunci'] ?? 'A'));
+        $kunci = in_array($ku, ['A', 'B', 'C', 'D'], true) ? $ku : 'A';
     } elseif ($jenis == 'pilihan_ganda_kompleks') {
         $opsi_a = mysqli_real_escape_string($koneksi, $_POST['pgk_a']);
         $opsi_b = mysqli_real_escape_string($koneksi, $_POST['pgk_b']);
         $opsi_c = mysqli_real_escape_string($koneksi, $_POST['pgk_c']);
         $opsi_d = mysqli_real_escape_string($koneksi, $_POST['pgk_d']);
-        $opsi_e = mysqli_real_escape_string($koneksi, $_POST['pgk_e']);
-        
-        if(isset($_POST['pgk_kunci'])) {
-            $kunci = implode(",", $_POST['pgk_kunci']);
+        $opsi_e = '';
+        $allowed = ['A', 'B', 'C', 'D'];
+        if (isset($_POST['pgk_kunci'])) {
+            $picked = array_intersect($allowed, array_map('strtoupper', (array) $_POST['pgk_kunci']));
+            $kunci = implode(',', $picked);
+        } else {
+            $kunci = '';
         }
     } elseif ($jenis == 'menjodohkan') {
         $kiri = [];
@@ -409,7 +434,6 @@ if (isset($_GET['edit_soal'])) {
                             <div class="col-md-6 mb-2"><div class="input-group"><span class="input-group-text">B</span><input type="text" name="pg_b" class="form-control" value="<?php echo ($e_jenis=='pilihan_ganda')?$e_opsi_b:''; ?>"></div></div>
                             <div class="col-md-6 mb-2"><div class="input-group"><span class="input-group-text">C</span><input type="text" name="pg_c" class="form-control" value="<?php echo ($e_jenis=='pilihan_ganda')?$e_opsi_c:''; ?>"></div></div>
                             <div class="col-md-6 mb-2"><div class="input-group"><span class="input-group-text">D</span><input type="text" name="pg_d" class="form-control" value="<?php echo ($e_jenis=='pilihan_ganda')?$e_opsi_d:''; ?>"></div></div>
-                            <div class="col-md-6 mb-2"><div class="input-group"><span class="input-group-text">E</span><input type="text" name="pg_e" class="form-control" value="<?php echo ($e_jenis=='pilihan_ganda')?$e_opsi_e:''; ?>"></div></div>
                         </div>
                         <div class="mt-2">
                             <label class="form-label fw-bold">Kunci Jawaban</label>
@@ -418,7 +442,6 @@ if (isset($_GET['edit_soal'])) {
                                 <option value="B" <?php echo ($e_kunci=='B')?'selected':''; ?>>B</option>
                                 <option value="C" <?php echo ($e_kunci=='C')?'selected':''; ?>>C</option>
                                 <option value="D" <?php echo ($e_kunci=='D')?'selected':''; ?>>D</option>
-                                <option value="E" <?php echo ($e_kunci=='E')?'selected':''; ?>>E</option>
                             </select>
                         </div>
                     </div>
@@ -453,13 +476,6 @@ if (isset($_GET['edit_soal'])) {
                                     <div class="input-group-text"><input class="form-check-input mt-0" type="checkbox" name="pgk_kunci[]" value="D" <?php echo (in_array('D', $pgk_keys))?'checked':''; ?>></div>
                                     <span class="input-group-text">D</span>
                                     <input type="text" name="pgk_d" class="form-control" value="<?php echo ($e_jenis=='pilihan_ganda_kompleks')?$e_opsi_d:''; ?>">
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <div class="input-group">
-                                    <div class="input-group-text"><input class="form-check-input mt-0" type="checkbox" name="pgk_kunci[]" value="E" <?php echo (in_array('E', $pgk_keys))?'checked':''; ?>></div>
-                                    <span class="input-group-text">E</span>
-                                    <input type="text" name="pgk_e" class="form-control" value="<?php echo ($e_jenis=='pilihan_ganda_kompleks')?$e_opsi_e:''; ?>">
                                 </div>
                             </div>
                         </div>
@@ -557,7 +573,6 @@ if (isset($_GET['edit_soal'])) {
                         <li class="<?php echo ($s['kunci_jawaban']=='B')?'text-success fw-bold':''; ?>">B. <?php echo $s['opsi_b']; ?></li>
                         <li class="<?php echo ($s['kunci_jawaban']=='C')?'text-success fw-bold':''; ?>">C. <?php echo $s['opsi_c']; ?></li>
                         <li class="<?php echo ($s['kunci_jawaban']=='D')?'text-success fw-bold':''; ?>">D. <?php echo $s['opsi_d']; ?></li>
-                        <li class="<?php echo ($s['kunci_jawaban']=='E')?'text-success fw-bold':''; ?>">E. <?php echo $s['opsi_e']; ?></li>
                     </ul>
                     <div class="small text-muted">Kunci: <?php echo $s['kunci_jawaban']; ?></div>
                 
@@ -569,7 +584,6 @@ if (isset($_GET['edit_soal'])) {
                         <li class="<?php echo (in_array('B', $keys))?'text-success fw-bold':''; ?>">B. <?php echo $s['opsi_b']; ?></li>
                         <li class="<?php echo (in_array('C', $keys))?'text-success fw-bold':''; ?>">C. <?php echo $s['opsi_c']; ?></li>
                         <li class="<?php echo (in_array('D', $keys))?'text-success fw-bold':''; ?>">D. <?php echo $s['opsi_d']; ?></li>
-                        <li class="<?php echo (in_array('E', $keys))?'text-success fw-bold':''; ?>">E. <?php echo $s['opsi_e']; ?></li>
                     </ul>
                     <div class="small text-muted">Kunci: <?php echo $s['kunci_jawaban']; ?></div>
 
@@ -650,7 +664,7 @@ if (isset($_GET['edit_soal'])) {
                             <a href="download_template_word.php" class="fw-bold text-decoration-none text-success"><i class="fas fa-download"></i> Download Template Word</a>
                             <br><br>
                             <em>Fitur deteksi otomatis:</em><br>
-                            - Pilihan Ganda (Opsi A-E)<br>
+                            - Pilihan Ganda (Opsi A-D)<br>
                             - Pilihan Ganda Kompleks (Kunci: A, B)<br>
                             - Menjodohkan (Format: Kiri => Kanan)<br>
                             - Isian / Essay (Tanpa opsi)

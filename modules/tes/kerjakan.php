@@ -139,7 +139,7 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
                         <?php if($soal['jenis'] == 'pilihan_ganda'): ?>
                             <div class="list-group">
                                 <?php 
-                                $opsi = ['A', 'B', 'C', 'D', 'E'];
+                                $opsi = ['A', 'B', 'C', 'D'];
                                 foreach($opsi as $o): 
                                     $val_opsi = $soal['opsi_'.strtolower($o)];
                                     if(!empty($val_opsi)):
@@ -156,7 +156,7 @@ $total_soal = mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM jawaban_sisw
                         ?>
                              <div class="list-group">
                                 <?php 
-                                $opsi = ['A', 'B', 'C', 'D', 'E'];
+                                $opsi = ['A', 'B', 'C', 'D'];
                                 foreach($opsi as $o): 
                                     $val_opsi = $soal['opsi_'.strtolower($o)];
                                     if(!empty($val_opsi)):

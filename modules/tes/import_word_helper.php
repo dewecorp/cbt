@@ -62,7 +62,7 @@ function parseQuestionsFromDocx($filename) {
     $collecting_question = false;
     
     // Regex patterns
-    $pattern_option = '/^([A-E])\./i'; // Matches A. B. C. D. E.
+    $pattern_option = '/^([A-D])\./i'; // PG / PG kompleks: opsi A–D saja
     $pattern_key = '/^(Kunci|Jawaban)\s*:\s*(.*)/i'; // Matches Kunci: ...
     $pattern_jenis = '/^Jenis\s*:\s*(.*)/i'; // Matches Jenis: ...
     $pattern_match = '/(.*)\s*=>\s*(.*)/'; // Matches Left => Right for Menjodohkan
@@ -91,6 +91,19 @@ function parseQuestionsFromDocx($filename) {
             if ($q['jenis'] != 'menjodohkan') {
                 unset($q['kiri']);
                 unset($q['kanan']);
+            }
+
+            if ($q['jenis'] == 'pilihan_ganda' || $q['jenis'] == 'pilihan_ganda_kompleks') {
+                $q['opsi_e'] = '';
+                if ($q['jenis'] == 'pilihan_ganda_kompleks' && !empty($q['kunci'])) {
+                    $parts = array_values(array_filter(array_map('trim', explode(',', $q['kunci'])), function ($x) {
+                        return $x !== '' && strtoupper($x) !== 'E';
+                    }));
+                    $q['kunci'] = implode(',', $parts);
+                } elseif ($q['jenis'] == 'pilihan_ganda' && isset($q['kunci'])) {
+                    $ku = strtoupper(trim($q['kunci']));
+                    $q['kunci'] = in_array($ku, ['A', 'B', 'C', 'D'], true) ? $ku : 'A';
+                }
             }
             
             $questions[] = $q;
@@ -154,7 +167,6 @@ function parseQuestionsFromDocx($filename) {
             if ($opt_label == 'B') $q_temp['opsi_b'] = $opt_text;
             if ($opt_label == 'C') $q_temp['opsi_c'] = $opt_text;
             if ($opt_label == 'D') $q_temp['opsi_d'] = $opt_text;
-            if ($opt_label == 'E') $q_temp['opsi_e'] = $opt_text;
             
             continue;
         }

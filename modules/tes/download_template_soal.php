@@ -4,9 +4,9 @@ require '../../vendor/autoload.php';
 use Shuchkin\SimpleXLSXGen;
 
 $data = [
-    ['Jenis Soal', 'Pertanyaan', 'Opsi A', 'Opsi B', 'Opsi C', 'Opsi D', 'Opsi E', 'Kunci Jawaban'],
-    ['pilihan_ganda', 'Contoh Pertanyaan PG', 'Jawaban A', 'Jawaban B', 'Jawaban C', 'Jawaban D', 'Jawaban E', 'A'],
-    ['pilihan_ganda_kompleks', 'Contoh Pertanyaan PGK', 'Opsi A', 'Opsi B', 'Opsi C', 'Opsi D', 'Opsi E', 'A,C'],
+    ['Jenis Soal', 'Pertanyaan', 'Opsi A', 'Opsi B', 'Opsi C', 'Opsi D', '(kolom ini diabaikan)', 'Kunci Jawaban'],
+    ['pilihan_ganda', 'Contoh Pertanyaan PG', 'Jawaban A', 'Jawaban B', 'Jawaban C', 'Jawaban D', '', 'A'],
+    ['pilihan_ganda_kompleks', 'Contoh Pertanyaan PGK', 'Opsi A', 'Opsi B', 'Opsi C', 'Opsi D', '', 'A,C'],
     ['isian_singkat', 'Ibukota Indonesia adalah...', '', '', '', '', '', 'Jakarta'],
     ['essay', 'Jelaskan tentang...', '', '', '', '', '', 'Kata Kunci'],
 ];

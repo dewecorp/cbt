@@ -212,9 +212,6 @@ $q_soal = mysqli_query($koneksi, $query_soal);
                         B. <?php echo strip_tags($s['opsi_b']); ?><br>
                         C. <?php echo strip_tags($s['opsi_c']); ?><br>
                         D. <?php echo strip_tags($s['opsi_d']); ?><br>
-                        <?php if(!empty($s['opsi_e'])): ?>
-                        E. <?php echo strip_tags($s['opsi_e']); ?><br>
-                        <?php endif; ?>
                     </div>
                     <?php endif; ?>
 
