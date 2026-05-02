@@ -2,7 +2,6 @@
 include '../../config/database.php';
 $page_title = 'Hasil Asesmen';
 include '../../includes/header.php';
-include '../../includes/sidebar.php';
 
 $id_user = $_SESSION['user_id'];
 $level = $_SESSION['level'];

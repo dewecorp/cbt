@@ -2,7 +2,6 @@
 include '../../config/database.php';
 $page_title = 'Data Siswa';
 include '../../includes/header.php';
-include '../../includes/sidebar.php';
 
 // Include SimpleXLSX library
 if (file_exists('../../vendor/shuchkin/simplexlsx/src/SimpleXLSX.php')) {

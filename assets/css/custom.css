@@ -2,7 +2,7 @@
     --kemenag-green: #2e7d32;
     --kemenag-green-dark: #1b5e20;
     --kemenag-green-light: #4caf50;
-    --sidebar-width: 240px;
+    --sidebar-width: 268px;
 }
 
 body {
@@ -31,27 +31,62 @@ body {
     box-shadow: 2px 0 5px rgba(0,0,0,0.1);
     overflow: hidden;
     transition: margin-left 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* Logo + brand: menyatu dengan gradien sidebar (tanpa bayangan / lapis gradien kedua) */
+#sidebar .sidebar-brand-header {
+    position: relative;
+    z-index: 1;
+    background: transparent;
+    box-shadow: none;
+}
+
+/* Hanya isi menu (termasuk logout) yang digulir */
+#sidebar .sidebar-nav-scroll {
+    flex: 1 1 0;
+    min-height: 0;
+    padding-top: 0.75rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overflow-anchor: none;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.45) rgba(0, 0, 0, 0.15);
+}
+
+#sidebar .sidebar-nav-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+#sidebar .sidebar-nav-scroll::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+}
+
+#sidebar .sidebar-nav-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
+}
+
+#sidebar .sidebar-nav-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.55);
 }
 
 #sidebar .nav-pills {
-    flex: 1;
-    overflow-y: auto;
-    flex-wrap: nowrap !important; /* Prevent wrapping to next column */
-    flex-direction: column !important; /* Ensure vertical layout */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none;  /* IE 10+ */
-    margin-bottom: 0 !important; /* Override mb-auto */
-}
-
-#sidebar .nav-pills::-webkit-scrollbar { 
-    display: none; /* Chrome/Safari */
+    flex-wrap: nowrap !important;
+    flex-direction: column !important;
 }
 
 #sidebar .nav-link {
     color: #fff;
     border-radius: 0.25rem;
     margin-bottom: 0.25rem;
-    padding: 0.75rem 1rem;
+    padding: 0.65rem 0.85rem;
+    scroll-margin-block: 8px;
 }
 
 #sidebar .nav-link:hover, #sidebar .nav-link.active {

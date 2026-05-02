@@ -2,7 +2,6 @@
 include '../../config/database.php';
 $page_title = 'Bank Soal';
 include '../../includes/header.php';
-include '../../includes/sidebar.php';
 
 // Handle Add/Edit/Delete
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_SESSION['level'] == 'guru') {

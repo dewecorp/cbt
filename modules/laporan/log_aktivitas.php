@@ -14,7 +14,6 @@ if (!isset($_SESSION['level']) || $_SESSION['level'] != 'admin') {
 
 $page_title = 'Log Aktivitas';
 include '../../includes/header.php';
-include '../../includes/sidebar.php';
 
 // Pagination setup
 $limit = 50;

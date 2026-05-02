@@ -2,7 +2,6 @@
 include '../../config/database.php';
 $page_title = 'Konfirmasi Asesmen';
 include '../../includes/header.php';
-include '../../includes/sidebar.php';
 
 $id_ujian = $_GET['id'];
 $ujian = mysqli_fetch_assoc(mysqli_query($koneksi, "

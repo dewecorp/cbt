@@ -2,7 +2,6 @@
 include '../../config/database.php';
 $page_title = 'Detail Jawaban Siswa';
 include '../../includes/header.php';
-include '../../includes/sidebar.php';
 
 // Check Permissions
 if (!isset($_SESSION['level']) || ($_SESSION['level'] != 'guru' && $_SESSION['level'] != 'admin')) {

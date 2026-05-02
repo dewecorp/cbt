@@ -1,6 +1,7 @@
         <!-- Sidebar -->
 <div class="sidebar d-flex flex-column p-3 text-white" id="sidebar">
-    <div class="d-flex align-items-center justify-content-between mb-3">
+    <div class="sidebar-brand-header flex-shrink-0">
+    <div class="d-flex align-items-center justify-content-between mb-3 px-3 pt-3">
         <?php
         $school_name = 'CBT MI';
         $school_logo = '';
@@ -20,6 +21,25 @@
         elseif ($level === 'guru') $dashboard_url = 'teacher.php' . $role_param;
         elseif ($level === 'siswa') $dashboard_url = 'student.php' . $role_param;
         else $dashboard_url = 'dashboard.php' . $role_param;
+
+        $script_base = basename($_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? '');
+        $path_self = str_replace('\\', '/', $_SERVER['PHP_SELF'] ?? '');
+        $dash_basename = basename(explode('?', $dashboard_url)[0]);
+        $nav_dashboard_active = ($script_base === $dash_basename || $script_base === 'dashboard.php');
+
+        // Sub-halaman modules/tes/* agar item Asesmen bisa active; gulir sidebar (#sidebar) menjaga menu aktif tetap terlihat
+        $sb_bank = ['bank_soal.php', 'buat_soal.php', 'export_pdf.php', 'export_excel.php', 'download_template_soal.php', 'download_template_word.php', 'import_word_helper.php', 'check_db.php', 'add_column_bobot.php'];
+        $sb_jadwal = ['jadwal_ujian.php', 'monitoring_ujian.php', 'kerjakan.php', 'konfirmasi.php', 'simpan_jawaban.php', 'keep_alive.php', 'set_ragu.php'];
+        $sb_hasil = ['hasil_ujian.php', 'lihat_jawaban.php', 'selesai_ujian.php'];
+        $sb_rekap = ['rekap_nilai.php'];
+        $active_tes_bank = in_array($script_base, $sb_bank, true);
+        $active_tes_jadwal = in_array($script_base, $sb_jadwal, true);
+        $active_tes_hasil = in_array($script_base, $sb_hasil, true);
+        $active_tes_rekap = in_array($script_base, $sb_rekap, true);
+        $active_tes_kartu = (strpos($path_self, 'kartu_ujian.php') !== false || strpos($path_self, 'print_kartu.php') !== false);
+        if ($level === 'siswa' && in_array($script_base, ['kerjakan.php', 'konfirmasi.php'], true)) {
+            $active_tes_hasil = true;
+        }
         ?>
         <a href="<?php echo $base_url . $dashboard_url; ?>" class="d-flex align-items-center text-white text-decoration-none">
             <?php if($school_logo): ?>
@@ -31,10 +51,12 @@
             <i class="fas fa-times fa-lg"></i>
         </button>
     </div>
-    <hr class="mt-0">
-    <ul class="nav nav-pills flex-column mb-auto">
+    <hr class="mt-0 mx-3">
+    </div>
+    <div class="sidebar-nav-scroll">
+    <ul class="nav nav-pills flex-column mb-0 px-3">
                 <li class="nav-item">
-                    <a href="<?php echo $base_url . $dashboard_url; ?>" class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == $dashboard_url || basename($_SERVER['PHP_SELF']) == 'dashboard.php') ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url . $dashboard_url; ?>" class="nav-link <?php echo $nav_dashboard_active ? 'active' : ''; ?>">
                         <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
                 </li>
@@ -127,33 +149,34 @@
                 </li>
                 <?php endif; ?>
 
+                <?php if($level === 'admin' || $level === 'guru' || $level === 'siswa'): ?>
                 <li class="nav-item mt-2">
                     <span class="text-uppercase small text-white-50 ms-3">Asesmen</span>
                 </li>
-                
+                <?php endif; ?>
                 <?php if($level === 'admin' || $level === 'guru'): ?>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/tes/bank_soal.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'bank_soal.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/tes/bank_soal.php<?php echo $role_param; ?>" class="nav-link <?php echo $active_tes_bank ? 'active' : ''; ?>">
                         <i class="fas fa-database"></i> Bank Soal
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/tes/jadwal_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'jadwal_ujian.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/tes/jadwal_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo $active_tes_jadwal ? 'active' : ''; ?>">
                         <i class="fas fa-calendar-alt"></i> Jadwal Asesmen
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/tes/hasil_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'hasil_ujian.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/tes/hasil_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo $active_tes_hasil ? 'active' : ''; ?>">
                         <i class="fas fa-poll"></i> Hasil Asesmen
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/tes/rekap_nilai.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'rekap_nilai.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/tes/rekap_nilai.php<?php echo $role_param; ?>" class="nav-link <?php echo $active_tes_rekap ? 'active' : ''; ?>">
                         <i class="fas fa-file-alt"></i> Rekap Nilai
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/cetak/kartu_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'kartu_ujian.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/cetak/kartu_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo $active_tes_kartu ? 'active' : ''; ?>">
                         <i class="fas fa-print"></i> Cetak Kartu
                     </a>
                 </li>
@@ -161,17 +184,16 @@
 
                 <?php if($level === 'siswa'): ?>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/tes/hasil_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'hasil_ujian.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/tes/hasil_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo $active_tes_hasil ? 'active' : ''; ?>">
                         <i class="fas fa-poll"></i> Hasil Asesmen
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $base_url; ?>modules/cetak/kartu_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'kartu_ujian.php') !== false) ? 'active' : ''; ?>">
+                    <a href="<?php echo $base_url; ?>modules/cetak/kartu_ujian.php<?php echo $role_param; ?>" class="nav-link <?php echo $active_tes_kartu ? 'active' : ''; ?>">
                         <i class="fas fa-print"></i> Cetak Kartu
                     </a>
                 </li>
                 <?php endif; ?>
-
 
                 <?php if($level === 'admin'): ?>
                 <li class="nav-item mt-2">
@@ -193,13 +215,16 @@
                     </a>
                 </li>
                 <?php endif; ?>
-                
-                <li class="nav-item mt-4 mb-5">
+    </ul>
+
+    <ul class="nav nav-pills flex-column flex-shrink-0 mb-2 mt-1 px-3 pb-2">
+                <li class="nav-item">
                     <a href="javascript:void(0);" onclick="confirmAction('<?php echo $base_url; ?>logout.php?role=<?php echo $level; ?>','Keluar dari aplikasi?','Keluar');" class="nav-link bg-danger text-white">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </li>
     </ul>
     <hr>
+    </div>
     <!-- Dropdown User removed from sidebar, moved to Navbar -->
 </div>

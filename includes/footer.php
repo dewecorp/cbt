@@ -114,6 +114,13 @@
                              <a href="<?php echo $base_url; ?>modules/cetak/kartu_ujian.php<?php echo $role_param; ?>" class="list-group-item list-group-item-action"><i class="fas fa-print me-2 text-success"></i> Cetak Kartu</a>
                         <?php endif; ?>
 
+                        <?php if($level === 'admin'): ?>
+                        <div class="list-group-item bg-light fw-bold text-uppercase small text-muted">System</div>
+                        <a href="<?php echo $base_url; ?>modules/pengaturan/index.php<?php echo $role_param; ?>" class="list-group-item list-group-item-action <?php echo (strpos($_SERVER['PHP_SELF'], 'pengaturan') !== false) ? 'active' : ''; ?>"><i class="fas fa-cogs me-2 text-success"></i> Pengaturan</a>
+                        <a href="<?php echo $base_url; ?>modules/users/index.php<?php echo $role_param; ?>" class="list-group-item list-group-item-action <?php echo (strpos($_SERVER['PHP_SELF'], '/users/') !== false || strpos($_SERVER['PHP_SELF'], 'users/index') !== false) ? 'active' : ''; ?>"><i class="fas fa-users-cog me-2 text-success"></i> Pengguna</a>
+                        <a href="<?php echo $base_url; ?>modules/backup/index.php<?php echo $role_param; ?>" class="list-group-item list-group-item-action <?php echo (strpos($_SERVER['PHP_SELF'], 'backup') !== false) ? 'active' : ''; ?>"><i class="fas fa-hdd me-2 text-success"></i> Backup Restore</a>
+                        <?php endif; ?>
+
                          <div class="list-group-item bg-light fw-bold text-uppercase small text-muted">Akun</div>
                          <a href="javascript:void(0);" onclick="confirmAction('<?php echo $base_url; ?>logout.php?role=<?php echo $level; ?>','Keluar dari aplikasi?','Keluar');" class="list-group-item list-group-item-action text-danger"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
                     </div>
@@ -133,7 +140,47 @@
     <script src="<?php echo $base_url; ?>assets/vendor/datatables/js/responsive.bootstrap5.min.js"></script>
     
     <script>
+        /** Gulir .sidebar-nav-scroll (bukan header brand) agar link aktif tetap terlihat setelah pindah halaman. */
+        function scheduleSidebarActiveScroll() {
+            var wrap = document.querySelector('#sidebar .sidebar-nav-scroll') || document.getElementById('sidebar');
+            if (!wrap || wrap.clientHeight < 12) return;
+            var active = wrap.querySelector('a.nav-link.active');
+            if (!active) return;
+
+            var anchor = active;
+            var li = active.closest('li');
+            if (li) {
+                outer: for (var p = li.previousElementSibling; p; p = p.previousElementSibling) {
+                    for (var i = 0; i < p.children.length; i++) {
+                        var c = p.children[i];
+                        if (c.tagName === 'SPAN' && c.classList.contains('text-uppercase')) {
+                            anchor = c;
+                            break outer;
+                        }
+                    }
+                }
+            }
+
+            var navRect = wrap.getBoundingClientRect();
+            var topAnchor = wrap.scrollTop + (anchor.getBoundingClientRect().top - navRect.top);
+            var topActive = wrap.scrollTop + (active.getBoundingClientRect().top - navRect.top);
+            var activeH = active.offsetHeight || active.getBoundingClientRect().height;
+            var pad = 8;
+            var maxScroll = Math.max(0, wrap.scrollHeight - wrap.clientHeight);
+            var st = Math.max(0, topAnchor - pad);
+            var activeBottom = topActive + activeH;
+            if (activeBottom - st > wrap.clientHeight) {
+                st = activeBottom - wrap.clientHeight + pad;
+            }
+            wrap.scrollTop = Math.max(0, Math.min(st, maxScroll));
+        }
+
         $(document).ready(function() {
+            scheduleSidebarActiveScroll();
+            requestAnimationFrame(scheduleSidebarActiveScroll);
+            setTimeout(scheduleSidebarActiveScroll, 100);
+            setTimeout(scheduleSidebarActiveScroll, 400);
+
             // Initialize all datatables
             $('.table-datatable').DataTable({
                 responsive: true,
@@ -159,11 +206,11 @@
                     }
                 }
             });
+            scheduleSidebarActiveScroll();
+        });
 
-            // Mobile sidebar toggle fix
-            $('.navbar-toggler').click(function() {
-                $('.sidebar').toggleClass('d-none');
-            });
+        $(window).on('load', function() {
+            scheduleSidebarActiveScroll();
         });
 
         // Function for SweetAlert confirmation

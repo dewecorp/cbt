@@ -9,8 +9,6 @@ include '../../includes/header.php';
 <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
 
 <?php
-include '../../includes/sidebar.php';
-
 // Fetch Teachers for Dropdown
 $q_guru = mysqli_query($koneksi, "SELECT id_user, nama_lengkap FROM users WHERE level='guru' ORDER BY nama_lengkap ASC");
 $guru_opts = [];

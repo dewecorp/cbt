@@ -2,7 +2,6 @@
 include '../../config/database.php';
 $page_title = 'Cetak Kartu Asesmen';
 include '../../includes/header.php';
-include '../../includes/sidebar.php';
 
 // Get Guru's Classes
 $id_user = $_SESSION['user_id'];

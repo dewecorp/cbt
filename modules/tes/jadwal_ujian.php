@@ -2,7 +2,6 @@
 include '../../config/database.php';
 $page_title = 'Jadwal Asesmen';
 include '../../includes/header.php';
-include '../../includes/sidebar.php';
 
 // Generate Token Random
 function generateToken($length = 6) {

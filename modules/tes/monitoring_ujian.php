@@ -2,7 +2,6 @@
 include '../../config/database.php';
 $page_title = 'Monitoring Asesmen';
 include '../../includes/header.php';
-include '../../includes/sidebar.php';
 
 $id_ujian = isset($_GET['id']) ? $_GET['id'] : 0;
 

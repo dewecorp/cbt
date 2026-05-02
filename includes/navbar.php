@@ -74,7 +74,7 @@ if (isset($koneksi)) {
                     $q_notifs = mysqli_query($koneksi, "SELECT * FROM notifications WHERE user_id='$my_id' ORDER BY created_at DESC LIMIT 10");
                 ?>
                 <li class="nav-item dropdown me-3">
-                    <a class="nav-link dropdown-toggle position-relative" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle position-relative" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                         <i class="fas fa-bell fa-lg"></i>
                         <?php if($unread_count > 0): ?>
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
@@ -138,7 +138,7 @@ if (isset($koneksi)) {
                 <?php endif; ?>
 
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                         <?php 
                          $u_foto = isset($_SESSION['foto']) ? $_SESSION['foto'] : '';
                          $u_nama = isset($_SESSION['nama']) ? $_SESSION['nama'] : 'User';

@@ -2,7 +2,6 @@
 include '../../config/database.php';
 $page_title = 'Data Mapel';
 include '../../includes/header.php';
-include '../../includes/sidebar.php';
 
 // Check if kktp column exists
 $check_col = mysqli_query($koneksi, "SHOW COLUMNS FROM mapel LIKE 'kktp'");

@@ -2,7 +2,6 @@
 include '../../config/database.php';
 $page_title = 'Buat Soal';
 include '../../includes/header.php';
-include '../../includes/sidebar.php';
 require '../../vendor/autoload.php';
 require_once 'import_word_helper.php';
 use Shuchkin\SimpleXLSX;
