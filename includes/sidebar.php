@@ -5,12 +5,17 @@
         <?php
         $school_name = 'CBT MI';
         $school_logo = '';
-        $rs = mysqli_query($koneksi, "SELECT nama_sekolah, logo FROM setting LIMIT 1");
+        $tahun_ajaran = '';
+        $semester = '';
+        $rs = mysqli_query($koneksi, "SELECT nama_sekolah, logo, tahun_ajaran, semester FROM setting LIMIT 1");
         if ($rs && mysqli_num_rows($rs) > 0) {
             $st = mysqli_fetch_assoc($rs);
             if (!empty($st['nama_sekolah'])) $school_name = $st['nama_sekolah'];
             if (!empty($st['logo'])) $school_logo = $st['logo'];
+            $tahun_ajaran = isset($st['tahun_ajaran']) ? $st['tahun_ajaran'] : '';
+            $semester = isset($st['semester']) ? $st['semester'] : '';
         }
+        $semester_label = ($semester == '1') ? 'Ganjil' : (($semester == '2') ? 'Genap' : '');
         
         // Determine Dashboard URL based on level
         $dashboard_url = 'dashboard.php';
@@ -51,6 +56,23 @@
             <i class="fas fa-times fa-lg"></i>
         </button>
     </div>
+    <?php if (!empty($tahun_ajaran) || !empty($semester_label)): ?>
+    <div class="sidebar-academic-info mx-3 mb-2">
+        <?php if (!empty($tahun_ajaran)): ?>
+            <span class="ai-item" title="Tahun Ajaran">
+                <i class="fas fa-calendar-alt"></i>
+                <span>TA <?php echo htmlspecialchars($tahun_ajaran); ?></span>
+            </span>
+        <?php endif; ?>
+        <?php if (!empty($semester_label)): ?>
+            <span class="ai-sep"></span>
+            <span class="ai-item" title="Semester">
+                <i class="fas fa-bookmark"></i>
+                <span><?php echo $semester_label; ?></span>
+            </span>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
     <hr class="mt-0 mx-3">
     </div>
     <div class="sidebar-nav-scroll">

@@ -134,6 +134,45 @@ body {
     border-radius: 6px;
 }
 
+/* Info Akademik di bawah brand sidebar */
+#sidebar .sidebar-academic-info{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+    padding: 0.35rem 0.6rem;
+    margin-top: -0.25rem;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 0.5rem;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+#sidebar .sidebar-academic-info .ai-item{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    line-height: 1;
+}
+
+#sidebar .sidebar-academic-info .ai-item i{
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.85);
+}
+
+#sidebar .sidebar-academic-info .ai-sep{
+    width: 1px;
+    height: 12px;
+    background: rgba(255,255,255,0.25);
+    display: inline-block;
+}
+
 /* Card & Buttons */
 .card {
     border: none;
