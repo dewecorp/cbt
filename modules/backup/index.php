@@ -124,10 +124,10 @@ if (is_dir($backupDir)) {
                                         <td><?php echo formatSizeUnits($file['size']); ?></td>
                                         <td><?php echo date('d-m-Y H:i:s', $file['time']); ?></td>
                                         <td>
-                                            <a href="javascript:void(0);" class="btn btn-success btn-sm" onclick="startDownload('<?php echo $file['name']; ?>')" title="Unduh">
+                                            <a href="javascript:void(0);" class="btn btn-success btn-sm btn-download-backup" data-filename="<?php echo htmlspecialchars($file['name'], ENT_QUOTES); ?>" title="Unduh">
                                                 <i class="fas fa-download"></i>
                                             </a>
-                                            <a href="javascript:void(0);" class="btn btn-danger btn-sm" onclick="confirmBackupDelete('<?php echo $file['name']; ?>', event)" title="Hapus">
+                                            <a href="javascript:void(0);" class="btn btn-danger btn-sm btn-delete-backup" data-filename="<?php echo htmlspecialchars($file['name'], ENT_QUOTES); ?>" title="Hapus">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </td>
@@ -144,30 +144,48 @@ if (is_dir($backupDir)) {
 </div>
 
 <script>
-function startDownload(filename) {
-    Swal.fire({
-        title: 'Menyiapkan Unduhan',
-        html: 'Mohon tunggu, sedang memproses file...',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
+<?php if (isset($_GET['deleted'])): ?>
+Swal.fire({icon:'success',title:'Berhasil',text:'File backup berhasil dihapus',timer:1500,showConfirmButton:false});
+<?php elseif (isset($_GET['error'])): ?>
+Swal.fire({icon:'error',title:'Gagal',text:'Gagal menghapus file backup',timer:2000,showConfirmButton:false});
+<?php endif; ?>
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-download-backup').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var filename = this.getAttribute('data-filename');
+            if (!filename) return;
+            Swal.fire({
+                title: 'Menyiapkan Unduhan',
+                html: 'Mohon tunggu, sedang memproses file...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            setTimeout(() => {
+                window.location.href = 'download.php?file=' + encodeURIComponent(filename);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Download Dimulai',
+                    text: 'File backup sedang diunduh ke perangkat Anda.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }, 2000);
+        });
     });
 
-    setTimeout(() => {
-        // Trigger download
-        window.location.href = 'download.php?file=' + filename;
-        
-        // Show success alert
-        Swal.fire({
-            icon: 'success',
-            title: 'Download Dimulai',
-            text: 'File backup sedang diunduh ke perangkat Anda.',
-            timer: 2000,
-            showConfirmButton: false
+    document.querySelectorAll('.btn-delete-backup').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            var filename = this.getAttribute('data-filename');
+            if (!filename) return;
+            confirmBackupDelete(filename, e);
         });
-    }, 2000); // 2 seconds delay
-}
+    });
+});
 
 function doBackup() {
     Swal.fire({
@@ -224,55 +242,8 @@ function confirmBackupDelete(filename, event) {
 }
 
 function processDeleteBackup(filename) {
-    Swal.fire({
-        title: 'Menghapus Backup',
-        html: 'Mohon tunggu sebentar...',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-
-    let formData = new FormData();
-    formData.append('filename', filename);
-
-    const minDelay = new Promise(resolve => setTimeout(resolve, 2000));
-    const request = fetch('action.php?action=delete', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        // Cek jika response bukan JSON valid
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-            return response.json();
-        } else {
-            return response.text().then(text => {
-                throw new Error("Server returned non-JSON response: " + text.substring(0, 100));
-            });
-        }
-    });
-
-    Promise.all([minDelay, request])
-    .then(([_, data]) => {
-        if (data.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Terhapus',
-                text: data.message,
-                timer: 1500,
-                showConfirmButton: false
-            }).then(() => {
-                location.reload();
-            });
-        } else {
-            Swal.fire('Error', data.message, 'error');
-        }
-    })
-    .catch(error => {
-        Swal.fire('Error', 'Terjadi kesalahan: ' + error.message, 'error');
-        console.error(error);
-    });
+    var url = 'action.php?action=delete&filename=' + encodeURIComponent(filename) + '&callback=1';
+    window.location.href = url;
 }
 
 document.getElementById('formRestore').addEventListener('submit', function(e) {

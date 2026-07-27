@@ -1,5 +1,6 @@
 <?php
 include 'config/database.php';
+include 'includes/init_session.php';
 
 // Fetch Settings
 $st = ['nama_sekolah' => 'MI Sultan Fattah', 'logo' => '', 'tahun_ajaran' => '', 'semester' => ''];
@@ -45,7 +46,7 @@ if (isset($_POST['login'])) {
             $_SESSION['level'] = $data['level'];
             log_activity('login', 'auth', 'login ' . $data['level']);
             session_write_close(); // Ensure session is saved before redirect
-            header("Location: login_success.php?role=" . $data['level']);
+            header("Location: index.php?login=success&role=" . $data['level']);
             exit;
         } else {
             $error = "Password salah!";
@@ -84,7 +85,7 @@ if (isset($_POST['login'])) {
                  
                  // Redirect to Student Dashboard via login_success page
                  session_write_close(); // Ensure session is saved before redirect
-                 header("Location: login_success.php?role=siswa");
+                 header("Location: index.php?login=success&role=siswa");
                  exit;
             } else {
                 $error = "Password salah!";
@@ -92,6 +93,20 @@ if (isset($_POST['login'])) {
         } else {
             $error = "Username/NISN tidak ditemukan!";
         }
+    }
+}
+
+$login_success = false;
+$redirect_url = 'dashboard.php';
+if (isset($_GET['login']) && $_GET['login'] == 'success' && isset($_SESSION['user_id'])) {
+    $login_success = true;
+    $level = $_SESSION['level'] ?? '';
+    if ($level === 'admin') {
+        $redirect_url = 'admin.php?role=admin';
+    } elseif ($level === 'guru') {
+        $redirect_url = 'teacher.php?role=guru';
+    } elseif ($level === 'siswa') {
+        $redirect_url = 'student.php?role=siswa';
     }
 }
 ?>
@@ -154,6 +169,27 @@ if (isset($_POST['login'])) {
             </script>
             <?php endif; ?>
 
+            <?php if($login_success): ?>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Login Berhasil',
+                        text: 'Selamat datang, <?php echo $_SESSION['nama']; ?>! Sedang mengalihkan ke dashboard...',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    }).then(() => {
+                        window.location.href = '<?php echo $redirect_url; ?>';
+                    });
+                });
+            </script>
+            <?php endif; ?>
+
+            <?php if(!$login_success): ?>
             <form method="POST" action="">
                 <div class="mb-3">
                     <label for="username" class="form-label">Username / NISN</label>
@@ -176,6 +212,7 @@ if (isset($_POST['login'])) {
             <div class="text-center mt-3">
                 <small class="text-muted">&copy; <?php echo date('Y'); ?> <?php echo $st['nama_sekolah']; ?></small>
             </div>
+            <?php endif; ?>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

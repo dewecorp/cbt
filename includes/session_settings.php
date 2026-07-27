@@ -20,4 +20,15 @@ if (!file_exists($session_save_path)) {
 if (is_writable($session_save_path)) {
     session_save_path($session_save_path);
 }
+
+// 3. Periodic Cleanup: Hapus session file > 24 jam (~1% request) 
+if (rand(1, 100) === 1) {
+    $session_maxlifetime = 86400; // 24 jam
+    $now = time();
+    foreach (glob($session_save_path . '/sess_*') as $file) {
+        if (is_file($file) && ($now - filemtime($file)) > $session_maxlifetime) {
+            @unlink($file);
+        }
+    }
+}
 ?>

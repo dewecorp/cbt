@@ -163,28 +163,33 @@ try {
         }
 
     } elseif ($action == 'delete') {
-        $filename = isset($_POST['filename']) ? $_POST['filename'] : '';
-        if (empty($filename)) throw new Exception('Filename kosong');
+        $filename = isset($_REQUEST['filename']) ? $_REQUEST['filename'] : '';
+        if (empty($filename)) {
+            if (isset($_GET['callback'])) { header('Location: index.php?error=1'); exit; }
+            throw new Exception('Filename kosong');
+        }
 
-        $path = __DIR__ . "/../../backups/" . basename($filename); // basename for security
+        $path = __DIR__ . "/../../backups/" . basename($filename);
 
         if (file_exists($path) && is_file($path)) {
             if (unlink($path)) {
-                // Log aktivitas
                 if (function_exists('log_activity')) {
-                    // Gunakan try catch khusus untuk log agar tidak mengganggu proses utama
                     try {
                         log_activity('delete', 'backup', 'Menghapus file backup: ' . $filename);
                     } catch (Throwable $t) {
-                        // Ignore log error
                     }
                 }
-
+                if (isset($_GET['callback'])) {
+                    header('Location: index.php?deleted=1');
+                    exit;
+                }
                 echo json_encode(['status' => 'success', 'message' => 'File backup berhasil dihapus']);
             } else {
+                if (isset($_GET['callback'])) { header('Location: index.php?error=1'); exit; }
                 throw new Exception('Gagal menghapus file');
             }
         } else {
+            if (isset($_GET['callback'])) { header('Location: index.php?error=1'); exit; }
             throw new Exception('File tidak ditemukan');
         }
     } else {

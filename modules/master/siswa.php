@@ -476,6 +476,73 @@ if (isset($_POST['reset_password'])) {
     }
 }
 
+// Handle Bulk Delete
+if (isset($_POST['bulk_delete'])) {
+    $ids = isset($_POST['ids']) ? $_POST['ids'] : [];
+    $redirect_kelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
+    if (!empty($ids) && is_array($ids)) {
+        $ids = array_map('intval', $ids);
+        $id_list = implode(',', $ids);
+        mysqli_query($koneksi, "DELETE FROM siswa WHERE id_siswa IN ($id_list)");
+        $count = count($ids);
+        log_activity('delete', 'siswa', 'hapus massal ' . $count . ' siswa');
+        echo "<script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: '$count siswa berhasil dihapus',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = 'siswa.php?kelas=$redirect_kelas';
+            });
+        </script>";
+    }
+}
+
+// Handle Bulk Edit Save
+if (isset($_POST['bulk_edit_save'])) {
+    $edit_ids = isset($_POST['edit_id']) ? $_POST['edit_id'] : [];
+    $redirect_kelas = isset($_POST['kelas']) ? $_POST['kelas'] : '';
+    $updated = 0;
+    if (!empty($edit_ids) && is_array($edit_ids)) {
+        $edit_id_kelas = isset($_POST['edit_id_kelas']) ? $_POST['edit_id_kelas'] : [];
+        $edit_jk = isset($_POST['edit_jk']) ? $_POST['edit_jk'] : [];
+        $edit_status = isset($_POST['edit_status']) ? $_POST['edit_status'] : [];
+        foreach ($edit_ids as $i => $id) {
+            $id = (int)$id;
+            $updates = [];
+            if (isset($edit_id_kelas[$i]) && $edit_id_kelas[$i] !== '') {
+                $updates[] = "id_kelas='" . (int)$edit_id_kelas[$i] . "'";
+            }
+            if (isset($edit_jk[$i]) && $edit_jk[$i] !== '') {
+                $updates[] = "jk='" . mysqli_real_escape_string($koneksi, $edit_jk[$i]) . "'";
+            }
+            if (isset($edit_status[$i]) && $edit_status[$i] !== '') {
+                $updates[] = "status='" . mysqli_real_escape_string($koneksi, $edit_status[$i]) . "'";
+            }
+            if (!empty($updates)) {
+                $sql = "UPDATE siswa SET " . implode(', ', $updates) . " WHERE id_siswa='$id'";
+                if (mysqli_query($koneksi, $sql)) {
+                    $updated++;
+                }
+            }
+        }
+    }
+    log_activity('update', 'siswa', 'edit massal ' . $updated . ' siswa');
+    echo "<script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil',
+            text: '$updated siswa berhasil diperbarui',
+            timer: 1500,
+            showConfirmButton: false
+        }).then(() => {
+            window.location.href = 'siswa.php?kelas=$redirect_kelas';
+        });
+    </script>";
+}
+
 // Handle Delete via GET
 if (isset($_GET['delete'])) {
     $id_siswa = $_GET['delete'];
@@ -494,6 +561,23 @@ while($k = mysqli_fetch_assoc($kelas_query)) {
 }
 
 $selected_kelas = isset($_GET['kelas']) ? $_GET['kelas'] : '';
+
+// Bulk Edit - Load student data for modal table
+$bulk_edit_students = [];
+$show_bulk_edit = false;
+if (isset($_GET['bulk_edit_ids'])) {
+    $ids = array_map('intval', explode(',', $_GET['bulk_edit_ids']));
+    if (!empty($ids)) {
+        $id_list = implode(',', $ids);
+        $q = mysqli_query($koneksi, "SELECT s.*, k.nama_kelas FROM siswa s JOIN kelas k ON s.id_kelas = k.id_kelas WHERE s.id_siswa IN ($id_list) ORDER BY s.nama_siswa ASC");
+        while ($r = mysqli_fetch_assoc($q)) {
+            $bulk_edit_students[] = $r;
+        }
+        if (!empty($bulk_edit_students)) {
+            $show_bulk_edit = true;
+        }
+    }
+}
 
 // Get Statistics
 $stats_query = "SELECT 
@@ -550,28 +634,32 @@ $total_p = $stats_res['total_p'] ?? 0;
     <?php if ($selected_kelas): ?>
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-success">Daftar Siswa</h6>
-                <div class="mt-2 mt-md-0 d-flex flex-wrap justify-content-md-end">
-                    <button type="button" class="btn btn-success btn-sm me-2 mb-2" onclick="confirmSyncSimad('<?php echo $selected_kelas; ?>')">
-                        <i class="fas fa-sync"></i> Sinkron SIMAD
-                    </button>
-                    <button type="button" class="btn btn-danger btn-sm me-2 mb-2" onclick="confirmResetAllPassword('<?php echo $selected_kelas; ?>')">
-                        <i class="fas fa-key"></i> Reset Semua Password
-                    </button>
-                    <a href="export_siswa_excel.php?kelas=<?php echo $selected_kelas; ?>" class="btn btn-success btn-sm me-2 mb-2">
-                        <i class="fas fa-file-excel"></i> Export Excel
-                    </a>
-                    <a href="export_siswa_pdf.php?kelas=<?php echo $selected_kelas; ?>" target="_blank" class="btn btn-secondary btn-sm me-2 mb-2">
-                        <i class="fas fa-file-pdf"></i> Export PDF
-                    </a>
-                    <button type="button" class="btn btn-primary btn-sm me-2 mb-2" data-bs-toggle="modal" data-bs-target="#importModal">
-                        <i class="fas fa-file-excel"></i> Import Excel
-                    </button>
-                    <button type="button" class="btn btn-primary btn-sm mb-2" data-bs-toggle="modal" data-bs-target="#addModal">
-                        <i class="fas fa-plus"></i> Tambah Siswa
-                    </button>
-                </div>
+            <h6 class="fw-bold text-success mb-2">Data Siswa</h6>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <button type="button" class="btn btn-warning btn-sm" id="btnBulkEdit" disabled onclick="openBulkEdit()">
+                    <i class="fas fa-edit"></i> Edit Terpilih
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" id="btnBulkDelete" disabled onclick="confirmBulkDelete()">
+                    <i class="fas fa-trash"></i> Hapus Terpilih
+                </button>
+                <button type="button" class="btn btn-success btn-sm" onclick="confirmSyncSimad('<?php echo $selected_kelas; ?>')">
+                    <i class="fas fa-sync"></i> Sinkron SIMAD
+                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmResetAllPassword('<?php echo $selected_kelas; ?>')">
+                    <i class="fas fa-key"></i> Reset Password
+                </button>
+                <a href="export_siswa_excel.php?kelas=<?php echo $selected_kelas; ?>" class="btn btn-outline-success btn-sm">
+                    <i class="fas fa-file-excel"></i> Excel
+                </a>
+                <a href="export_siswa_pdf.php?kelas=<?php echo $selected_kelas; ?>" target="_blank" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">
+                    <i class="fas fa-upload"></i> Import
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addModal">
+                    <i class="fas fa-plus"></i> Tambah
+                </button>
             </div>
         </div>
         <div class="card-body">
@@ -579,6 +667,7 @@ $total_p = $stats_res['total_p'] ?? 0;
                 <table class="table table-bordered table-hover table-datatable" width="100%" cellspacing="0">
                     <thead class="bg-light">
                         <tr>
+                            <th width="5%"><input type="checkbox" id="selectAll"></th>
                             <th width="5%">No</th>
                             <th width="5%">Foto</th>
                             <th>NISN</th>
@@ -597,6 +686,7 @@ $total_p = $stats_res['total_p'] ?? 0;
                         while ($row = mysqli_fetch_assoc($query)) :
                         ?>
                             <tr>
+                                <td><input type="checkbox" class="select-row" value="<?php echo $row['id_siswa']; ?>"></td>
                                 <td><?php echo $no++; ?></td>
                                 <td>
                                     <img src="<?php echo !empty($row['foto']) && file_exists('../../assets/img/siswa/'.$row['foto']) ? '../../assets/img/siswa/'.$row['foto'] : 'https://ui-avatars.com/api/?name='.urlencode($row['nama_siswa']).'&size=40&background=random'; ?>" 
@@ -819,6 +909,77 @@ $total_p = $stats_res['total_p'] ?? 0;
     </div>
 </div>
 
+<!-- Bulk Edit Modal -->
+<div class="modal fade" id="bulkEditModal" tabindex="-1" aria-labelledby="bulkEditModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Massal Siswa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <p class="text-muted">Edit data siswa yang dipilih. Ubah field pada baris yang diinginkan.</p>
+                    <input type="hidden" name="kelas" value="<?php echo $selected_kelas; ?>">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th width="5%">No</th>
+                                    <th>NISN</th>
+                                    <th>Nama</th>
+                                    <th>Kelas</th>
+                                    <th>JK</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php $no_bulk = 1; ?>
+                                <?php foreach ($bulk_edit_students as $s): ?>
+                                <tr>
+                                    <td><?php echo $no_bulk++; ?></td>
+                                    <td><?php echo $s['nisn']; ?><input type="hidden" name="edit_id[]" value="<?php echo $s['id_siswa']; ?>"></td>
+                                    <td><?php echo $s['nama_siswa']; ?></td>
+                                    <td>
+                                        <select class="form-select form-select-sm" name="edit_id_kelas[]">
+                                            <option value="">-- Tidak diubah --</option>
+                                            <?php
+                                            $kelas_query_bulk = mysqli_query($koneksi, "SELECT * FROM kelas ORDER BY nama_kelas ASC");
+                                            while ($kb = mysqli_fetch_assoc($kelas_query_bulk)):
+                                            ?>
+                                            <option value="<?php echo $kb['id_kelas']; ?>" <?php echo $kb['id_kelas'] == $s['id_kelas'] ? 'selected' : ''; ?>><?php echo $kb['nama_kelas']; ?></option>
+                                            <?php endwhile; ?>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="form-select form-select-sm" name="edit_jk[]">
+                                            <option value="">-- Tidak diubah --</option>
+                                            <option value="L" <?php echo $s['jk'] == 'L' ? 'selected' : ''; ?>>Laki-laki</option>
+                                            <option value="P" <?php echo $s['jk'] == 'P' ? 'selected' : ''; ?>>Perempuan</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="form-select form-select-sm" name="edit_status[]">
+                                            <option value="">-- Tidak diubah --</option>
+                                            <option value="aktif" <?php echo $s['status'] == 'aktif' ? 'selected' : ''; ?>>Aktif</option>
+                                            <option value="nonaktif" <?php echo $s['status'] == 'nonaktif' ? 'selected' : ''; ?>>Nonaktif</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" name="bulk_edit_save" class="btn btn-warning">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <?php include '../../includes/footer.php'; ?>
 
 <script>
@@ -948,6 +1109,92 @@ $total_p = $stats_res['total_p'] ?? 0;
                 document.body.appendChild(form);
                 form.submit();
             }
+        });
+    }
+
+    // Select All checkbox
+    $('#selectAll').on('change', function() {
+        $('.select-row').prop('checked', this.checked);
+        toggleBulkButtons();
+    });
+
+    $(document).on('change', '.select-row', function() {
+        toggleBulkButtons();
+    });
+
+    function getSelectedIds() {
+        var ids = [];
+        $('.select-row:checked').each(function() {
+            ids.push($(this).val());
+        });
+        return ids;
+    }
+
+    function toggleBulkButtons() {
+        var count = getSelectedIds().length;
+        $('#btnBulkEdit, #btnBulkDelete').prop('disabled', count === 0);
+    }
+
+    function confirmBulkDelete() {
+        var ids = getSelectedIds();
+        if (ids.length === 0) {
+            Swal.fire('Pilih siswa', 'Silakan pilih siswa yang akan dihapus.', 'warning');
+            return;
+        }
+        Swal.fire({
+            title: 'Hapus ' + ids.length + ' siswa?',
+            text: 'Data yang dihapus tidak dapat dikembalikan!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '';
+
+                ids.forEach(function(id) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'ids[]';
+                    input.value = id;
+                    form.appendChild(input);
+                });
+
+                var inputKelas = document.createElement('input');
+                inputKelas.type = 'hidden';
+                inputKelas.name = 'kelas';
+                inputKelas.value = '<?php echo $selected_kelas; ?>';
+                form.appendChild(inputKelas);
+
+                var inputSubmit = document.createElement('input');
+                inputSubmit.type = 'hidden';
+                inputSubmit.name = 'bulk_delete';
+                inputSubmit.value = '1';
+                form.appendChild(inputSubmit);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
+
+    function openBulkEdit() {
+        var ids = getSelectedIds();
+        if (ids.length === 0) {
+            Swal.fire('Pilih siswa', 'Silakan pilih siswa yang akan diedit.', 'warning');
+            return;
+        }
+        window.location.href = 'siswa.php?kelas=<?php echo $selected_kelas; ?>&bulk_edit_ids=' + ids.join(',');
+    }
+
+    var showBulkEdit = <?php echo $show_bulk_edit ? 'true' : 'false'; ?>;
+    if (showBulkEdit) {
+        $(document).ready(function() {
+            $('#bulkEditModal').modal('show');
         });
     }
 </script>
