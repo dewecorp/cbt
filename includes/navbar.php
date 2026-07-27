@@ -166,6 +166,10 @@ if (isset($koneksi)) {
                         <span class="d-none d-lg-inline"><?php echo $u_nama; ?></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <?php if ($u_level === 'admin'): ?>
+                        <li><a class="dropdown-item" href="javascript:void(0);" onclick="confirmUpdate()"><i class="fas fa-sync-alt me-2 text-success"></i> Update Sistem</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <?php endif; ?>
                         <li><a class="dropdown-item" href="javascript:void(0);" onclick="confirmAction('<?php echo $base_url; ?>logout.php?role=<?php echo (isset($_SESSION['level']) ? $_SESSION['level'] : ''); ?>','Keluar dari aplikasi?','Keluar');"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
                     </ul>
                 </li>

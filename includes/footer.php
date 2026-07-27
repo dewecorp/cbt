@@ -247,6 +247,78 @@
                 }
             })
         }
+
+        function confirmUpdate() {
+            Swal.fire({
+                title: 'Update Sistem?',
+                text: 'Sistem akan memperbarui file aplikasi dari repositori. Pastikan koneksi internet stabil. Database tidak akan terpengaruh.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Update!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    processUpdate();
+                }
+            });
+        }
+
+        function processUpdate() {
+            Swal.fire({
+                title: 'Memproses Update',
+                html: 'Mengunduh dan memasang update...<br><small>Mohon tunggu, jangan tinggalkan halaman ini.</small>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            const minDelay = new Promise(resolve => setTimeout(resolve, 2000));
+            const request = fetch('<?php echo $base_url; ?>modules/update/index.php', {
+                method: 'POST'
+            })
+            .then(response => {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    return response.json();
+                } else {
+                    return response.text().then(text => {
+                        throw new Error("Respon server tidak valid: " + text.substring(0, 100));
+                    });
+                }
+            });
+
+            Promise.all([minDelay, request])
+            .then(([_, data]) => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Update Berhasil',
+                        text: data.message,
+                        confirmButtonColor: '#28a745',
+                        confirmButtonText: 'OK'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Update Gagal',
+                        text: data.message,
+                        confirmButtonText: 'Tutup'
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan',
+                    text: 'Terjadi kesalahan: ' + error.message,
+                    confirmButtonText: 'Tutup'
+                });
+            });
+        }
     </script>
 </body>
 </html>
