@@ -277,7 +277,7 @@
             });
 
             const minDelay = new Promise(resolve => setTimeout(resolve, 2000));
-            const request = fetch('<?php echo $base_url; ?>modules/update/index.php', {
+            const request = fetch('<?php echo $base_url; ?>modules/update/index', {
                 method: 'POST'
             })
             .then(response => {
