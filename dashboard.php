@@ -71,6 +71,7 @@ if ($level === 'admin') {
         ['icon' => 'fa-cogs', 'label' => 'Pengaturan', 'url' => $base_url . 'modules/pengaturan/index.php' . $role_param],
         ['icon' => 'fa-users-cog', 'label' => 'Pengguna', 'url' => $base_url . 'modules/users/index.php' . $role_param],
         ['icon' => 'fa-hdd', 'label' => 'Backup', 'url' => $base_url . 'modules/backup/index.php' . $role_param],
+        ['icon' => 'fa-plug', 'label' => 'Integrasi API', 'url' => $base_url . 'modules/integrasi/index.php' . $role_param],
     ];
 } elseif ($level === 'guru') {
     // Sinkron dengan sidebar: E-Learning + seluruh Asesmen (+ Pengumuman)

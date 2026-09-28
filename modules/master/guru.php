@@ -136,7 +136,7 @@ function simad_guru_random_password($length = 8) {
 }
 
 function simad_guru_api_origin() {
-    $u = defined('SIMAD_TEACHER_API_URL') ? SIMAD_TEACHER_API_URL : '';
+    $u = function_exists('simad_get_endpoint') ? simad_get_endpoint('guru') : '';
     $p = parse_url($u);
     if (!$p || empty($p['scheme']) || empty($p['host'])) {
         return '';
@@ -204,7 +204,7 @@ function simad_guru_try_save_foto($username_base, $foto_raw) {
 }
 
 function simad_guru_build_api_url($updated_since, $limit) {
-    $base = defined('SIMAD_TEACHER_API_URL') ? SIMAD_TEACHER_API_URL : '';
+    $base = function_exists('simad_get_endpoint') ? simad_get_endpoint('guru') : '';
     if ($base === '') {
         return '';
     }
@@ -234,7 +234,7 @@ function simad_guru_fetch($apiUrl) {
     curl_setopt($ch, CURLOPT_TIMEOUT, 45);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 12);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'CBT-Sync/1.0 (+https://simad.misultanfattah.sch.id)');
+    curl_setopt($ch, CURLOPT_USERAGENT, 'CBT-Sync/1.0');
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Accept: application/json',
     ]);
@@ -287,10 +287,10 @@ if (isset($_POST['sync_simad_guru'])) {
             .then(() => { window.location.href = 'guru.php'; });
         </script>";
     } else {
-        $apiBase = defined('SIMAD_TEACHER_API_URL') ? SIMAD_TEACHER_API_URL : '';
+        $apiBase = function_exists('simad_get_endpoint') ? simad_get_endpoint('guru') : '';
         if ($apiBase === '') {
             echo "<script>
-                Swal.fire({icon:'error', title:'Konfigurasi', text:'SIMAD_TEACHER_API_URL belum dikonfigurasi.'})
+                Swal.fire({icon:'error', title:'Konfigurasi', text:'Endpoint SIMAD guru belum dikonfigurasi. Atur di menu Integrasi API.'})
                 .then(() => { window.location.href = 'guru.php'; });
             </script>";
         } else {

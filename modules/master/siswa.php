@@ -91,7 +91,7 @@ function simad_fetch_students($apiUrl) {
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    curl_setopt($ch, CURLOPT_USERAGENT, 'CBT-Sync/1.0 (+https://simad.misultanfattah.sch.id)');
+    curl_setopt($ch, CURLOPT_USERAGENT, 'CBT-Sync/1.0');
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Accept: application/json',
     ]);
@@ -301,10 +301,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             }
 
-            $apiUrl = defined('SIMAD_STUDENT_API_URL') ? SIMAD_STUDENT_API_URL : '';
+            $apiUrl = function_exists('simad_get_endpoint') ? simad_get_endpoint('siswa') : '';
             if ($apiUrl === '') {
                 echo "<script>
-                    Swal.fire({icon:'error', title:'Konfigurasi', text:'SIMAD_STUDENT_API_URL belum dikonfigurasi.'})
+                    Swal.fire({icon:'error', title:'Konfigurasi', text:'Endpoint SIMAD siswa belum dikonfigurasi. Atur di menu Integrasi API.'})
                     .then(() => { window.location.href = 'siswa.php?kelas=" . addslashes($redirect_kelas) . "'; });
                 </script>";
             } else {
@@ -322,15 +322,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $skipped_invalid = 0;
                     $skipped_other_kelas = 0;
                     $skipped_kelas_unknown = 0;
+                    $skipped_dup_nisn = 0;
                     $errors = 0;
+                    $source_total = is_array($res['data']) ? count($res['data']) : 0;
+                    $seen_nisn = [];
+                    $dup_nisn_list = [];
+                    $name_map = [];
 
                     foreach ($res['data'] as $siswa) {
                         if (!is_array($siswa)) { $skipped_invalid++; continue; }
-                        $nisn_raw = isset($siswa['nisn']) ? trim((string)$siswa['nisn']) : '';
+                        $nisn_raw = isset($siswa['nisn']) ? preg_replace('/\s+/', '', trim((string)$siswa['nisn'])) : '';
                         $nama_raw = isset($siswa['nama_siswa']) ? trim((string)$siswa['nama_siswa']) : '';
                         $kelas_raw = isset($siswa['nama_kelas']) ? trim((string)$siswa['nama_kelas']) : '';
 
                         if ($nisn_raw === '' || $nama_raw === '') { $skipped_invalid++; continue; }
+
+                        $nama_key = strtolower(preg_replace('/\s+/', ' ', $nama_raw));
+                        if (!isset($name_map[$nama_key])) $name_map[$nama_key] = [];
+                        if (!in_array($nisn_raw, $name_map[$nama_key], true)) $name_map[$nama_key][] = $nisn_raw;
+
+                        if (isset($seen_nisn[$nisn_raw])) {
+                            $skipped_dup_nisn++;
+                            if (!in_array($nisn_raw, $dup_nisn_list, true)) $dup_nisn_list[] = $nisn_raw;
+                            continue;
+                        }
+                        $seen_nisn[$nisn_raw] = true;
                         if ($selected_kelas_key !== '') {
                             $kelas_key = simad_normalize_kelas_key($kelas_raw);
                             if ($kelas_key === '' || $kelas_key !== $selected_kelas_key) { $skipped_other_kelas++; continue; }
@@ -409,10 +425,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         }
                     }
 
-                    log_activity('sync', 'siswa', 'sync SIMAD kelas ' . $redirect_kelas . ' insert ' . $inserted . ', update ' . $updated . ', unchanged ' . $unchanged . ', skip_invalid ' . $skipped_invalid . ', skip_other_kelas ' . $skipped_other_kelas . ', skip_kelas_unknown ' . $skipped_kelas_unknown . ', error ' . $errors);
+                    $same_name_diff_nisn = 0;
+                    foreach ($name_map as $list) {
+                        if (count($list) > 1) $same_name_diff_nisn++;
+                    }
+                    $dup_detail = $skipped_dup_nisn > 0 ? ' NISN ganda di sumber: ' . implode(',', array_slice($dup_nisn_list, 0, 10)) : '';
 
-                    $skip_total = $skipped_invalid + $skipped_other_kelas + $skipped_kelas_unknown;
-                    $msg = "Insert: $inserted, Update (isi field kosong): $updated, Tidak berubah: $unchanged, Skip: $skip_total (invalid: $skipped_invalid, beda kelas: $skipped_other_kelas, kelas tidak dikenali: $skipped_kelas_unknown), Error: $errors";
+                    log_activity('sync', 'siswa', 'sync SIMAD kelas ' . $redirect_kelas . ' sumber ' . $source_total . ' insert ' . $inserted . ', update ' . $updated . ', unchanged ' . $unchanged . ', skip_invalid ' . $skipped_invalid . ', skip_other_kelas ' . $skipped_other_kelas . ', skip_kelas_unknown ' . $skipped_kelas_unknown . ', dup_nisn ' . $skipped_dup_nisn . ', error ' . $errors . $dup_detail);
+
+                    $skip_total = $skipped_invalid + $skipped_other_kelas + $skipped_kelas_unknown + $skipped_dup_nisn;
+                    $msg = "Sumber: $source_total (acuan NISN). Insert: $inserted, Update (isi field kosong): $updated, Tidak berubah: $unchanged, Skip: $skip_total (invalid: $skipped_invalid, beda kelas: $skipped_other_kelas, kelas tidak dikenali: $skipped_kelas_unknown, NISN ganda di sumber: $skipped_dup_nisn), Nama sama beda NISN: $same_name_diff_nisn (aman, tidak ditimpa), Error: $errors" . $dup_detail;
                     $msg = addslashes($msg);
                     echo "<script>
                         Swal.fire({icon:'success', title:'Sinkron SIMAD Selesai', text:'$msg'})

@@ -241,6 +241,11 @@
                         <i class="fas fa-hdd"></i> Backup Restore
                     </a>
                 </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/integrasi/index.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'integrasi') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-plug"></i> Integrasi API
+                    </a>
+                </li>
                 <?php endif; ?>
     </ul>
 

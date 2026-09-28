@@ -120,6 +120,7 @@
                         <a href="<?php echo $base_url; ?>modules/pengaturan/index.php<?php echo $role_param; ?>" class="list-group-item list-group-item-action <?php echo (strpos($_SERVER['PHP_SELF'], 'pengaturan') !== false) ? 'active' : ''; ?>"><i class="fas fa-cogs me-2 text-success"></i> Pengaturan</a>
                         <a href="<?php echo $base_url; ?>modules/users/index.php<?php echo $role_param; ?>" class="list-group-item list-group-item-action <?php echo (strpos($_SERVER['PHP_SELF'], '/users/') !== false || strpos($_SERVER['PHP_SELF'], 'users/index') !== false) ? 'active' : ''; ?>"><i class="fas fa-users-cog me-2 text-success"></i> Pengguna</a>
                         <a href="<?php echo $base_url; ?>modules/backup/index.php<?php echo $role_param; ?>" class="list-group-item list-group-item-action <?php echo (strpos($_SERVER['PHP_SELF'], 'backup') !== false) ? 'active' : ''; ?>"><i class="fas fa-hdd me-2 text-success"></i> Backup Restore</a>
+                        <a href="<?php echo $base_url; ?>modules/integrasi/index.php<?php echo $role_param; ?>" class="list-group-item list-group-item-action <?php echo (strpos($_SERVER['PHP_SELF'], 'integrasi') !== false) ? 'active' : ''; ?>"><i class="fas fa-plug me-2 text-success"></i> Integrasi API</a>
                         <?php endif; ?>
 
                          <div class="list-group-item bg-light fw-bold text-uppercase small text-muted">Akun</div>

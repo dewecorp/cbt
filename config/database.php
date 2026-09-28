@@ -137,10 +137,23 @@ function time_ago_str($datetime) {
 }
 }
 
-if (!defined('SIMAD_STUDENT_API_URL')) {
-    define('SIMAD_STUDENT_API_URL', 'https://simad.misultanfattah.sch.id/api/v1/students.php?api_key=SIS_CENTRAL_HUB_SECRET_2026');
+mysqli_query($koneksi, "CREATE TABLE IF NOT EXISTS simad_endpoint (
+    key_name VARCHAR(32) NOT NULL,
+    url TEXT NOT NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (key_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+if (!function_exists('simad_get_endpoint')) {
+function simad_get_endpoint($type) {
+    global $koneksi;
+    $type = ($type === 'guru') ? 'guru' : 'siswa';
+    $q = mysqli_query($koneksi, "SELECT url FROM simad_endpoint WHERE key_name='$type' LIMIT 1");
+    if ($q && mysqli_num_rows($q) > 0) {
+        $r = mysqli_fetch_assoc($q);
+        return trim((string)$r['url']);
+    }
+    return '';
 }
-if (!defined('SIMAD_TEACHER_API_URL')) {
-    define('SIMAD_TEACHER_API_URL', 'https://simad.misultanfattah.sch.id/api/v1/teachers.php?api_key=SIS_CENTRAL_HUB_SECRET_2026');
 }
 ?>
