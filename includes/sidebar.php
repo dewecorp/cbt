@@ -113,6 +113,11 @@
                         <i class="fas fa-calendar-alt"></i> Jadwal Pelajaran
                     </a>
                 </li>
+                <li>
+                    <a href="<?php echo $base_url; ?>modules/master/kenaikan_kelas.php<?php echo $role_param; ?>" class="nav-link <?php echo (strpos($_SERVER['PHP_SELF'], 'kenaikan_kelas.php') !== false) ? 'active' : ''; ?>">
+                        <i class="fas fa-arrow-up"></i> Kenaikan Kelas
+                    </a>
+                </li>
                 <?php endif; ?>
 
                 <li class="nav-item mt-2">

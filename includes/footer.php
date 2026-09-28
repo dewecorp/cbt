@@ -91,6 +91,7 @@
                             <a href="<?php echo $base_url; ?>modules/master/siswa.php<?php echo $role_param; ?>" class="list-group-item list-group-item-action"><i class="fas fa-user-graduate me-2 text-success"></i> Data Siswa</a>
                             <a href="<?php echo $base_url; ?>modules/master/kelas.php<?php echo $role_param; ?>" class="list-group-item list-group-item-action"><i class="fas fa-school me-2 text-success"></i> Data Kelas</a>
                             <a href="<?php echo $base_url; ?>modules/master/mapel.php<?php echo $role_param; ?>" class="list-group-item list-group-item-action"><i class="fas fa-book me-2 text-success"></i> Mata Pelajaran</a>
+                            <a href="<?php echo $base_url; ?>modules/master/kenaikan_kelas.php<?php echo $role_param; ?>" class="list-group-item list-group-item-action"><i class="fas fa-arrow-up me-2 text-success"></i> Kenaikan Kelas</a>
                         <?php endif; ?>
 
                         <div class="list-group-item bg-light fw-bold text-uppercase small text-muted">E-Learning</div>
